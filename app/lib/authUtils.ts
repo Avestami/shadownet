@@ -13,7 +13,8 @@ export async function getUserIdFromRequest(request: NextRequest): Promise<string
     }
     
     // Fallback to legacy session cookie if NextAuth token not found
-    const sessionId = cookies().get('session_id')?.value;
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('session_id')?.value;
     
     if (!sessionId) {
       return null;

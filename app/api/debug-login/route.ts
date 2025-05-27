@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
     );
     
     // Set cookie
-    cookies().set({
+    const cookieStore = await cookies();
+    cookieStore.set({
       name: 'next-auth.session-token',
       value: token,
       httpOnly: true,

@@ -6,7 +6,8 @@ const SESSION_COOKIE_NAME = 'session_id';
 
 // Set user session cookie
 export async function setSessionCookie(userId: string): Promise<void> {
-  cookies().set({
+  const cookieStore = await cookies();
+  cookieStore.set({
     name: SESSION_COOKIE_NAME,
     value: userId,
     httpOnly: true,
@@ -20,14 +21,15 @@ export async function setSessionCookie(userId: string): Promise<void> {
 
 // Get user ID from session cookie
 export const getSessionCookie = async (): Promise<string | undefined> => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
   return sessionCookie?.value;
 };
 
 // Remove session cookie
 export async function clearSessionCookie(): Promise<void> {
-  cookies().delete(SESSION_COOKIE_NAME);
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
 // Validate user session from cookie

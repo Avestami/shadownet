@@ -83,7 +83,7 @@ export function DialogueProvider({
     };
     
     // Check if message matches a database unlock code
-    const dbLevel = dbUnlockCodes[message.toLowerCase()];
+    const dbLevel = dbUnlockCodes[message.toLowerCase() as keyof typeof dbUnlockCodes];
     if (dbLevel) {
       // If we found a match with database codes and we're in level 1
       if (level === 1 && dbLevel === "level2") {

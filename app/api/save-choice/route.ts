@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../lib/prisma';
 import { getUserIdFromRequest } from '../../lib/authUtils';
-import { invalidateUserCache } from '../user/route';
+import { invalidateUserCache } from '../../lib/userCache';
 import { decisions } from '../../../data/story';
 
 export async function POST(request: NextRequest) {

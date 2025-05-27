@@ -3,22 +3,7 @@ import prisma from '../../../lib/prisma';
 import { getUserIdFromRequest } from '../../lib/authUtils';
 import { getToken } from 'next-auth/jwt';
 import { getUserUpdates } from './updateStore';
-
-// Simple caching mechanism to prevent excessive database calls
-const userCache: Record<string, {
-  data: any,
-  timestamp: number
-}> = {};
-
-// Cache timeout (5 seconds)
-const CACHE_TIMEOUT = 5000;
-
-// Function to invalidate a user's cache when data is updated
-export function invalidateUserCache(userId: string) {
-  if (userCache[userId]) {
-    delete userCache[userId];
-  }
-}
+import { getCachedUser, setCachedUser } from '../../lib/userCache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,7 +24,7 @@ export async function GET(request: NextRequest) {
     
     // Only log user API calls if not already cached
     const userCacheKey = userId || 'debug-user';
-    if (forceRefresh || !userCache[userCacheKey] || Date.now() - userCache[userCacheKey].timestamp > CACHE_TIMEOUT) {
+    if (forceRefresh || !getCachedUser(userCacheKey)) {
       console.log('User API called, userId:', userId);
     }
     
@@ -54,8 +39,9 @@ export async function GET(request: NextRequest) {
     // For debug mode, return dummy data
     if (isDebug) {
       // Check if there's a cache entry and it's still valid
-      if (!forceRefresh && userCache['debug-user'] && Date.now() - userCache['debug-user'].timestamp < CACHE_TIMEOUT) {
-        return NextResponse.json(userCache['debug-user'].data);
+      const cachedDebugUser = getCachedUser('debug-user');
+      if (!forceRefresh && cachedDebugUser) {
+        return NextResponse.json(cachedDebugUser);
       }
       
       console.log('Debug mode, returning dummy user data');
@@ -73,17 +59,15 @@ export async function GET(request: NextRequest) {
       };
       
       // Cache the result
-      userCache['debug-user'] = {
-        data: dummyData,
-        timestamp: Date.now()
-      };
+      setCachedUser('debug-user', dummyData);
       
       return NextResponse.json(dummyData);
     }
     
     // Check if there's a cache entry and it's still valid (skip if force refresh)
-    if (!forceRefresh && userCache[userCacheKey] && Date.now() - userCache[userCacheKey].timestamp < CACHE_TIMEOUT) {
-      return NextResponse.json(userCache[userCacheKey].data);
+    const cachedUser = getCachedUser(userCacheKey);
+    if (!forceRefresh && cachedUser) {
+      return NextResponse.json(cachedUser);
     }
     
     // Ensure userId is defined for TypeScript
@@ -164,10 +148,7 @@ export async function GET(request: NextRequest) {
     };
     
     // Cache the result
-    userCache[userCacheKey] = {
-      data: userData,
-      timestamp: Date.now()
-    };
+    setCachedUser(userCacheKey, userData);
     
     // Return user data
     return NextResponse.json(userData);

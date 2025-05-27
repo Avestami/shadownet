@@ -75,17 +75,21 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log("JWT callback - user found:", user.username);
-        token.id = user.id;
-        token.username = user.username;
+        const customUser = user as any;
+        const customToken = token as any;
+        console.log("JWT callback - user found:", customUser.username);
+        customToken.id = customUser.id;
+        customToken.username = customUser.username;
       }
       return token;
     },
     async session({ session, token }) {
       console.log("Session callback called");
       if (session?.user) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string;
+        const customSession = session as any;
+        const customToken = token as any;
+        customSession.user.id = customToken.id;
+        customSession.user.username = customToken.username;
       }
       return session;
     },

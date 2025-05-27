@@ -55,7 +55,7 @@ export default function Scoreboard() {
           
           {session ? (
             <p className="text-gray-300 mt-2 font-mono text-sm">
-              Logged in as: <span className="text-red-400">{session.user?.username}</span>
+              Logged in as: <span className="text-red-400">{(session.user as any)?.username}</span>
             </p>
           ) : (
             <p className="text-gray-400 mt-4 font-mono text-xs">
@@ -99,7 +99,7 @@ export default function Scoreboard() {
                   </tr>
                 ) : (
                   scores.map((user, index) => {
-                    const isCurrentUser = session?.user?.id === user.id;
+                    const isCurrentUser = (session?.user as any)?.id === user.id;
                     
                     return (
                       <tr 
