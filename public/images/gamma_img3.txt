@@ -1,0 +1,3 @@
+# Gamma Mission Image 3 (Decoy)
+# This image contains no hidden data
+# It's a red herring to make the challenge more realistic 

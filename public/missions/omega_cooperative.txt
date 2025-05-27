@@ -1,0 +1,20 @@
+OMEGA MISSION - COOPERATIVE DECRYPTION:
+
+The final cipher requires THREE agents with karma within ±2 of each other.
+Each agent receives a unique key fragment that must be XORed together.
+
+TEAM COOPERATION REQUIREMENTS:
+- All 3 agents must have karma within 2 points of each other
+- Each agent gets a different key fragment based on their karma range
+- All 3 fragments must be XORed together to get the master key
+
+KEY FRAGMENT DISTRIBUTION:
+- High Karma Team (karma 15+): Fragment A
+- Medium Karma Team (karma 5-14): Fragment B  
+- Low Karma Team (karma <5): Fragment C
+
+ENCRYPTED FINAL MESSAGE:
+The fate of the Ghost Grid depends on your cooperation.
+Only united agents can unlock the truth.
+
+MASTER KEY REQUIRED: m@st3rk3y (result of XOR of all 3 fragments) 

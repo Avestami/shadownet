@@ -1,0 +1,9 @@
+VIGENÈRE ENCRYPTED MESSAGE:
+Agent callsign required for decryption.
+
+ENCRYPTED DATA:
+Kzjvh wf r hvxkvg rvvag jzgz gzv xrppfmtl "krjva"
+Gzv hvxkvg xbqv wf: olgrhf
+
+HINT: The agent callsign is a bird of darkness and mystery.
+Use the callsign as the Vigenère key to decrypt this message. 

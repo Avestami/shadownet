@@ -1,0 +1,5 @@
+# Gamma Mission Image 2
+# This image should contain the hidden string: "w@ll"
+# In a real implementation, this would be steganographically hidden in the image
+# For now, this serves as a reference for the second part of the XOR key
+# XOR of "f1r3" and "w@ll" gives the decryption key 

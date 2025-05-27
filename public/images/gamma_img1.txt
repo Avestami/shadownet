@@ -1,0 +1,4 @@
+# Gamma Mission Image 1
+# This image should contain the hidden string: "f1r3"
+# In a real implementation, this would be steganographically hidden in the image
+# For now, this serves as a reference for the first part of the XOR key 

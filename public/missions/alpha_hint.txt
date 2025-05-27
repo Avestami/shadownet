@@ -1,0 +1,9 @@
+MISSION ALPHA - CAESAR CIPHER CHALLENGE
+
+The resistance has left an encrypted message using a Caesar cipher.
+The shift value is hidden in the message itself.
+
+HINT: Count the letters in "SHADOW" to find the shift value.
+SHADOW has 6 letters, so the Caesar shift is 6.
+
+Use this shift to decrypt the message and find the access code. 

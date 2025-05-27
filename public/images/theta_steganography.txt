@@ -1,0 +1,4 @@
+# Theta Mission Steganography Image
+# This PNG image should contain the key "mirr0r" encoded in the LSB (Least Significant Bits)
+# In a real implementation, this would be a proper PNG file with binary LSB encoding
+# For now, this serves as a reference that the key "mirr0r" is hidden in the image LSBs 

@@ -1,0 +1,182 @@
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '../../../lib/prisma';
+import { getUserIdFromRequest } from '../../lib/authUtils';
+import { getToken } from 'next-auth/jwt';
+import { getUserUpdates } from './updateStore';
+
+// Simple caching mechanism to prevent excessive database calls
+const userCache: Record<string, {
+  data: any,
+  timestamp: number
+}> = {};
+
+// Cache timeout (5 seconds)
+const CACHE_TIMEOUT = 5000;
+
+// Function to invalidate a user's cache when data is updated
+export function invalidateUserCache(userId: string) {
+  if (userCache[userId]) {
+    delete userCache[userId];
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    // Force refresh if requested (used after score/karma updates)
+    const forceRefresh = request.nextUrl.searchParams.get('refresh') === 'true';
+    
+    // Check for debug header
+    const isDebug = request.headers.get('X-Debug-Mode') === 'true';
+    
+    // Try to get user ID from NextAuth session directly
+    const token = await getToken({ req: request });
+    let userId = token?.id as string | null;
+
+    // If that didn't work, try the custom getUserIdFromRequest method
+    if (!userId && !isDebug) {
+      userId = await getUserIdFromRequest(request);
+    }
+    
+    // Only log user API calls if not already cached
+    const userCacheKey = userId || 'debug-user';
+    if (forceRefresh || !userCache[userCacheKey] || Date.now() - userCache[userCacheKey].timestamp > CACHE_TIMEOUT) {
+      console.log('User API called, userId:', userId);
+    }
+    
+    if (!userId && !isDebug) {
+      console.log('No userId found, not authenticated');
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+    
+    // For debug mode, return dummy data
+    if (isDebug) {
+      // Check if there's a cache entry and it's still valid
+      if (!forceRefresh && userCache['debug-user'] && Date.now() - userCache['debug-user'].timestamp < CACHE_TIMEOUT) {
+        return NextResponse.json(userCache['debug-user'].data);
+      }
+      
+      console.log('Debug mode, returning dummy user data');
+      const dummyUserId = 'debug-user';
+      
+      // Check localStorage data if available (in a real implementation, this would be read from a database)
+      // We're simulating this by returning predefined values
+      const dummyData = {
+        id: dummyUserId,
+        username: 'debug_user',
+        karma: 0,
+        choices: [],
+        flagsCaptured: [],
+        score: 0
+      };
+      
+      // Cache the result
+      userCache['debug-user'] = {
+        data: dummyData,
+        timestamp: Date.now()
+      };
+      
+      return NextResponse.json(dummyData);
+    }
+    
+    // Check if there's a cache entry and it's still valid (skip if force refresh)
+    if (!forceRefresh && userCache[userCacheKey] && Date.now() - userCache[userCacheKey].timestamp < CACHE_TIMEOUT) {
+      return NextResponse.json(userCache[userCacheKey].data);
+    }
+    
+    // Ensure userId is defined for TypeScript
+    if (!userId) {
+      userId = 'unknown-user';
+    }
+    
+    // Get user data from the database
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    
+    if (!user) {
+      console.log('User not found for ID:', userId);
+      
+      // Clear any existing sessions for this non-existent user
+      try {
+        await prisma.session.deleteMany({
+          where: { userId: userId }
+        });
+        console.log('Cleared sessions for non-existent user:', userId);
+      } catch (error) {
+        console.error('Error clearing sessions:', error);
+      }
+      
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+    
+    console.log('User found:', user.username);
+    
+    // Parse choices or default to empty array
+    let choices = [];
+    try {
+      // Fix for empty or malformed choices
+      if (user.choices && typeof user.choices === 'string' && user.choices.trim() !== '') {
+        // Attempt to parse JSON
+        choices = JSON.parse(user.choices);
+        
+        // Verify if choices is an array
+        if (!Array.isArray(choices)) {
+          console.log('Choices is not an array, resetting to empty array');
+          choices = [];
+          
+          // Fix the database
+          await prisma.user.update({
+            where: { id: userId },
+            data: { choices: '[]' }
+          });
+        }
+      } else {
+        // Fix empty choices in database
+        console.log('Empty choices, updating database with empty array');
+        await prisma.user.update({
+          where: { id: userId },
+          data: { choices: '[]' }
+        });
+      }
+    } catch (error) {
+      console.error('Error parsing user choices:', error);
+      // Fix invalid choices in database
+      await prisma.user.update({
+        where: { id: userId },
+        data: { choices: '[]' }
+      });
+    }
+    
+    // Prepare user data
+    const userData = {
+      id: user.id,
+      username: user.username,
+      karma: user.karma || 0,
+      choices: choices,
+      flagsCaptured: user.flagsCaptured || [],
+      score: user.score || 0
+    };
+    
+    // Cache the result
+    userCache[userCacheKey] = {
+      data: userData,
+      timestamp: Date.now()
+    };
+    
+    // Return user data
+    return NextResponse.json(userData);
+    
+  } catch (error) {
+    console.error('Error getting user data:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: String(error) },
+      { status: 500 }
+    );
+  }
+} 
