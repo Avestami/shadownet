@@ -439,12 +439,24 @@ export default function LevelPage() {
         return 'Decryption challenge unlocked. Solve it to proceed.';
       },
       capture: () => {
-        if (!flagCaptured) {
-          handleCaptureFlag();
-          return 'Flag capture initiated... Processing...';
-        } else {
+        if (flagCaptured) {
           return 'Flag already captured for this level.';
         }
+        
+        // Check if user has actually solved the cryptographic challenge
+        if (!cryptoSolved) {
+          return [
+            'ACCESS DENIED: Cryptographic challenge not solved.',
+            '',
+            'You must decrypt the mission data before capturing the flag.',
+            'Use the appropriate decryption commands to solve the challenge first.',
+            '',
+            'Type "hint" for guidance on solving this level\'s challenge.'
+          ].join('\n');
+        }
+        
+        handleCaptureFlag();
+        return 'Flag capture initiated... Processing...';
       },
       hint: () => {
         // Provide level-specific hints with detailed explanations
@@ -662,7 +674,7 @@ STORY: Only united agents can unlock the final truth. Cooperation is the key to 
               
               return `Traces left successfully. Other agents will find helpful hints.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}`;
             } else if (pendingKarmaDecision.context === 'mission') {
-              return `Decision recorded. Your choice will affect the story.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}\n\nType 'next' to continue to the next level.`;
+              return `Decision recorded. Your choice will affect the story.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}\n\nNow solve the cryptographic challenge and capture the flag before proceeding.\nUse 'hint' for guidance on the challenge.`;
             }
           }
         }
@@ -675,7 +687,7 @@ STORY: Only united agents can unlock the final truth. Cooperation is the key to 
             if (pendingKarmaDecision.context === 'trace') {
               return `You remain hidden. No traces left.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}`;
             } else if (pendingKarmaDecision.context === 'mission') {
-              return `Decision recorded. Your choice will affect the story.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}\n\nType 'next' to continue to the next level.`;
+              return `Decision recorded. Your choice will affect the story.\nKarma: ${karmaChange >= 0 ? '+' : ''}${karmaChange}\n\nNow solve the cryptographic challenge and capture the flag before proceeding.\nUse 'hint' for guidance on the challenge.`;
             }
           }
         }
@@ -727,7 +739,11 @@ STORY: Only united agents can unlock the final truth. Cooperation is the key to 
                  `KARMA DECISION REQUIRED:\n${missionData[levelId].prompt}\n\n` +
                  `Type "yes" (+${missionData[levelId].yesKarma} karma) or "no" (${missionData[levelId].noKarma >= 0 ? '+' : ''}${missionData[levelId].noKarma} karma)`;
         } else if (karmaChoiceMade) {
-          return 'Mission decision already made. Type "next" to proceed to the next level.';
+          if (flagCaptured) {
+            return 'Mission decision already made. Flag captured. Type "next" to proceed to the next level.';
+          } else {
+            return 'Mission decision already made. Now solve the cryptographic challenge and capture the flag.\nUse "hint" for guidance on the challenge.';
+          }
         } else {
           return 'No mission data available for this level.';
         }
@@ -1415,15 +1431,9 @@ STORY: Only united agents can unlock the final truth. Cooperation is the key to 
         handleShareData(dataId);
       }
     } else if (command.toLowerCase() === 'capture') {
-      // Ensure crypto challenge is solved before allowing flag capture
-      if (cryptoSolved) {
-        // Flag capture
-        handleCaptureFlag();
-      } else {
-        console.log("Attempted flag capture before solving crypto challenge");
-        setError("You must solve the encryption challenge before capturing the flag.");
-        setTimeout(() => setError(null), 3000);
-      }
+      // The capture command itself now handles validation
+      // No need to handle it here as well
+      console.log("Capture command executed via terminal");
     } else if (command.toLowerCase() === 'unlock') {
       // Unlock crypto challenge
       setCryptoSolved(true);
