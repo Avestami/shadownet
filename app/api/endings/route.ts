@@ -3,6 +3,8 @@ import prisma from '../../../lib/prisma';
 import { getUserIdFromRequest } from '../../lib/authUtils';
 import { endings } from '../../../data/story';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get user ID from session

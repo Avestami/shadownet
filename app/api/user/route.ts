@@ -5,6 +5,8 @@ import { getToken } from 'next-auth/jwt';
 import { getUserUpdates } from './updateStore';
 import { getCachedUser, setCachedUser } from '../../lib/userCache';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Force refresh if requested (used after score/karma updates)
