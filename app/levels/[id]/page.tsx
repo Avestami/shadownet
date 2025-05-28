@@ -909,7 +909,19 @@ export default function LevelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-red-500 relative overflow-hidden">
+    <div className="relative min-h-screen bg-black text-green-500 font-mono">
+      <MatrixBackground />
+      
+      {/* Terminal Section */}
+      <div className="relative z-10">
+        <Terminal
+          commands={terminalCommands}
+          onCommandExecuted={handleTerminalCommand}
+          levelId={levelId}
+          initialText={levelInfo.terminalWelcome}
+        />
+      </div>
+      
       {/* Background */}
       <MatrixBackground colorCode="red" density="medium" />
       
@@ -959,43 +971,6 @@ export default function LevelPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Terminal Interface (2/3 width) */}
           <div className="md:col-span-2">
-            <Terminal 
-              initialText={
-                `ShadowNet System Terminal - ${translate("Level")}: ${levelId.toUpperCase()}\n` +
-                `${translate("User")}: ${user?.username || 'anonymous'}\n` +
-                `${translate("Karma")}: ${user?.karma || 0}\n` +
-                `${translate("Score")}: ${user?.score || 0}\n\n` +
-                `${translate("Location")}: ${levelInfo.serverName}\n` +
-                `${translate(levelInfo.terminalWelcome)}\n\n` +
-                `${translate("MISSION OBJECTIVE")}:\n` +
-                `${levelId === 'alpha' ? translate('Infiltrate the perimeter security and extract the access codes.') : ''}` +
-                `${levelId === 'beta' ? translate('Navigate the internal network and locate the backdoor.') : ''}` +
-                `${levelId === 'gamma' ? translate('Access the protected database and retrieve sensitive data.') : ''}` +
-                `${levelId === 'delta' ? translate('Override the core system functions and gain control.') : ''}` +
-                `${levelId === 'sigma' ? translate('Liberate District 14 from AI control using the override pass.') : ''}` +
-                `${levelId === 'theta' ? translate('Confront your digital clone and resolve the identity crisis.') : ''}` +
-                `${levelId === 'zeta' ? translate('Fix the corrupted key before the young hackers are exposed.') : ''}` +
-                `${levelId === 'sigma-2' ? translate('Decode the cultist\'s confession and decide their fate.') : ''}` +
-                `${levelId === 'omega' ? translate('Face the AI consciousness and determine humanity\'s future.') : ''}\n\n` +
-                `${translate("MISSION COMMANDS")}:\n` +
-                `- ${translate("Use 'mission' to view mission briefing and make karma decisions")}\n` +
-                `- ${translate("Use 'ls' to list files in the current directory")}\n` +
-                `- ${translate("Use 'cat <filename>' to read file contents")}\n` +
-                `- ${translate("Use 'decrypt <file> <key>' to decrypt encrypted files")}\n` +
-                `- ${translate("Use 'traces' to see traces left by other agents")}\n` +
-                `- ${translate("Use 'leave-trace' after decryption to help other agents")}\n` +
-                `- ${translate("Use 'capture' to capture the flag after solving challenges")}\n` +
-                `- ${translate("Use 'next' to proceed to the next level after completing objectives")}\n\n` +
-                `${translate("Type 'help' for all available commands.")}`
-              }
-              prompt={`${levelInfo.serverName}:~$ `}
-              commands={terminalCommands}
-              onCommandExecuted={handleTerminalCommand}
-              encryptedContent={cryptoContent}
-              decryptionKey={levelKeys[levelId as keyof typeof levelKeys] || ''}
-              challengeSolved={cryptoSolved}
-            />
-            
             {cryptoSolved && !flagCaptured && (
               <div className="mt-4 p-3 border border-green-800 bg-black/60 rounded-md">
                 <div className="text-green-400 font-mono mb-2">[{translate("DECRYPTION SUCCESSFUL")}]</div>

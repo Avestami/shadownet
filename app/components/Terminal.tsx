@@ -1,7 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useRouter } from 'next/navigation';
+import { translate } from '@/utils/translate';
+import { missionData } from '@/data/missions';
+
+interface MissionData {
+  id: string;
+  narration: string;
+  prompt: string;
+  yesKarma: number;
+  noKarma: number;
+}
 
 interface TerminalProps {
   initialText?: string;
@@ -16,6 +27,8 @@ interface TerminalProps {
   dialogueOptions?: Array<{id: string, text: string, action: () => void}>;
   autoFocus?: boolean;
   avestaMessage?: string;
+  initialMissionId?: string;
+  levelId?: string;
 }
 
 // Simple Caesar cipher for encrypting/decrypting content
@@ -43,7 +56,9 @@ export const Terminal: React.FC<TerminalProps> = ({
   decryptionKey = '',
   dialogueOptions = [],
   autoFocus = true,
-  avestaMessage = ''
+  avestaMessage = '',
+  initialMissionId,
+  levelId
 }) => {
   const [history, setHistory] = useState<string[]>(initialText.split('\n'));
   const [input, setInput] = useState('');
@@ -55,6 +70,15 @@ export const Terminal: React.FC<TerminalProps> = ({
   const terminalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { translate, language, setLanguage } = useLanguage();
+  const [currentMission, setCurrentMission] = useState<MissionData | null>(null);
+
+  useEffect(() => {
+    // Set current mission based on level ID or initial mission ID
+    const missionId = levelId || initialMissionId;
+    if (missionId && missionData[missionId]) {
+      setCurrentMission(missionData[missionId]);
+    }
+  }, [levelId, initialMissionId]);
 
   // Handle Avesta responses with translation
   const handleAvestaResponse = (message: string) => {
@@ -123,13 +147,18 @@ export const Terminal: React.FC<TerminalProps> = ({
   // Default commands available in all terminals
   const defaultCommands: Record<string, (args: string[]) => string> = {
     help: () => {
-      const allCommands = { ...defaultCommands, ...commands };
-      const commandList = Object.keys(allCommands).sort().map(cmd => `- ${cmd}`).join('\n');
-      return translate('Available commands:') + '\n' + commandList + 
-        '\n\n' + translate('Special commands:') + '\n' +
-        '- language <en|fa> - ' + translate('Change the terminal language (en: English, fa: Finglish)') + '\n' +
-        '- sign-out / logout - ' + translate('Sign out of your account') + '\n' +
-        '- delete-account - ' + translate('Permanently delete your account (WARNING: Cannot be undone!)');
+      return [
+        'Available commands:',
+        'help     - Show this help message',
+        'clear    - Clear the terminal',
+        'mission  - Show current mission details and choices',
+        'choose   - Make a choice (usage: choose <yes/no>)',
+        'options  - Show available choices',
+        'keep     - Keep sensitive data (usage: keep <data_id>)',
+        'share    - Share sensitive data (usage: share <data_id>)',
+        'status   - Show your current status',
+        'exit     - Exit the current session'
+      ].join('\n');
     },
     clear: () => {
       setTimeout(() => setHistory([]), 50);
@@ -688,11 +717,81 @@ export const Terminal: React.FC<TerminalProps> = ({
       handleAvestaResponse("Another challenge awaits. Prove your worth.");
       return 'Unlocking encryption challenge...';
     },
-    // Remove these commands completely
-    // choose: (args) => { ... },
-    // options: () => { ... },
-    // choose: () => { ... },
-    // options: () => { ... },
+    mission: () => {
+      if (!currentMission) {
+        return 'No active mission. Please start a new level.';
+      }
+      
+      return [
+        `CURRENT MISSION: ${currentMission.id.toUpperCase()}`,
+        '',
+        'Situation:',
+        currentMission.narration,
+        '',
+        'Decision Required:',
+        currentMission.prompt,
+        '',
+        'Use "choose yes" or "choose no" to make your decision.',
+        'Your choice will affect your karma and may have hidden consequences.',
+        '',
+        'Additional commands:',
+        '- options  : View your choices',
+        '- status   : Check your current status',
+        '- help     : View all available commands'
+      ].join('\n');
+    },
+    options: () => {
+      if (!currentMission) {
+        return 'No active mission. Please start a new level.';
+      }
+      
+      return [
+        'AVAILABLE CHOICES:',
+        '',
+        'yes - Accept the mission prompt',
+        'no  - Reject the mission prompt',
+        '',
+        'Use "choose <yes/no>" to make your decision.',
+        'Each choice affects your karma differently:',
+        `Accept (yes): ${currentMission.yesKarma > 0 ? '+' : ''}${currentMission.yesKarma} karma`,
+        `Reject (no): ${currentMission.noKarma > 0 ? '+' : ''}${currentMission.noKarma} karma`
+      ].join('\n');
+    },
+    choose: (args) => {
+      if (!currentMission) {
+        return 'No active mission. Please start a new level.';
+      }
+      
+      if (args.length === 0) {
+        return 'Usage: choose <yes/no>';
+      }
+      
+      const choice = args[0].toLowerCase();
+      if (choice !== 'yes' && choice !== 'no') {
+        return 'Invalid choice. Use "yes" or "no".';
+      }
+      
+      // Tell the parent component about this choice
+      if (onCommandExecuted) {
+        onCommandExecuted('choose', choice);
+      }
+      
+      const karma = choice === 'yes' ? currentMission.yesKarma : currentMission.noKarma;
+      const karmaEffect = karma > 0 ? 'increased' : karma < 0 ? 'decreased' : 'unchanged';
+      
+      triggerGlitchEffect();
+      handleAvestaResponse(choice === 'yes' 
+        ? "Choice made. The path of action often carries both rewards and risks." 
+        : "Sometimes inaction is the wisest action. We'll see how this plays out.");
+        
+      return [
+        `Decision made: ${choice.toUpperCase()}`,
+        `Your karma has ${karmaEffect}.`,
+        'Continue exploring or proceed to the next challenge.',
+        '',
+        'Type "mission" to review your current objectives.'
+      ].join('\n');
+    },
     keep: (args) => {
       if (args.length === 0) return 'Usage: keep <data_id>';
       

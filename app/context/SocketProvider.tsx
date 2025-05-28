@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
+import { initSocket, getSocket } from '../lib/socket';
+import type { Socket } from 'socket.io-client';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -22,15 +23,7 @@ export default function SocketProvider({ children }: { children: React.ReactNode
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
-      reconnectionDelay: 1000,
-      reconnection: true,
-      reconnectionAttempts: 10,
-      transports: ['websocket'],
-      agent: false,
-      upgrade: false,
-      rejectUnauthorized: false
-    });
+    const socketInstance = initSocket();
 
     socketInstance.on('connect', () => {
       console.log('Socket connected');
