@@ -12,6 +12,7 @@ interface ScoreboardEntry {
   karma: number;
   flagsCaptured: string[];
   choices: string[];
+  unlockedLevels: string[];
 }
 
 interface ScoreboardData {
@@ -37,7 +38,7 @@ export default function ScoreboardPage() {
         setLoading(false);
       }
     };
-
+    
     fetchScores();
   }, []);
 

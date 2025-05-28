@@ -13,6 +13,7 @@ import MatrixBackground from './components/MatrixBackground';
 import Scoreboard from './components/Scoreboard';
 import { useLanguage } from './contexts/LanguageContext';
 import loggedFetch from './lib/apiLogger';
+import { User } from '@/app/types/user';
 
 export default function Home() {
   const router = useRouter();
@@ -210,13 +211,17 @@ export default function Home() {
 
   // DEBUG: Bypass login for testing
   const bypassLogin = () => {
-    const debugUserData = {
+    const debugUserData: User = {
       id: 'debug-user',
-      username: 'elite_hacker',
+      username: 'debug_player',
+      email: null,
+      password: 'debug_password',
       karma: 0,
-      choices: '[]',
+      choices: '[]',  // JSON string
       flagsCaptured: [],
-      score: 0
+      score: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     // Also initialize karma in localStorage
