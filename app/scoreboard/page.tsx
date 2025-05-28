@@ -5,38 +5,39 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { MatrixBackground } from '../components/MatrixBackground';
 
-interface UserScore {
+interface ScoreboardEntry {
   id: string;
   username: string;
   score: number;
-  unlockedLevels: number;
+  karma: number;
+  flagsCaptured: string[];
+  choices: string[];
 }
 
-export default function Scoreboard() {
-  const [scores, setScores] = useState<UserScore[]>([]);
+interface ScoreboardData {
+  scores: ScoreboardEntry[];
+}
+
+export default function ScoreboardPage() {
+  const [scores, setScores] = useState<ScoreboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { data: session } = useSession();
 
   useEffect(() => {
-    async function fetchScores() {
+    const fetchScores = async () => {
       try {
         const response = await fetch('/api/scoreboard');
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch scoreboard data');
-        }
-        
-        const data = await response.json();
-        setScores(data.users);
+        const data: ScoreboardData = await response.json();
+        setScores(data.scores);
       } catch (error) {
-        console.error('Scoreboard error:', error);
+        console.error('Error fetching scores:', error);
         setError('Failed to load scoreboard. Please try again later.');
       } finally {
         setLoading(false);
       }
-    }
-    
+    };
+
     fetchScores();
   }, []);
 

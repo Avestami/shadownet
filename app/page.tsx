@@ -1,7 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useSocket } from '@/app/context/SocketProvider';
+import { useUser } from '@/app/context/UserProvider';
+import { useError } from '@/app/context/ErrorProvider';
+import { useTerminal } from '@/app/context/TerminalProvider';
 import KarmaDisplay from './components/KarmaDisplay';
 import Terminal from './components/Terminal';
 import MatrixBackground from './components/MatrixBackground';
@@ -11,6 +16,11 @@ import loggedFetch from './lib/apiLogger';
 
 export default function Home() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const { socket } = useSocket();
+  const { user, setUser } = useUser();
+  const { error, setError } = useError();
+  const { setTerminalOutput } = useTerminal();
   const { translate } = useLanguage();
   const hasLoadedUserData = useRef(false);
   
@@ -18,16 +28,14 @@ export default function Home() {
     id: string;
     username: string;
     karma: number;
-    choices: string[];
+    choices: string;
     flagsCaptured: string[];
     score: number;
     [key: string]: any;
   }
   
-  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isTerminalMode, setIsTerminalMode] = useState(true);
+  const [isTerminalMode, setIsTerminalMode] = useState(false);
   const [scoreUpdateTrigger, setScoreUpdateTrigger] = useState(0);
   const [hasRedirected, setHasRedirected] = useState(false);
 
@@ -185,7 +193,7 @@ export default function Home() {
 
   // Always set terminal mode
   useEffect(() => {
-    setIsTerminalMode(true);
+    setIsTerminalMode(false);
   }, []);
 
   // Handle redirect to login when no user is authenticated
@@ -196,10 +204,9 @@ export default function Home() {
     }
   }, [loading, user, hasRedirected]);
 
-  const handleLoginClick = () => {
-    // Use direct navigation to avoid Next.js routing issues
-    window.location.href = '/auth/login';
-  };
+  const handleLoginClick = useCallback(() => {
+    router.push('/auth/login');
+  }, [router]);
 
   // DEBUG: Bypass login for testing
   const bypassLogin = () => {
@@ -207,7 +214,7 @@ export default function Home() {
       id: 'debug-user',
       username: 'elite_hacker',
       karma: 0,
-      choices: [],
+      choices: '[]',
       flagsCaptured: [],
       score: 0
     };
@@ -360,6 +367,13 @@ export default function Home() {
       console.log('Connection to Avesta initiated...');
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      setUser(user);
+      setError(null);
+    }
+  }, [user, setUser, setError]);
 
   if (loading) {
     return (
