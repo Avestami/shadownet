@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpx prisma generate && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
@@ -12,7 +12,14 @@
     "prisma:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:3000": "PORT=3000 npm start",
+    "start:3001": "PORT=3001 npm start",
+    "start:3002": "PORT=3002 npm start",
+    "start:3003": "PORT=3003 npm start",
+    "start:3004": "PORT=3004 npm start",
+    "start:3005": "PORT=3005 npm start",
+    "start:all": "concurrently \"npm run start:3000\" \"npm run start:3001\" \"npm run start:3002\" \"npm run start:3003\" \"npm run start:3004\" \"npm run start:3005\""
   },
   "prisma": {
     "schema": "prisma/schema.prisma",
@@ -40,6 +47,7 @@
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
+    "concurrently": "^9.1.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.1.0",
     "tailwindcss": "^3.4.1",

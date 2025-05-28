@@ -1,6 +1,7 @@
 import { NextApiRequest } from 'next';
 import { Server as SocketIOServer } from 'socket.io';
 import { NextResponse } from 'next/server';
+import { registerSocketHandlers } from '../socket-handlers';
 
 // Level-specific data that was previously in the LEVEL_FLAVOR object
 const LEVEL_DATA = {
@@ -48,53 +49,18 @@ function initSocketIO(req: NextApiRequest, res: any) {
     io = new SocketIOServer(res.socket.server, {
       path: '/api/socket',
       addTrailingSlash: false,
+      transports: ['polling'], // Use polling instead of WebSocket
+      cors: {
+        origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST']
+      }
     });
     
     // @ts-ignore
     res.socket.server.io = io;
     
-    // Set up socket event handlers
-    io.on('connection', (socket) => {
-      console.log('Socket connected:', socket.id);
-      
-      // Send welcome message
-      socket.emit('message', 'Connected to ShadowNet socket server');
-      
-      // Handle level info requests
-      socket.on('getLevelInfo', ({ levelId }) => {
-        const levelInfo = LEVEL_DATA[levelId as keyof typeof LEVEL_DATA] || {
-          title: 'Unknown Level',
-          subtitle: 'Navigate with caution',
-          serverName: 'unknown',
-          terminalWelcome: 'Connection established to unknown system.',
-        };
-        
-        socket.emit('levelInfo', levelInfo);
-      });
-      
-      // Track choices
-      socket.on('makeChoice', ({ levelId, choiceId }) => {
-        console.log(`User ${socket.id} chose ${choiceId} on level ${levelId}`);
-        // Could broadcast to admin dashboard or other monitoring systems
-      });
-      
-      // Track flag captures
-      socket.on('captureFlag', ({ levelId }) => {
-        console.log(`User ${socket.id} captured flag on level ${levelId}`);
-        // Could broadcast to admin dashboard or leaderboard
-      });
-      
-      // Track crypto challenges
-      socket.on('cryptoSolved', ({ levelId, key }) => {
-        console.log(`User ${socket.id} solved crypto challenge on level ${levelId} with key ${key}`);
-        // Could broadcast to admin dashboard
-      });
-      
-      // Handle disconnection
-      socket.on('disconnect', () => {
-        console.log('Socket disconnected:', socket.id);
-      });
-    });
+    // Register socket handlers
+    registerSocketHandlers(io);
   }
 }
 
