@@ -4,16 +4,16 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useSocket } from './context/SocketProvider';
-import { useUser } from '@/app/context/UserProvider';
-import { useError } from '@/app/context/ErrorProvider';
-import { useTerminal } from '@/app/context/TerminalProvider';
+import { useUser } from './context/UserProvider';
+import { useError } from './context/ErrorProvider';
+import { useTerminal } from './context/TerminalProvider';
 import KarmaDisplay from './components/KarmaDisplay';
 import Terminal from './components/Terminal';
 import MatrixBackground from './components/MatrixBackground';
 import Scoreboard from './components/Scoreboard';
 import { useLanguage } from './contexts/LanguageContext';
 import loggedFetch from './lib/apiLogger';
-import { User } from '@/app/types/user';
+import { User } from './types/user';
 
 export default function Home() {
   const router = useRouter();

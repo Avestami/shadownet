@@ -1,10 +1,13 @@
 import { translations } from '@/data/translations';
 
-export function translate(key: string, language: string = 'en'): string {
+type Language = keyof typeof translations;
+type TranslationKey = keyof typeof translations['en'];
+
+export function translate(key: TranslationKey | string, language: Language = 'en'): string {
   const translationSet = translations[language] || translations['en'];
-  return translationSet[key] || key;
+  return (translationSet as Record<string, string>)[key] || key;
 }
 
-export function getAvailableLanguages(): string[] {
-  return Object.keys(translations);
+export function getAvailableLanguages(): Language[] {
+  return Object.keys(translations) as Language[];
 } 
