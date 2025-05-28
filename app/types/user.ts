@@ -3,10 +3,10 @@ export interface User {
   username: string;
   email: string | null;
   password: string;
-  score: number;
   karma: number;
   choices: string;  // JSON string
   flagsCaptured: string[];
+  score: number;
   createdAt: Date;
   updatedAt: Date;
   

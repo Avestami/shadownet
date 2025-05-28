@@ -1,23 +1,20 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google'
 import "./globals.css";
-import AuthProvider from "./context/AuthProvider";
-import SocketProvider from "./components/SocketProvider";
-import { LanguageProvider } from './contexts/LanguageContext'
-import SignOutButtonWrapper from "./components/SignOutButtonWrapper";
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "ShadowNet: Hidden Truths of Mankind",
-  description: "A futuristic hacker-themed decryption game with Persian influences",
+  title: "Project Control",
+  description: "A cyberpunk hacking game",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className={inter.className}>
       <head>
@@ -26,14 +23,9 @@ export default function RootLayout({
       <body
         className="antialiased overflow-hidden m-0 p-0"
       >
-        <AuthProvider>
-          <SocketProvider>
-            <LanguageProvider>
-              <SignOutButtonWrapper />
-              {children}
-            </LanguageProvider>
-          </SocketProvider>
-        </AuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,35 +1,16 @@
 'use client';
 
-import { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
-
-interface User {
-  id: string;
-  username: string;
-  email: string | null;
-  password: string;
-  score: number;
-  karma: number;
-  choices: string;
-  flagsCaptured: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { User } from '@/app/types/user';
 
 interface UserContextType {
   user: User | null;
-  setUser: Dispatch<SetStateAction<User | null>>;
+  setUser: (user: User | null) => void;
 }
 
-const UserContext = createContext<UserContextType>({
-  user: null,
-  setUser: () => {}
-});
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const useUser = () => {
-  return useContext(UserContext);
-};
-
-export default function UserProvider({ children }: { children: React.ReactNode }) {
+export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   return (
@@ -37,4 +18,12 @@ export default function UserProvider({ children }: { children: React.ReactNode }
       {children}
     </UserContext.Provider>
   );
+}
+
+export function useUser() {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
 } 
