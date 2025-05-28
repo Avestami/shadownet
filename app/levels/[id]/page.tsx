@@ -18,6 +18,7 @@ import AudioPlayer from '../../components/AudioPlayer';
 import EnhancedAudioPlayer from '../../components/EnhancedAudioPlayer';
 import { getAudioConfig } from '../../../data/audioConfig';
 import { useAudioManager } from '../../hooks/useAudioManager';
+import { User } from '@/app/types/user';
 import { 
   caesarDecrypt, 
   rot13, 
@@ -75,6 +76,7 @@ export default function LevelPage() {
   const { user, setUser } = useUser();
   const { setError } = useError();
   const { setTerminalOutput } = useTerminal();
+  const [error, setLocalError] = useState<string | null>(null);
 
   const [cryptoSolved, setCryptoSolved] = useState(false);
   const [flagCaptured, setFlagCaptured] = useState(false);
@@ -280,7 +282,7 @@ export default function LevelPage() {
                 const karmaData = JSON.parse(savedKarma);
                 // Use localStorage karma if it's more recent or higher
                 if (karmaData.karma !== undefined) {
-                  userData.karma = karmaData.karma;
+                userData.karma = karmaData.karma;
                 }
               } catch (e) {
                 console.error('Invalid karma data in localStorage');
@@ -388,8 +390,8 @@ export default function LevelPage() {
     try {
       // For debug mode
       if (user && user.id === 'debug-user') {
-        const updatedUser = {
-          ...user,
+      const updatedUser = {
+        ...user,
           score: (user.score || 0) + 100,
           flagsCaptured: [...(user.flagsCaptured || []), `flag_${levelId}`]
         };
@@ -439,19 +441,19 @@ export default function LevelPage() {
         console.log(`Flag captured in level ${levelId}`);
         
         // No need for another API call - we already have the updated data
-      } else {
+        } else {
         setError('Failed to capture flag. Please try again.');
-      }
-    } catch (error) {
+          }
+        } catch (error) {
       console.error('Error capturing flag:', error);
       setError('An error occurred while capturing the flag.');
-    }
+        }
   }, [user, levelId, flagCaptured, setError]);
 
   const handleDeleteAccount = useCallback(async () => {
     try {
       const res = await fetch('/api/delete-account', {
-        method: 'POST',
+                method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         }
@@ -466,10 +468,10 @@ export default function LevelPage() {
         
         // Redirect to home page
         router.push('/');
-      } else {
+        } else {
         setError('Failed to delete account. Please try again.');
-      }
-    } catch (error) {
+        }
+        } catch (error) {
       console.error('Error deleting account:', error);
       setError('An error occurred while deleting your account.');
     }
@@ -486,8 +488,8 @@ export default function LevelPage() {
         handleDeleteAccount();
       } else if (command === 'karma decision') {
         handleKarmaDecision();
+        }
       }
-    }
   }, [terminalCommands, handleCaptureFlag, handleDeleteAccount, handleKarmaDecision]);
 
   // Add the current level's story choices to terminal commands
@@ -870,13 +872,17 @@ export default function LevelPage() {
                 console.log("Manual bypass activated from error screen");
                 // Create emergency debug user if needed
                 if (!user) {
-                  const emergencyUser = {
+                  const emergencyUser: User = {
                     id: 'emergency-debug-user',
                     username: 'debug_player',
+                    email: null,
+                    password: 'debug_password',
                     karma: 0,
-                    choices: [],
+                    choices: '[]',  // JSON string
                     flagsCaptured: [],
-                    score: 0
+                    score: 0,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                   };
                   
                   // Also initialize karma in localStorage
