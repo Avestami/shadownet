@@ -1,32 +1,36 @@
-// Simple caching mechanism to prevent excessive database calls
-const userCache: Record<string, {
-  data: any,
-  timestamp: number
-}> = {};
+import { User } from '@prisma/client'
 
-// Cache timeout (5 seconds)
-const CACHE_TIMEOUT = 5000;
-
-// Function to invalidate a user's cache when data is updated
-export function invalidateUserCache(userId: string) {
-  if (userCache[userId]) {
-    delete userCache[userId];
-  }
+interface UserCacheData {
+  user: User | null;
+  lastFetch: number;
 }
 
-// Function to get cached user data
-export function getCachedUser(userId: string) {
-  const cached = userCache[userId];
-  if (cached && Date.now() - cached.timestamp < CACHE_TIMEOUT) {
-    return cached.data;
+const userCache = new Map<string, UserCacheData>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+export function getCachedUser(userId: string): User | null {
+  const cached = userCache.get(userId);
+  if (!cached) return null;
+  
+  if (Date.now() - cached.lastFetch > CACHE_TTL) {
+    userCache.delete(userId);
+    return null;
   }
-  return null;
+  
+  return cached.user;
 }
 
-// Function to cache user data
-export function setCachedUser(userId: string, data: any) {
-  userCache[userId] = {
-    data,
-    timestamp: Date.now()
-  };
+export function setCachedUser(userId: string, user: User | null): void {
+  userCache.set(userId, {
+    user,
+    lastFetch: Date.now()
+  });
+}
+
+export function clearUserCache(userId: string): void {
+  userCache.delete(userId);
+}
+
+export function invalidateUserCache(userId: string): void {
+  clearUserCache(userId);
 } 

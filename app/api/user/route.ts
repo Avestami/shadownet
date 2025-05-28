@@ -51,11 +51,15 @@ export async function GET(request: NextRequest) {
       // We're simulating this by returning predefined values
       const dummyData = {
         id: dummyUserId,
+        email: null,
         username: 'debug_user',
+        password: 'debug_pass',
         karma: 0,
-        choices: [],
+        score: 0,
+        choices: '[]',
         flagsCaptured: [],
-        score: 0
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       // Cache the result
@@ -140,11 +144,15 @@ export async function GET(request: NextRequest) {
     // Prepare user data
     const userData = {
       id: user.id,
+      email: user.email,
       username: user.username,
+      password: user.password,
       karma: user.karma || 0,
-      choices: choices,
+      score: user.score || 0,
+      choices: user.choices,
       flagsCaptured: user.flagsCaptured || [],
-      score: user.score || 0
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     };
     
     // Cache the result

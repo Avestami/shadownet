@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        choices: [...choices, choiceId],
+        choices: JSON.stringify([...choices, choiceId]),
         karma: (user.karma || 0) + karmaDelta
       }
     });
