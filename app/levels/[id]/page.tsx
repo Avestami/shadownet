@@ -18,7 +18,7 @@ import AudioPlayer from '../../components/AudioPlayer';
 import EnhancedAudioPlayer from '../../components/EnhancedAudioPlayer';
 import { getAudioConfig } from '../../../data/audioConfig';
 import { useAudioManager } from '../../hooks/useAudioManager';
-import { User } from '@/app/types/user';
+import { User } from '../../types/user';
 import { 
   caesarDecrypt, 
   rot13, 
@@ -35,9 +35,9 @@ import {
   canCooperate
 } from '../../lib/cryptoUtils';
 import { useSession } from 'next-auth/react';
-import { useUser } from '@/app/context/UserProvider';
-import { useError } from '@/app/context/ErrorProvider';
-import { useTerminal } from '@/app/context/TerminalProvider';
+import { useUser } from '../../context/UserProvider';
+import { useError } from '../../context/ErrorProvider';
+import { useTerminal } from '../../context/TerminalProvider';
 
 // Map of level IDs to the next level
 const LEVEL_SEQUENCE = {
@@ -390,8 +390,8 @@ export default function LevelPage() {
     try {
       // For debug mode
       if (user && user.id === 'debug-user') {
-      const updatedUser = {
-        ...user,
+        const updatedUser = {
+          ...user,
           score: (user.score || 0) + 100,
           flagsCaptured: [...(user.flagsCaptured || []), `flag_${levelId}`]
         };
@@ -425,13 +425,13 @@ export default function LevelPage() {
       if (res.ok) {
         const data = await res.json();
         if (!user) return;
-        setUser((prev: User | null) => prev ? {
-          ...prev,
+        setUser({
+          ...user,
           karma: data.karma,
           choices: data.choices,
           score: data.score,
           flagsCaptured: data.flagsCaptured
-        } : null);
+        });
         setFlagCaptured(true);
         
         // Update the score trigger to refresh the UI
@@ -441,13 +441,13 @@ export default function LevelPage() {
         console.log(`Flag captured in level ${levelId}`);
         
         // No need for another API call - we already have the updated data
-        } else {
+      } else {
         setError('Failed to capture flag. Please try again.');
-          }
-        } catch (error) {
+      }
+    } catch (error) {
       console.error('Error capturing flag:', error);
       setError('An error occurred while capturing the flag.');
-        }
+    }
   }, [user, levelId, flagCaptured, setError]);
 
   const handleDeleteAccount = useCallback(async () => {
@@ -555,11 +555,12 @@ export default function LevelPage() {
       if (response.ok) {
         const data = await response.json();
         // Update user state
-        setUser((prev: User | null) => prev ? {
-          ...prev,
+        if (!user) return;
+        setUser({
+          ...user,
           karma: data.karma,
           choices: data.choices
-        } : null);
+        });
         
         // Navigate to the next level directly with window.location
         // This bypasses the router completely
@@ -650,13 +651,10 @@ export default function LevelPage() {
       
       if (res.ok) {
         const data = await res.json();
-        setUser((prev: User | null) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            score: data.score,
-            karma: data.karma
-          };
+        setUser({
+          ...user,
+          score: data.score,
+          karma: data.karma
         });
         
         // Update the score trigger to refresh the UI
@@ -716,13 +714,10 @@ export default function LevelPage() {
       
       if (res.ok) {
         const data = await res.json();
-        setUser((prev: User | null) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            score: data.score,
-            karma: data.karma
-          };
+        setUser({
+          ...user,
+          score: data.score,
+          karma: data.karma
         });
         
         // Update the score trigger to refresh the UI
