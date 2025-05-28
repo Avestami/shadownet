@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -14,8 +16,6 @@ import Scoreboard from './components/Scoreboard';
 import { useLanguage } from './contexts/LanguageContext';
 import loggedFetch from './lib/apiLogger';
 import { User } from './types/user';
-
-export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const router = useRouter();
