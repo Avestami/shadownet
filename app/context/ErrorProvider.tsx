@@ -1,22 +1,15 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ErrorContextType {
   error: string | null;
   setError: (error: string | null) => void;
 }
 
-const ErrorContext = createContext<ErrorContextType>({
-  error: null,
-  setError: () => {}
-});
+const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
 
-export const useError = () => {
-  return useContext(ErrorContext);
-};
-
-export default function ErrorProvider({ children }: { children: React.ReactNode }) {
+export function ErrorProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   return (
@@ -24,4 +17,12 @@ export default function ErrorProvider({ children }: { children: React.ReactNode 
       {children}
     </ErrorContext.Provider>
   );
+}
+
+export function useError() {
+  const context = useContext(ErrorContext);
+  if (context === undefined) {
+    throw new Error('useError must be used within an ErrorProvider');
+  }
+  return context;
 } 
