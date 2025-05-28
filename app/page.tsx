@@ -15,6 +15,8 @@ import { useLanguage } from './contexts/LanguageContext';
 import loggedFetch from './lib/apiLogger';
 import { User } from './types/user';
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const router = useRouter();
   const { data: session } = useSession();

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MatrixBackground } from '../../components/MatrixBackground';
 
+export const dynamic = 'force-dynamic';
+
 export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
