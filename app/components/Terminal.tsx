@@ -8,10 +8,20 @@ import { missionData } from '@/data/missions';
 
 interface MissionData {
   id: string;
-  narration: string;
-  prompt: string;
-  yesKarma: number;
-  noKarma: number;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  status: 'locked' | 'available' | 'in_progress' | 'completed';
+  prerequisites: string[];
+  rewards: {
+    xp: number;
+    items?: string[];
+  };
+  objectives: {
+    id: string;
+    description: string;
+    completed: boolean;
+  }[];
 }
 
 interface TerminalProps {
@@ -726,10 +736,10 @@ export const Terminal: React.FC<TerminalProps> = ({
         `CURRENT MISSION: ${currentMission.id.toUpperCase()}`,
         '',
         'Situation:',
-        currentMission.narration,
+        currentMission.description,
         '',
         'Decision Required:',
-        currentMission.prompt,
+        currentMission.title,
         '',
         'Use "choose yes" or "choose no" to make your decision.',
         'Your choice will affect your karma and may have hidden consequences.',
@@ -753,8 +763,8 @@ export const Terminal: React.FC<TerminalProps> = ({
         '',
         'Use "choose <yes/no>" to make your decision.',
         'Each choice affects your karma differently:',
-        `Accept (yes): ${currentMission.yesKarma > 0 ? '+' : ''}${currentMission.yesKarma} karma`,
-        `Reject (no): ${currentMission.noKarma > 0 ? '+' : ''}${currentMission.noKarma} karma`
+        `Accept (yes): ${currentMission.rewards.xp > 0 ? '+' : ''}${currentMission.rewards.xp} xp`,
+        `Reject (no): ${currentMission.rewards.xp > 0 ? '-' : ''}${currentMission.rewards.xp} xp`
       ].join('\n');
     },
     choose: (args) => {
@@ -776,7 +786,7 @@ export const Terminal: React.FC<TerminalProps> = ({
         onCommandExecuted('choose', choice);
       }
       
-      const karma = choice === 'yes' ? currentMission.yesKarma : currentMission.noKarma;
+      const karma = choice === 'yes' ? currentMission.rewards.xp : -currentMission.rewards.xp;
       const karmaEffect = karma > 0 ? 'increased' : karma < 0 ? 'decreased' : 'unchanged';
       
       triggerGlitchEffect();

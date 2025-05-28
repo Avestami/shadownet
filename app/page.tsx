@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useSocket } from '@/app/context/SocketProvider';
+import { useSocket } from './context/SocketProvider';
 import { useUser } from '@/app/context/UserProvider';
 import { useError } from '@/app/context/ErrorProvider';
 import { useTerminal } from '@/app/context/TerminalProvider';
