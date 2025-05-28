@@ -428,9 +428,9 @@ export default function Home() {
         </div>
         
         <div className="mt-16 mb-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Terminal Interface (2/3 width) */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-8 w-full">
               <Terminal 
                 initialText={
                   `ShadowNet Core Terminal v4.7.1\n` +
@@ -484,12 +484,10 @@ export default function Home() {
                 }}
                 onCommandExecuted={handleTerminalCommand}
               />
-              
-
             </div>
             
             {/* Scoreboard (1/3 width) */}
-            <div>
+            <div className="md:col-span-4 w-full">
               <Scoreboard 
                 currentUser={user ? {
                   username: user.username,
