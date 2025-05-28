@@ -15,6 +15,11 @@ const nextConfig = {
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
+  },
+  // Disable static page generation for authenticated routes
+  staticPageGenerationTimeout: 120,
+  images: {
+    unoptimized: true
   }
 }
 
