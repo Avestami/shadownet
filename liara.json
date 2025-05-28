@@ -1,8 +1,6 @@
 {
-    "app":"shadownet-uut"
-    "port":3000
-    "build":{
-    "location":"iran"
-    }
-    "disks":[]
+    "next": {
+    "mirror": true
+    },
+    "port": 3000
 }
