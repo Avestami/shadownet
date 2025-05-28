@@ -9,7 +9,7 @@ import ChoiceButton from '../../components/ChoiceButton';
 import Terminal from '../../components/Terminal';
 import CryptoChallenge from '../../components/CryptoChallenge';
 import MatrixBackground from '../../components/MatrixBackground';
-import { useSocket } from '@/app/context/SocketProvider';
+import { useSocket } from '../../context/SocketProvider';
 import Scoreboard from '../../components/Scoreboard';
 import { useLanguage } from '../../contexts/LanguageContext';
 import MissionNarration from '../../components/MissionNarration';
