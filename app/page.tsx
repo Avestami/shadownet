@@ -448,16 +448,24 @@ export default function Home() {
                 }
                 prompt="hacker@shadownet:~$ "
                 commands={{
-                  start: () => {
-                    // Navigate to the first level
-                    setTimeout(() => {
-                      window.location.href = '/levels/alpha';
-                    }, 1000);
-                    return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
+                  levels: () => {
+                    return 'MISSION LEVELS:\n\n' +
+                      '1. ALPHA - Perimeter Security [UNLOCKED]\n' +
+                      '2. BETA - Network Infiltration [🔒 LOCKED]\n' +
+                      '3. GAMMA - Database Access [🔒 LOCKED]\n' +
+                      '4. DELTA - Core Systems [🔒 LOCKED]\n' +
+                      '5. SIGMA - District Liberation [🔒 LOCKED]\n' +
+                      '6. THETA - Identity Crisis [🔒 LOCKED]\n' +
+                      '7. ZETA - Network Rescue [🔒 LOCKED]\n' +
+                      '8. SIGMA-2 - Digital Confession [🔒 LOCKED]\n' +
+                      '9. OMEGA - Final Confrontation [🔒 LOCKED]\n\n' +
+                      'Complete each level to unlock the next one.\n' +
+                      'Current progress: Level 1 - ALPHA';
                   },
                   mission: () => {
                     return 'SHADOWNET INFILTRATION MISSION\n\n' +
                       'Objective: Navigate through 9 levels of ShadowNet\'s defenses\n' +
+                      'Each level must be completed sequentially to unlock the next.\n\n' +
                       'Each level contains:\n' +
                       '- Encrypted data files to decrypt\n' +
                       '- Critical decisions that affect your karma\n' +
@@ -466,20 +474,25 @@ export default function Home() {
                       '- High karma: Become a liberator\n' +
                       '- Neutral karma: Walk the gray path\n' +
                       '- Low karma: Embrace the darkness\n\n' +
+                      'Current access: Level 1 - ALPHA\n' +
                       'Type "start" when ready to begin.';
                   },
-                  levels: () => {
-                    return 'MISSION LEVELS:\n\n' +
-                      '1. ALPHA - Perimeter Security\n' +
-                      '2. BETA - Network Infiltration\n' +
-                      '3. GAMMA - Database Access\n' +
-                      '4. DELTA - Core Systems\n' +
-                      '5. SIGMA - District Liberation\n' +
-                      '6. THETA - Identity Crisis\n' +
-                      '7. ZETA - Network Rescue\n' +
-                      '8. SIGMA-2 - Digital Confession\n' +
-                      '9. OMEGA - Final Confrontation\n\n' +
-                      'Each level increases in difficulty and complexity.';
+                  start: () => {
+                    // Navigate to the first level
+                    setTimeout(() => {
+                      window.location.href = '/levels/alpha';
+                    }, 1000);
+                    return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
+                  },
+                  connect: (args: string) => {
+                    const level = args.toLowerCase().trim();
+                    if (level === 'alpha' || level === 'level1' || level === 'level 1') {
+                      setTimeout(() => {
+                        window.location.href = '/levels/alpha';
+                      }, 1000);
+                      return 'Connecting to ALPHA level...\nInitializing secure connection...\nAccess granted.';
+                    }
+                    return 'ACCESS DENIED: Level is locked. Complete previous levels to unlock.\nCurrent access: Level 1 - ALPHA only.';
                   }
                 }}
                 onCommandExecuted={handleTerminalCommand}

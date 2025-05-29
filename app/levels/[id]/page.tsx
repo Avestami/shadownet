@@ -390,8 +390,8 @@ export default function LevelPage() {
     try {
       // For debug mode
       if (user && user.id === 'debug-user') {
-        const updatedUser = {
-          ...user,
+      const updatedUser = {
+        ...user,
           score: (user.score || 0) + 100,
           flagsCaptured: [...(user.flagsCaptured || []), `flag_${levelId}`]
         };
@@ -441,13 +441,13 @@ export default function LevelPage() {
         console.log(`Flag captured in level ${levelId}`);
         
         // No need for another API call - we already have the updated data
-      } else {
+        } else {
         setError('Failed to capture flag. Please try again.');
-      }
-    } catch (error) {
+          }
+        } catch (error) {
       console.error('Error capturing flag:', error);
       setError('An error occurred while capturing the flag.');
-    }
+        }
   }, [user, levelId, flagCaptured, setError]);
 
   const handleDeleteAccount = useCallback(async () => {
@@ -653,8 +653,8 @@ export default function LevelPage() {
         const data = await res.json();
         setUser({
           ...user,
-          score: data.score,
-          karma: data.karma
+            score: data.score,
+            karma: data.karma
         });
         
         // Update the score trigger to refresh the UI
@@ -716,8 +716,8 @@ export default function LevelPage() {
         const data = await res.json();
         setUser({
           ...user,
-          score: data.score,
-          karma: data.karma
+            score: data.score,
+            karma: data.karma
         });
         
         // Update the score trigger to refresh the UI
