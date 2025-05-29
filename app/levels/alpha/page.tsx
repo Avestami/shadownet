@@ -1,21 +1,54 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useUser } from '../../context/UserProvider';
-import MatrixBackground from '../../components/MatrixBackground';
+import { useUser } from '../../../app/context/UserProvider';
+import MatrixBackground from '../../../app/components/MatrixBackground';
+import type { User } from '../../../app/types/user';
 
-export default function AlphaLevel() {
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-black text-green-500 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-pulse text-xl mb-2">Loading Level Data</div>
+        <div className="flex gap-1 justify-center">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="w-3 h-3 rounded-full bg-green-600 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }}></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AlphaLevelContent() {
   const { user } = useUser();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Handle URL message
     const urlMessage = searchParams.get('message');
     if (urlMessage) {
       setMessage(urlMessage);
+      // Clear message after 5 seconds
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    // Check if user is loaded
+    if (user !== undefined) {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Loading state
+  if (isLoading) {
+    return <LoadingState />;
+  }
 
   return (
     <div className="min-h-screen bg-black text-green-500 relative">
@@ -23,7 +56,7 @@ export default function AlphaLevel() {
       
       {/* Level Lock Status Banner */}
       {message && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-900/80 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-900/80 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn">
           {message}
         </div>
       )}
@@ -82,5 +115,13 @@ export default function AlphaLevel() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AlphaLevel() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <AlphaLevelContent />
+    </Suspense>
   );
 } 

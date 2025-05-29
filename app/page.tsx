@@ -484,8 +484,8 @@ export default function Home() {
                     }, 1000);
                     return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
                   },
-                  connect: (args: string) => {
-                    const level = args.toLowerCase().trim();
+                  connect: (args: string[]) => {
+                    const level = args.join(' ').toLowerCase().trim();
                     if (level === 'alpha' || level === 'level1' || level === 'level 1') {
                       setTimeout(() => {
                         window.location.href = '/levels/alpha';
