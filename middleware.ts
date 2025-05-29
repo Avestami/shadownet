@@ -40,6 +40,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
     
+    // Allow access to alpha level and non-level routes
+    if (!path.startsWith('/levels/') || path === '/levels/alpha') {
+      return NextResponse.next();
+    }
+
+    // Block access to all other level routes
+    if (path.startsWith('/levels/')) {
+      // Redirect to alpha level with a message
+      const url = new URL('/levels/alpha', request.url);
+      url.searchParams.set('message', 'Level locked. Please complete previous levels first.');
+      return NextResponse.redirect(url);
+    }
+    
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
@@ -52,5 +65,6 @@ export const config = {
   matcher: [
     // Apply this middleware to all pages except APIs and Next.js internals
     '/((?!api/|_next/static|_next/image|favicon.ico|public/).*)',
+    '/levels/:path*',
   ],
 }; 
