@@ -7,10 +7,9 @@ import MatrixBackground from '../../../app/components/MatrixBackground';
 import Terminal from '../../../app/components/Terminal';
 import KarmaDisplay from '../../../app/components/KarmaDisplay';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
-import type { User } from '../../../app/types/user';
 
-// Interface for karma object
-interface KarmaValues {
+// Interface for karma object - matches what's used in the User type
+interface KarmaObject {
   [key: string]: number;
 }
 
@@ -37,6 +36,7 @@ function AlphaLevelContent() {
   const [flagCaptured, setFlagCaptured] = useState(false);
   const [karmaChoiceMade, setKarmaChoiceMade] = useState(false);
   const [glitchEffect, setGlitchEffect] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   
   // Get challenge data
   const alphaChallenge = LEVEL_CHALLENGES.alpha;
@@ -47,6 +47,14 @@ function AlphaLevelContent() {
     setTimeout(() => {
       setGlitchEffect(false);
     }, 2000);
+  };
+
+  // Display temporary status message
+  const showStatusMessage = (msg: string, duration = 5000) => {
+    setStatusMessage(msg);
+    setTimeout(() => {
+      setStatusMessage(null);
+    }, duration);
   };
 
   useEffect(() => {
@@ -82,6 +90,7 @@ function AlphaLevelContent() {
         if (flag === 'SHADOWNET{DTHEREFORTH}') {
           setFlagCaptured(true);
           triggerGlitch(); // Trigger glitch effect on correct flag
+          showStatusMessage('Flag captured! Choose your next action.');
           
           // Update user data
           if (user) {
@@ -98,14 +107,29 @@ function AlphaLevelContent() {
               
               setUser(updatedUser);
               
-              // Save to server
+              // Save to server with better error handling
               fetch('/api/user/capture-flag', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 },
-                body: JSON.stringify({ flag })
-              }).catch(err => console.error('Error saving flag:', err));
+                body: JSON.stringify({ 
+                  flag,
+                  levelId: 'alpha',
+                  score: 100
+                })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to save flag capture');
+                }
+                console.log('Flag capture saved successfully');
+              })
+              .catch(err => {
+                console.error('Error saving flag:', err);
+                showStatusMessage('Warning: Progress may not have saved properly', 3000);
+              });
             }
           }
         }
@@ -128,7 +152,7 @@ function AlphaLevelContent() {
     const karmaValue = choiceData.score;
     
     // Create a copy of user.karma if it exists, or initialize a new object
-    let updatedKarma: KarmaValues = {};
+    const updatedKarma: KarmaObject = {};
     if (typeof user.karma === 'object' && user.karma !== null) {
       // Safely copy the karma values
       Object.entries(user.karma as Record<string, number>).forEach(([key, value]) => {
@@ -144,26 +168,51 @@ function AlphaLevelContent() {
     // Update the specific karma type
     updatedKarma[karmaType] += karmaValue;
     
+    // Calculate new score
+    const newScore = (user.score || 0) + karmaValue;
+    
+    // Show UI feedback
+    triggerGlitch();
+    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score: ${newScore}`, 4000);
+    
     // Update the user object
-    const updatedUser = {
-      ...user,
-      karma: updatedKarma,
-      score: (user.score || 0) + karmaValue
-    };
-    
-    setUser(updatedUser);
-    
-    // Save to server
-    fetch('/api/user/karma-choice', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ 
-        levelId: 'alpha',
-        choiceId: choiceType
+    try {
+      const updatedUser = {
+        ...user,
+        karma: updatedKarma,
+        score: newScore
+      };
+      
+      setUser(updatedUser);
+      
+      // Better server update with error handling
+      fetch('/api/user/karma-choice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({ 
+          levelId: 'alpha',
+          choiceId: choiceType,
+          karmaType: karmaType,
+          karmaValue: karmaValue,
+          score: karmaValue
+        })
       })
-    }).catch(err => console.error('Error saving karma choice:', err));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to save karma choice');
+        }
+        console.log('Karma choice saved successfully');
+      })
+      .catch(err => {
+        console.error('Error saving karma choice:', err);
+        showStatusMessage('Warning: Karma choice may not have saved properly', 3000);
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
   };
 
   // Loading state
@@ -186,15 +235,32 @@ function AlphaLevelContent() {
           {message}
         </div>
       )}
+      
+      {/* Status Message */}
+      {statusMessage && (
+        <div className="fixed top-16 left-1/2 transform -translate-x-1/2 bg-green-900/80 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn">
+          {statusMessage}
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        {/* Karma Display */}
-        <div className="fixed top-4 right-4">
+        {/* Progress Display */}
+        <div className="fixed top-4 right-4 flex flex-col space-y-2">
           <KarmaDisplay karma={user?.karma || 0} score={user?.score || 0} />
+          {flagCaptured && (
+            <div className="bg-green-900/80 text-white px-3 py-2 rounded text-sm">
+              Flag Status: Captured ✓
+            </div>
+          )}
+          {karmaChoiceMade && (
+            <div className="bg-purple-900/80 text-white px-3 py-2 rounded text-sm">
+              Karma Choice: Made ✓
+            </div>
+          )}
         </div>
         
         {/* Level Navigation Panel */}
-        <div className="fixed right-4 top-20 bg-black/80 border border-green-500 rounded-lg p-4 shadow-lg">
+        <div className="fixed right-4 top-36 bg-black/80 border border-green-500 rounded-lg p-4 shadow-lg">
           <h3 className="text-lg font-mono mb-4">Level Access Status</h3>
           <div className="space-y-2 font-mono text-sm">
             <div className="flex items-center text-green-400">
@@ -223,15 +289,15 @@ function AlphaLevelContent() {
             <h2 className="text-2xl font-mono mb-4">Mission Objectives</h2>
             <ul className="space-y-3 font-mono">
               <li className="flex items-center">
-                <span className="mr-2">→</span>
+                <span className="mr-2">{flagCaptured ? "✓" : "→"}</span>
                 <span>Bypass the initial security systems</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2">→</span>
+                <span className="mr-2">{flagCaptured ? "✓" : "→"}</span>
                 <span>Decrypt the first set of encrypted files</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2">→</span>
+                <span className="mr-2">{karmaChoiceMade ? "✓" : "→"}</span>
                 <span>Make your first crucial decision that will affect your karma</span>
               </li>
             </ul>
@@ -241,6 +307,14 @@ function AlphaLevelContent() {
                 <span className="text-yellow-400">⚠ NOTE:</span> Complete this level to unlock access to Level Beta.
                 Your performance and decisions here will influence your progression path.
               </p>
+              
+              {flagCaptured && karmaChoiceMade && (
+                <div className="mt-4 p-2 bg-green-900/40 rounded border border-green-500 text-center">
+                  <p className="text-sm font-mono text-green-300">
+                    LEVEL COMPLETE! Type 'next' in the terminal to proceed to Level Beta.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           
@@ -444,26 +518,50 @@ Return to the main hub using 'exit' or continue your exploration here.
                   
                   // Save progress and unlock next level
                   if (user) {
-                    const updatedUser = {
-                      ...user,
+                    try {
                       // Add the beta level to unlockedLevels if it exists
-                      unlockedLevels: [...(user.unlockedLevels || []), 'beta']
-                    };
-                    
-                    // Save to database
-                    fetch('/api/user/unlock-level', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({ levelId: 'beta' })
-                    }).catch(err => console.error('Error unlocking level:', err));
-                    
-                    setUser(updatedUser);
+                      const unlockedLevels = [...(user.unlockedLevels || [])];
+                      if (!unlockedLevels.includes('beta')) {
+                        unlockedLevels.push('beta');
+                      }
+                      
+                      const updatedUser = {
+                        ...user,
+                        unlockedLevels
+                      };
+                      
+                      setUser(updatedUser);
+                      
+                      // Save to database with better error handling
+                      fetch('/api/user/unlock-level', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        },
+                        body: JSON.stringify({ 
+                          levelId: 'beta',
+                          userId: user.id
+                        })
+                      })
+                      .then(response => {
+                        if (!response.ok) {
+                          throw new Error('Failed to unlock next level');
+                        }
+                        console.log('Level Beta unlocked successfully');
+                      })
+                      .catch(err => {
+                        console.error('Error unlocking level:', err);
+                        showStatusMessage('Warning: Level unlocking may have failed', 3000);
+                      });
+                    } catch (error) {
+                      console.error('Error updating user:', error);
+                    }
                   }
                   
                   // Apply glitch effect before navigation
                   triggerGlitch();
+                  showStatusMessage('LEVEL COMPLETE - Proceeding to Level Beta', 1500);
                   
                   // Navigate to next level with a delay
                   setTimeout(() => {
@@ -522,6 +620,15 @@ const glitchKeyframes = `
 .glitch-effect {
   animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
   animation-iteration-count: 5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in forwards;
 }
 `;
 
