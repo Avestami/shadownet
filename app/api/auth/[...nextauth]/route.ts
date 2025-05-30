@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import prisma from "../../../../lib/prisma";
+import { prisma } from "../../../../lib/prisma";
 
 // NextAuth handler
 const handler = NextAuth({
@@ -13,13 +13,9 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("Authorize attempting with credentials:", { 
-          username: credentials?.username 
-        });
-
         if (!credentials?.username || !credentials?.password) {
           console.log("Missing username or password");
-          throw new Error("Please enter username and password");
+          return null;
         }
 
         try {
@@ -31,10 +27,8 @@ const handler = NextAuth({
           // If user doesn't exist
           if (!user) {
             console.log("User not found:", credentials.username);
-            throw new Error("User not found");
+            return null;
           }
-          
-          console.log("User found, comparing password");
           
           // Compare the input password with stored hash
           const passwordMatch = await bcrypt.compare(
@@ -44,10 +38,8 @@ const handler = NextAuth({
 
           if (!passwordMatch) {
             console.log("Invalid password for user:", credentials.username);
-            throw new Error("Invalid password");
+            return null;
           }
-
-          console.log("Password matched, creating session");
 
           // Create and store a new session
           await prisma.session.create({
@@ -57,17 +49,15 @@ const handler = NextAuth({
             },
           });
 
-          console.log("Session created, returning user");
-
           // Return the user data (excluding password)
           return {
             id: user.id,
-            username: user.username,
-            email: user.email || "",
+            name: user.username,
+            email: user.email || undefined,
           };
         } catch (error) {
           console.error("Error in authorize function:", error);
-          throw error;
+          return null;
         }
       },
     }),
@@ -75,21 +65,17 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const customUser = user as any;
-        const customToken = token as any;
-        console.log("JWT callback - user found:", customUser.username);
-        customToken.id = customUser.id;
-        customToken.username = customUser.username;
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
-      console.log("Session callback called");
       if (session?.user) {
-        const customSession = session as any;
-        const customToken = token as any;
-        customSession.user.id = customToken.id;
-        customSession.user.username = customToken.username;
+        session.user.id = token.id as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
       }
       return session;
     },
@@ -103,7 +89,6 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
-  debug: true, // Always enable debug mode to help troubleshoot
 });
 
 export { handler as GET, handler as POST }; 

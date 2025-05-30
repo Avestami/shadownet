@@ -23,32 +23,6 @@ export default function Login() {
     }
   }, [session, status, router]);
 
-  // Direct login function that bypasses NextAuth
-  const directLogin = async () => {
-    try {
-      const response = await fetch('/api/debug-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      console.log('Direct login succeeded');
-      window.location.href = '/';
-      return true;
-    } catch (error) {
-      console.error('Direct login error:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
@@ -56,43 +30,22 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    console.log('Login attempt with:', { username });
-
     try {
-      // Try NextAuth first
       const result = await signIn('credentials', {
         username,
         password,
         redirect: false,
       });
 
-      console.log('SignIn result:', result);
-
       if (result?.error) {
-        console.log('NextAuth login failed, trying direct login');
-        
-        // If NextAuth fails, try direct login
-        const directLoginSuccess = await directLogin();
-        
-        if (!directLoginSuccess) {
-          setError('Invalid username or password');
-          setLoading(false);
-        }
+        setError('Invalid username or password');
       } else if (result?.ok) {
-        // Successful login - force reload to ensure session is updated
-        window.location.href = '/';
+        router.replace('/');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      
-      // Try direct login as a fallback
-      console.log('Login exception caught, trying direct login');
-      const directLoginSuccess = await directLogin();
-      
-      if (!directLoginSuccess) {
-        setError('An unexpected error occurred. Please try again.');
-        setLoading(false);
-      }
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

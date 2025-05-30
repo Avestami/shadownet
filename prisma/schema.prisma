@@ -48,7 +48,7 @@ model Level {
   nextLevelId String?  @unique
   sequence    Int      @default(0)
   narrative   String   @default("")
-  karmaChoices Json    @default("[]") // Array of available karma choices for the level
+  availableKarmaChoices Json    @default("[]") // Array of available karma choices for the level
   documents   Json     @default("[]") // Array of narrative documents available in the level
   hints       Json     @default("[]") // Array of hints unlocked by karma choices
   createdAt   DateTime @default(now())

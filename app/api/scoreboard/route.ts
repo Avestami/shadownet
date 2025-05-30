@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,6 +15,20 @@ const scoreboardCache: {
 
 // Cache timeout (5 seconds)
 const CACHE_TIMEOUT = 5000;
+
+// Calculate total karma from karma object
+function calculateTotalKarma(karma: any) {
+  if (!karma) return 0;
+  try {
+    const karmaObj = typeof karma === 'string' ? JSON.parse(karma) : karma;
+    return Math.round(
+      (karmaObj.loyalty + karmaObj.defiance + karmaObj.mercy + karmaObj.curiosity + karmaObj.integration) / 5
+    );
+  } catch (error) {
+    console.error('Error calculating karma:', error);
+    return 0;
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,7 +58,7 @@ export async function GET(request: NextRequest) {
     const formattedUsers = users.map(user => ({
       username: user.username,
       score: user.score || 0,
-      karma: user.karma || 0
+      karma: calculateTotalKarma(user.karma)
     }));
     
     // Prepare response

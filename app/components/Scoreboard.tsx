@@ -25,7 +25,7 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
         const res = await fetch('/api/scoreboard');
         if (res.ok) {
           const data = await res.json();
-          setUsers(data.users);
+          setUsers(data.users || []);
         }
       } catch (error) {
         console.error('Error fetching scoreboard:', error);
@@ -78,6 +78,14 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
   // Sort users by score (highest first)
   const sortedUsers = [...users].sort((a, b) => b.score - a.score);
   
+  // Get karma color based on value
+  const getKarmaColor = (karma: number) => {
+    const karmaValue = karma || 0;
+    if (karmaValue >= 70) return 'text-green-400';
+    if (karmaValue <= 30) return 'text-red-400';
+    return 'text-purple-400';
+  };
+  
   return (
     <div className="h-full border border-red-800 bg-black/80 rounded-md p-3 overflow-auto">
       <div className="text-red-400 font-mono mb-3 text-center border-b border-red-900 pb-2">
@@ -112,11 +120,11 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
               <div className="flex space-x-4 text-sm">
                 <div>
                   <span className="text-gray-500 mr-1">Score:</span>
-                  <span className="text-green-400">{user.score}</span>
+                  <span className="text-green-400">{user.score || 0}</span>
                 </div>
                 <div>
                   <span className="text-gray-500 mr-1">Karma:</span>
-                  <span className="text-purple-400">{user.karma}</span>
+                  <span className={getKarmaColor(user.karma)}>{user.karma || 0}</span>
                 </div>
               </div>
             </div>

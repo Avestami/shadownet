@@ -448,6 +448,7 @@ export default function Home() {
                 }
                 prompt="hacker@shadownet:~$ "
                 commands={{
+                  ...terminalCommands,
                   levels: () => {
                     return 'MISSION LEVELS:\n\n' +
                       '1. ALPHA - Perimeter Security [UNLOCKED]\n' +
@@ -478,18 +479,15 @@ export default function Home() {
                       'Type "start" when ready to begin.';
                   },
                   start: () => {
-                    // Navigate to the first level
-                    setTimeout(() => {
-                      window.location.href = '/levels/alpha';
-                    }, 1000);
+                    console.log('Start command triggered, attempting navigation to /levels/alpha');
+                    router.push('/levels/alpha');
+                    console.log('Navigation command sent to router');
                     return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
                   },
                   connect: (args: string[]) => {
                     const level = args.join(' ').toLowerCase().trim();
                     if (level === 'alpha' || level === 'level1' || level === 'level 1') {
-                      setTimeout(() => {
-                        window.location.href = '/levels/alpha';
-                      }, 1000);
+                      router.push('/levels/alpha');
                       return 'Connecting to ALPHA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     return 'ACCESS DENIED: Level is locked. Complete previous levels to unlock.\nCurrent access: Level 1 - ALPHA only.';
@@ -505,7 +503,12 @@ export default function Home() {
                 currentUser={user ? {
                   username: user.username,
                   score: user.score || 0,
-                  karma: user.karma || 0
+                  karma: typeof user.karma === 'object' 
+                    ? Math.round(
+                        (user.karma.loyalty + user.karma.defiance + user.karma.mercy + 
+                         user.karma.curiosity + user.karma.integration) / 5
+                      )
+                    : 0
                 } : undefined}
               />
             </div>

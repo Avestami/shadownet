@@ -21,4 +21,4 @@ export const authConfig: NextAuthOptions = {
     }
   },
   providers: [], // configured in auth.ts
-} 
+}
