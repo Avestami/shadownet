@@ -41,7 +41,16 @@ export default function Home() {
   const [isTerminalMode, setIsTerminalMode] = useState(false);
   const [scoreUpdateTrigger, setScoreUpdateTrigger] = useState(0);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const isDebugMode = useRef(false);
 
+  // Function to check if we're already on an auth page
+  const isOnAuthPage = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname.includes('/auth/');
+    }
+    return false;
+  };
+  
   // Function to refresh user data - only called on explicit user actions, not periodically
   const refreshUserData = async () => {
     console.log("Explicitly refreshing user data - by request only");
@@ -102,6 +111,7 @@ export default function Home() {
     if (debugUser) {
       try {
         const parsedUser = JSON.parse(debugUser);
+        isDebugMode.current = true;
         
         // Restore karma from localStorage if available
         const savedKarma = localStorage.getItem('userKarma');
@@ -124,6 +134,12 @@ export default function Home() {
 
     // Fetch user data - only once on initial mount
     const fetchUser = async () => {
+      // Check if we're already on an auth page to prevent redirect loops
+      if (isOnAuthPage()) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const res = await loggedFetch('/api/user');
         if (res.ok) {
@@ -194,18 +210,39 @@ export default function Home() {
     }
   }, []);  // Empty dependency array so it only runs once when component mounts
 
+  // Handle redirects to login page safely
+  useEffect(() => {
+    // Skip redirect if:
+    // 1. Still loading
+    // 2. User exists
+    // 3. Already redirected in this session
+    // 4. Debug mode is enabled
+    // 5. Already on an auth page
+    if (!loading && !user && !hasRedirected && !isDebugMode.current && !isOnAuthPage()) {
+      console.log('Redirecting to login - no authenticated user found');
+      setHasRedirected(true);
+      
+      // Store redirect flag in sessionStorage to prevent loops across page refreshes
+      sessionStorage.setItem('redirected', 'true');
+      
+      // Use a short timeout to prevent immediate redirect
+      const timer = setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user, hasRedirected]);
+
   // Always set terminal mode
   useEffect(() => {
     setIsTerminalMode(false);
-  }, []);
-
-  // Handle redirect to login when no user is authenticated
-  useEffect(() => {
-    if (!loading && !user && !hasRedirected) {
+    
+    // Check for existing redirect flag in sessionStorage
+    if (sessionStorage.getItem('redirected') === 'true') {
       setHasRedirected(true);
-      window.location.href = '/auth/login';
     }
-  }, [loading, user, hasRedirected]);
+  }, []);
 
   const handleLoginClick = useCallback(() => {
     router.push('/auth/login');
