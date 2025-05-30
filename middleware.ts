@@ -21,6 +21,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
+  // Check for existing redirect cookie to prevent loops
+  const redirectAttempt = request.cookies.get('redirect_attempt')?.value;
+  const redirectCount = redirectAttempt ? parseInt(redirectAttempt, 10) : 0;
+  
+  // If we've redirected too many times, just proceed to prevent loops
+  if (redirectCount > 2) {
+    console.log('Too many redirects detected, allowing request to proceed');
+    return NextResponse.next();
+  }
+  
   try {
     // Get the token
     const token = await getToken({ 
@@ -37,7 +47,15 @@ export async function middleware(request: NextRequest) {
     if (!token && !isPublicPath) {
       const url = new URL('/auth/login', request.url);
       url.searchParams.set('callbackUrl', path);
-      return NextResponse.redirect(url);
+      
+      // Set a cookie to track redirect attempts
+      const response = NextResponse.redirect(url);
+      response.cookies.set('redirect_attempt', String(redirectCount + 1), {
+        maxAge: 60, // Short-lived cookie (60 seconds)
+        path: '/'
+      });
+      
+      return response;
     }
     
     // Allow access to alpha level and non-level routes
