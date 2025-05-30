@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import prisma from '../../../../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +50,16 @@ export async function POST(request: NextRequest) {
         email: email || null,
         password: hashedPassword,
         score: 0,
-        karma: 0, // Set default karma to 0 as requested
+        karma: {
+          loyalty: 0,
+          defiance: 0,
+          mercy: 0,
+          curiosity: 0,
+          integration: 0
+        },
+        choices: [],
+        flagsCaptured: [],
+        currentLevel: "alpha"
       },
     });
     

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '../../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 import { getUserIdFromRequest } from '../../lib/authUtils';
 import { invalidateUserCache } from '../../lib/userCache';
-import
+
 export async function POST(request: NextRequest) {
   try {
     // Get user ID
