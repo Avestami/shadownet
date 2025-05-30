@@ -727,6 +727,9 @@ export const Terminal: React.FC<TerminalProps> = ({
       // Get the flag from arguments
       const flag = args.join(' ');
       
+      // Log that we're attempting to capture a flag
+      console.log('Terminal attempting to capture flag:', flag);
+      
       // Notify the parent component
       if (onCommandExecuted) {
         onCommandExecuted('capture', flag);
@@ -841,18 +844,23 @@ export const Terminal: React.FC<TerminalProps> = ({
           `CURRENT MISSION: ${levelMap[missionLevel] || missionLevel.toUpperCase()}`,
           '',
           'Objective:',
-          `Find and capture the flag hidden in this level.`,
+          `Find and capture the flag hidden in this level using "capture <flag>"`,
           '',
-          'Karma Choices:',
-          choices ? `1. ${choices.effect1}` : 'Will be revealed after capturing the flag',
-          choices ? `2. ${choices.effect2}` : '',
+          'KARMA CHOICES:',
+          '------------------------',
+          choices ? `Option 1: choose ${choices.option1}` : 'Capture the flag first to reveal choices',
+          choices ? `  Effect: ${choices.effect1}` : '',
           '',
-          'Commands:',
-          '- capture <flag>  : Submit a flag when found',
-          choices ? `- choose ${choices.option1} : ${choices.effect1.split(':')[0]}` : '- choose <option> : Make a karma choice after flag capture',
-          choices ? `- choose ${choices.option2} : ${choices.effect2.split(':')[0]}` : '',
-          '- next-level      : Proceed to next level after flag capture',
-          '- help            : View all available commands'
+          choices ? `Option 2: choose ${choices.option2}` : '',
+          choices ? `  Effect: ${choices.effect2}` : '',
+          '------------------------',
+          '',
+          'MISSION FLOW:',
+          '1. Capture the flag with "capture <flag>"',
+          '2. Make a karma choice with "choose <option>"',
+          '3. Proceed to next level with "next-level"',
+          '',
+          'Type "help" for more commands'
         ].join('\n');
       }
       
@@ -960,7 +968,22 @@ export const Terminal: React.FC<TerminalProps> = ({
       ].join('\n');
     },
     analyze: (args) => {
-      if (args.length === 0) return 'Usage: analyze <data_id or filename>';
+      if (args.length === 0) {
+        // Special handling for Beta level - provide audio analysis tips
+        if (levelId && levelId === 'beta') {
+          return [
+            "AUDIO ANALYSIS TIPS:",
+            "1. Download the audio file using the button below the terminal",
+            "2. The audio contains hidden data in its frequencies",
+            "3. Use an audio analysis tool to examine the spectrum",
+            "4. Look for patterns or unusual frequency shifts",
+            "5. The network key is embedded in the audio",
+            "6. Once found, use 'capture SHADOWNET{KEY}' to submit"
+          ].join('\n');
+        }
+        
+        return 'Usage: analyze <data_id or filename>';
+      }
       
       const target = args.join(' ').toLowerCase();
       
@@ -1420,13 +1443,51 @@ export const Terminal: React.FC<TerminalProps> = ({
       return translate("Unknown Avesta command. Try 'avesta help' for available options.");
     },
     'next-level': () => {
-      // Simply call the onCommandExecuted callback with the command
+      // Check if the flag has been captured
       if (onCommandExecuted) {
         setTimeout(() => {
           onCommandExecuted('next-level', '');
         }, 100);
       }
       return 'Preparing to proceed to the next level...';
+    },
+    // Add next command to go to the next level
+    next: (args) => {
+      // Get current level from the levelId prop
+      if (!levelId) {
+        return 'Error: Could not determine current level. Use the Level Select button at the top.';
+      }
+      
+      // Define the level progression
+      const levelOrder = [
+        'alpha', 'beta', 'gamma', 'delta', 
+        'sigma', 'theta', 'zeta', 'sigma-2', 'omega'
+      ];
+      
+      // Find current level index
+      const currentIndex = levelOrder.indexOf(levelId);
+      if (currentIndex === -1) {
+        return 'Error: Unknown level. Use the Level Select button at the top.';
+      }
+      
+      // If this is the last level, there is no next
+      if (currentIndex === levelOrder.length - 1) {
+        return 'This is the final level. Congratulations on making it this far!';
+      }
+      
+      // Get the next level
+      const nextLevel = levelOrder[currentIndex + 1];
+      
+      // Check if player has captured flag and made karma choice
+      // We'll delegate this check to the parent component via onCommandExecuted
+      if (onCommandExecuted) {
+        // The parent component will determine if the player can proceed
+        // and will handle the navigation if appropriate
+        onCommandExecuted('next', nextLevel);
+        return `Attempting to navigate to the ${nextLevel.toUpperCase()} level...`;
+      }
+      
+      return 'Error: Cannot navigate to the next level at this time.';
     }
   };
 
@@ -1543,14 +1604,20 @@ export const Terminal: React.FC<TerminalProps> = ({
     
     // Special handling for the capture command
     if (command === 'capture') {
+      console.log('TERMINAL DEBUG - Capture command detected:', command, 'with args:', args);
       const flag = args.join(' ');
+      console.log('TERMINAL DEBUG - Assembled flag:', flag);
       
       // Add a response to the terminal history
       setHistory(prev => [...prev, `Attempting to capture flag: ${flag}...`]);
       
       // Call the onCommandExecuted callback with both command and output
       if (onCommandExecuted) {
-        onCommandExecuted(command, flag);
+        console.log('TERMINAL DEBUG - Calling onCommandExecuted with:', command, flag);
+        const result = onCommandExecuted(input, flag);
+        console.log('TERMINAL DEBUG - Result from onCommandExecuted:', result);
+      } else {
+        console.log('TERMINAL DEBUG - No onCommandExecuted callback provided');
       }
       
       setInput('');
@@ -1630,6 +1697,29 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   // Apply glitch effect class when triggered
   const terminalClasses = `console ${glitchEffect ? 'glitch' : ''} bg-black/90 text-red-500 p-4 rounded-md border border-red-700 shadow-[0_0_20px_rgba(255,0,0,0.2)] overflow-auto font-mono text-sm`;
+
+  // Add this function to add messages to the terminal history
+  const addToTerminalHistory = useCallback((message: string) => {
+    setHistory(prev => [...prev, message]);
+    // Auto-scroll to bottom
+    setTimeout(() => {
+      if (terminalRef.current) {
+        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      }
+    }, 50);
+  }, []);
+
+  // Expose the addToTerminalHistory function to the parent component
+  useEffect(() => {
+    if (onCommandExecuted) {
+      // Make the function available to the parent component via window
+      (window as any).terminalAddMessage = addToTerminalHistory;
+    }
+    return () => {
+      // Clean up when component unmounts
+      delete (window as any).terminalAddMessage;
+    };
+  }, [addToTerminalHistory, onCommandExecuted]);
 
   return (
     <div className="terminal-container w-full">

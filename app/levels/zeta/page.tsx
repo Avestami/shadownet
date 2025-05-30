@@ -1,40 +1,310 @@
 'use client';
 
-import React, { useState, useRef, Suspense } from 'react';
+import React, { useState, useRef, Suspense, useEffect } from 'react';
 import { useUser } from '../../context/UserProvider';
 import Terminal from '../../components/Terminal';
 import LevelLayout from '../../components/LevelLayout';
 import LevelLoading from '../../components/LevelLoading';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
+import GlobalAudioPlayer from '../../components/GlobalAudioPlayer';
+import KarmaDisplay from '../../components/KarmaDisplay';
+
+interface KarmaObject {
+  [key: string]: number;
+}
 
 function ZetaLevelContent() {
-  const { user, setUser } = useUser();
+  const { user, setUser, refreshUser } = useUser();
   const [flagCaptured, setFlagCaptured] = useState(false);
   const [karmaChoiceMade, setKarmaChoiceMade] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [glitchEffect, setGlitchEffect] = useState(false);
+  const audioPlayerRef = useRef<any>(null);
   
   // Get challenge data
   const zetaChallenge = LEVEL_CHALLENGES.zeta;
   
+  // Effect to check if user has already captured the flag
+  useEffect(() => {
+    console.log('ZETA LEVEL - Checking user state:', user);
+    if (user && user.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{TOKEN_FORGED}')) {
+      setFlagCaptured(true);
+    }
+    
+    // Check if karma choice was already made for this level
+    if (user?.choices && Array.isArray(user.choices)) {
+      console.log('ZETA LEVEL - User choices on mount:', user.choices);
+      
+      const zetaChoices = user.choices.filter(choice => 
+        choice.startsWith('zeta_')
+      );
+      
+      if (zetaChoices.length > 0) {
+        console.log('ZETA LEVEL - Zeta choices already made:', zetaChoices);
+        setKarmaChoiceMade(true);
+      }
+    }
+  }, [user]);
+  
+  // Function to trigger glitch effect
+  const triggerGlitch = () => {
+    console.log('ZETA DEBUG - Triggering glitch effect');
+    setGlitchEffect(true);
+    setTimeout(() => setGlitchEffect(false), 1500);
+  };
+
+  // Function to show status messages
+  const showStatusMessage = (msg: string, duration = 5000) => {
+    setStatusMessage(msg);
+    setTimeout(() => setStatusMessage(null), duration);
+  };
+  
   // Function to handle terminal commands
   const handleTerminalCommand = (command: string) => {
-    if (command.toLowerCase().startsWith('submit')) {
+    if (command.toLowerCase().startsWith('submit') || command.toLowerCase().startsWith('capture')) {
       const parts = command.split(' ');
       if (parts.length > 1) {
         const flag = parts.slice(1).join(' ');
         
-        if (flag === 'SHADOWNET{VULN_HUNTER_PRO}') {
+        if (flag === 'SHADOWNET{TOKEN_FORGED}') {
+          // Play capture sound
+          if (audioPlayerRef.current) {
+            audioPlayerRef.current.playCapture();
+          }
+          
+          // Trigger glitch effect for visual feedback
+          console.log('ZETA DEBUG - Flag captured, triggering glitch effect');
+          triggerGlitch();
+          
           setFlagCaptured(true);
+          
+          // Update user data
+          if (user) {
+            const updatedFlags = [...(user.flagsCaptured || [])];
+            if (!updatedFlags.includes(flag)) {
+              updatedFlags.push(flag);
+              
+              // Calculate score increase
+              const scoreIncrease = 100;
+              
+              // Update user data with score increase
+              const updatedUser = {
+                ...user,
+                flagsCaptured: updatedFlags,
+                score: (user.score || 0) + scoreIncrease
+              };
+              
+              // Update local state immediately for responsive UI
+              setUser(updatedUser);
+              
+              // Display success message with score information
+              showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
+              
+              // Save to server with better error handling
+              fetch('/api/user/force-update', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                  flagId: flag,
+                  scoreChange: scoreIncrease
+                })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to save flag capture');
+                }
+                return response.json();
+              })
+              .then(data => {
+                console.log('Flag capture saved successfully:', data);
+                // Add a message specifically prompting the user to make a karma choice
+                showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
+                
+                // Refresh user data to ensure UI is updated
+                if (refreshUser) {
+                  setTimeout(() => {
+                    refreshUser().then(updatedUser => {
+                      console.log('User data auto-refreshed after flag capture:', updatedUser);
+                    });
+                  }, 500);
+                }
+              })
+              .catch(err => {
+                console.error('Error saving flag:', err);
+                showStatusMessage('Warning: Progress may not have saved properly', 3000);
+              });
+            } else {
+              // Flag was already captured
+              showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
+            }
+          }
+          
           return 'Flag captured successfully! Choose your next action.';
         } else {
           return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
         }
       }
+    } else if (command.toLowerCase() === 'choose') {
+      if (flagCaptured && !karmaChoiceMade) {
+        const choiceType = command.split(' ')[1]?.toLowerCase();
+        if (choiceType === 'patch' || choiceType === 'blackmail') {
+          handleKarmaChoice(choiceType);
+        } else {
+          showStatusMessage('Invalid choice. Use "choose patch" or "choose blackmail".', 3000);
+        }
+      } else if (!flagCaptured) {
+        showStatusMessage('You must capture the flag before making a karma choice.', 3000);
+      } else if (karmaChoiceMade) {
+        showStatusMessage('You have already made your karma choice. Use the Level Select button at the top or type "next" to continue.', 4000);
+      }
     }
+    
     return null;
   };
   
+  // Function to handle karma choices
+  const handleKarmaChoice = (choiceType: 'patch' | 'blackmail') => {
+    console.log('ZETA LEVEL - handleKarmaChoice called with choice:', choiceType);
+    console.log('ZETA LEVEL - Current user state:', user);
+    
+    if (!user) {
+      console.log('ZETA LEVEL - No user data available');
+      return;
+    }
+    
+    // Check if user has already made a zeta karma choice
+    const choiceId = `zeta_${choiceType}`;
+    console.log('ZETA LEVEL - Checking for existing choice:', choiceId);
+    console.log('ZETA LEVEL - User choices:', user.choices);
+    
+    // Check if user has already made any zeta karma choice
+    if (user.choices && Array.isArray(user.choices)) {
+      const zetaChoices = user.choices.filter(choice => 
+        choice.startsWith('zeta_')
+      );
+      
+      if (zetaChoices.length > 0) {
+        console.log('ZETA LEVEL - User already made a zeta choice:', zetaChoices);
+        showStatusMessage('You have already made a karma choice for this level.', 3000);
+        setKarmaChoiceMade(true);
+        return;
+      }
+    }
+    
+    setKarmaChoiceMade(true);
+    
+    // Update user karma and score
+    const karmaType = choiceType === 'patch' ? 'mercy' : 'defiance';
+    const karmaValue = 5;
+    
+    // Create a copy of user.karma if it exists, or initialize a new object
+    const updatedKarma: KarmaObject = {};
+    if (typeof user.karma === 'object' && user.karma !== null) {
+      // Safely copy the karma values
+      Object.entries(user.karma as Record<string, number>).forEach(([key, value]) => {
+        updatedKarma[key] = value;
+      });
+    }
+    
+    // Ensure the karma type property exists
+    if (!updatedKarma[karmaType]) {
+      updatedKarma[karmaType] = 0;
+    }
+    
+    // Update the specific karma type
+    updatedKarma[karmaType] += karmaValue;
+    
+    // Calculate new score - Add a score for making a karma choice
+    const scoreForKarmaChoice = karmaValue; // Same as karma value
+    const newScore = (user.score || 0) + scoreForKarmaChoice;
+    
+    // Show UI feedback
+    triggerGlitch();
+    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score +${scoreForKarmaChoice}, Total Score: ${newScore}`, 4000);
+    
+    // Update the user object with new karma and the choice tracking
+    try {
+      // Get current choices or initialize empty array
+      const currentChoices = Array.isArray(user.choices) ? [...user.choices] : [];
+      // Add this choice to the array
+      currentChoices.push(choiceId);
+      
+      const updatedUser = {
+        ...user,
+        karma: updatedKarma,
+        score: newScore,
+        choices: currentChoices
+      };
+      
+      console.log('ZETA LEVEL - Updated user with choice:', updatedUser);
+      
+      // Update local state immediately for responsive UI
+      setUser(updatedUser as any);
+      
+      // Better server update with error handling
+      fetch('/api/user/force-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          flagId: `flag_zeta`,
+          scoreChange: scoreForKarmaChoice,
+          karmaType: karmaType,
+          karmaValue: karmaValue,
+          choiceId: choiceId
+        })
+      })
+      .then(response => {
+        console.log('ZETA LEVEL - API response status:', response.status);
+        if (!response.ok) {
+          throw new Error('Failed to save karma choice');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('ZETA LEVEL - Karma choice saved successfully:', data);
+        showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${data.score}`, 5000);
+        
+        // Refresh user data to ensure UI is updated
+        if (refreshUser) {
+          setTimeout(() => {
+            console.log('ZETA LEVEL - Refreshing user data after karma choice');
+            refreshUser().then(updatedUser => {
+              console.log('ZETA LEVEL - User data auto-refreshed after karma choice:', updatedUser);
+            });
+          }, 500);
+        }
+      })
+      .catch(err => {
+        console.error('ZETA LEVEL - Error saving karma choice:', err);
+        showStatusMessage('Warning: Karma update may not have saved properly', 3000);
+      });
+    } catch (error) {
+      console.error('Error updating karma:', error);
+    }
+  };
+  
   return (
-    <div className="relative">
+    <div className={`relative ${glitchEffect ? 'animate-glitch' : ''}`}>
+      <GlobalAudioPlayer ref={audioPlayerRef} levelId="zeta" initialVolume={0.5} autoPlay={false} />
+      
+      {statusMessage && (
+        <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-300 text-sm font-mono">
+          <p className="flex items-center">
+            <span className="mr-2">✓</span>
+            {statusMessage}
+          </p>
+        </div>
+      )}
+      
+      {/* User stats display */}
+      <div className="fixed top-4 right-4 flex items-center space-x-4 z-20">
+        {user && <KarmaDisplay karma={user.karma} score={user.score || 0} />}
+      </div>
+      
       {/* Web Application Section */}
       <div className="mb-6 bg-black/80 border border-red-800 p-4 rounded-lg">
         <h3 className="text-lg font-mono mb-3 text-red-400">WEB APPLICATION SECURITY</h3>
@@ -76,68 +346,13 @@ function ZetaLevelContent() {
           `Available commands:\n` +
           `- help            Show all commands\n` +
           `- analyze         Get analysis tips\n` +
-          `- submit <flag>   Submit the flag when found\n\n` +
-          `Begin your web application security testing...\n`
-        }
-        prompt="hacker@zeta:~$ "
-        commands={{
-          help: () => `Available commands:
-  analyze             Get tips on web application testing
-  submit <flag>       Submit a flag (format: SHADOWNET{...})
-  clear               Clear the terminal screen`,
-          
-          analyze: () => `WEB APPLICATION SECURITY TIPS:
-
-1. Test for these common vulnerabilities:
-   - SQL Injection (SQLi)
-   - Cross-Site Scripting (XSS)
-   - Insecure Direct Object References (IDOR)
-   - Cross-Site Request Forgery (CSRF)
-   - NoSQL Injection
-   - Authentication bypasses
-
-2. Web application testing tools:
-   - Burp Suite for intercepting and modifying requests
-   - OWASP ZAP for automated scanning
-   - SQLmap for database injection testing
-   - Developer tools in your browser
-
-3. Testing methodology:
-   - Map the application (find all endpoints)
-   - Identify input points
-   - Test authentication mechanisms
-   - Check authorization controls
-   - Test all input fields for injection
-
-Remember: Always document your findings and the steps to reproduce vulnerabilities.`,
-          
-          clear: () => ''
-        }}
-        onCommandExecuted={handleTerminalCommand}
-      />
-    </div>
-  );
-}
-
-export default function ZetaLevel() {
-  return (
-    <Suspense fallback={<LevelLoading color="text-red-500" />}>
-      <LevelLayout
-        levelId="zeta"
-        levelTitle="Web Intrusion"
-        levelDescription="We've obtained a copy of ShadowNet's admin portal. Penetration testing is required to identify vulnerabilities."
-        objectives={[
-          'Deploy the Docker container with the vulnerable web application',
-          'Identify and exploit vulnerabilities in the admin portal',
-          'Gain administrative access and find the flag',
-          'Make a karma choice after capturing the flag'
-        ]}
-        colorCode="red"
-        loreText="This admin portal may contain clues about Dr. Draconis' next move."
-        loreSubtext="Web applications are often the weakest link in the security chain."
-      >
-        <ZetaLevelContent />
-      </LevelLayout>
-    </Suspense>
-  );
-} 
+          `- submit <flag>   Submit the flag when found\n` +
+          `- choose <option> Make a karma choice\n\n` +
+          `Begin your web application security testing...\n` +
+          (flagCaptured ? 
+          `\n========================================\n` +
+          `FLAG SUCCESSFULLY CAPTURED!\n` +
+          `You have successfully completed the Zeta level.\n` +
+          `Use the Level Select button at the top to access other levels.\n` +
+          `Make a karma choice first with:\n` +
+          `

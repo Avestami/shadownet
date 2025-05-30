@@ -7,7 +7,7 @@ import MatrixBackground from '../../components/MatrixBackground';
 import Terminal from '../../components/Terminal';
 import Scoreboard from '../../components/Scoreboard';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
-import AudioPlayer, { AudioPlayerHandle } from '../../components/AudioPlayer';
+import GlobalAudioPlayer, { GlobalAudioPlayerHandle } from '../../components/GlobalAudioPlayer';
 
 // Interface for karma object
 interface KarmaObject {
@@ -30,7 +30,7 @@ function LoadingState() {
 }
 
 function BetaLevelContent() {
-  const { user, setUser } = useUser();
+  const { user, setUser, refreshUser } = useUser();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +43,7 @@ function BetaLevelContent() {
   const betaChallenge = LEVEL_CHALLENGES.beta;
 
   // Add the audioPlayerRef
-  const audioPlayerRef = useRef<AudioPlayerHandle>(null);
+  const audioPlayerRef = useRef<GlobalAudioPlayerHandle>(null);
 
   // Trigger glitch effect
   const triggerGlitch = () => {
@@ -75,11 +75,29 @@ function BetaLevelContent() {
   useEffect(() => {
     // Check if user is loaded
     if (user !== undefined) {
+      console.log('BETA LEVEL - User data loaded:', user);
       setIsLoading(false);
       
       // Check if user has already captured this flag
       if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{SOUND876}')) {
+        console.log('BETA LEVEL - Flag already captured: SHADOWNET{SOUND876}');
         setFlagCaptured(true);
+      }
+      
+      // Check if karma choice was already made for this level
+      if (user?.choices && Array.isArray(user.choices)) {
+        console.log('BETA LEVEL - User choices on mount:', user.choices);
+        
+        const betaChoices = user.choices.filter(choice => 
+          choice.startsWith('beta_')
+        );
+        
+        if (betaChoices.length > 0) {
+          console.log('BETA LEVEL - Beta karma choices already made:', betaChoices);
+          setKarmaChoiceMade(true);
+        }
+      } else {
+        console.log('BETA LEVEL - No choices found or choices is not an array:', user?.choices);
       }
     }
   }, [user]);
@@ -94,7 +112,6 @@ function BetaLevelContent() {
       if (flag === 'SHADOWNET{SOUND876}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
-        showStatusMessage('Flag captured! Your score has increased by 100 points. Choose your next action or type "next-level" to proceed.');
         
         // Play success sound
         if (audioPlayerRef.current) {
@@ -107,24 +124,31 @@ function BetaLevelContent() {
           if (!updatedFlags.includes(flag)) {
             updatedFlags.push(flag);
             
+            // Calculate score increase - Make sure this is actually applied
+            const scoreIncrease = 100;
+            
             // Update user data with score increase
             const updatedUser = {
               ...user,
               flagsCaptured: updatedFlags,
-              score: (user.score || 0) + 100 // Award points for flag capture
+              score: (user.score || 0) + scoreIncrease // Award points for flag capture
             };
             
+            // Update local state immediately for responsive UI
             setUser(updatedUser as any);
             
+            // Display success message with score information
+            showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
+            
             // Save to server with better error handling
-            fetch('/api/capture-flag', {
+            fetch('/api/user/force-update', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({ 
                 flagId: flag,
-                baseScore: 100
+                scoreChange: scoreIncrease
               })
             })
             .then(response => {
@@ -135,25 +159,32 @@ function BetaLevelContent() {
             })
             .then(data => {
               console.log('Flag capture saved successfully:', data);
-              // Update UI with score increase message
-              if (data.scoreAdded) {
-                showStatusMessage(`Flag captured successfully! Score +${data.scoreAdded} points.`, 5000);
+              // Add a message specifically prompting the user to make a karma choice
+              showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
+              
+              // Refresh user data to ensure UI is updated
+              if (refreshUser) {
+                setTimeout(() => {
+                  refreshUser().then(updatedUser => {
+                    console.log('User data auto-refreshed after flag capture:', updatedUser);
+                  });
+                }, 500);
               }
             })
             .catch(err => {
               console.error('Error saving flag:', err);
               showStatusMessage('Warning: Progress may not have saved properly', 3000);
             });
+          } else {
+            // Flag was already captured
+            showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
           }
         }
+        
+        return 'FLAG CAPTURED SUCCESSFULLY! Type "mission" to see karma choices.';
       } else {
-        showStatusMessage('Incorrect flag. Try analyzing the audio more carefully.', 3000);
-      }
-    } else if (command.toLowerCase() === 'next-level') {
-      if (flagCaptured) {
-        proceedToNextLevel();
-      } else {
-        showStatusMessage('You must capture the flag before proceeding to the next level.', 3000);
+        // Return the error message to the terminal instead of showing a status message
+        return 'ERROR: Incorrect flag. Try analyzing the audio more carefully.';
       }
     } else if (command.toLowerCase() === 'choose') {
       if (flagCaptured && !karmaChoiceMade) {
@@ -166,53 +197,79 @@ function BetaLevelContent() {
       } else if (!flagCaptured) {
         showStatusMessage('You must capture the flag before making a karma choice.', 3000);
       } else if (karmaChoiceMade) {
-        showStatusMessage('You have already made your karma choice.', 3000);
+        showStatusMessage('You have already made your karma choice. Use the Level Select button at the top or type "next" to continue.', 4000);
       }
+    } else if (command.toLowerCase() === 'next') {
+      // Handle next command - check if requirements are met
+      if (!flagCaptured) {
+        showStatusMessage('You must capture the flag before proceeding to the next level.', 3000);
+        return 'You must capture the flag before proceeding to the next level.';
+      }
+      
+      if (!karmaChoiceMade) {
+        showStatusMessage('You must make a karma choice before proceeding. Type "mission" to see options.', 4000);
+        return 'You must make a karma choice before proceeding. Type "mission" to see options.';
+      }
+      
+      // If we get here, requirements are met, so navigate to the next level
+      const nextLevel = output; // The next level ID is passed in the output
+      window.location.href = `/levels/${nextLevel}`;
+      return `Navigating to the ${nextLevel.toUpperCase()} level...`;
     }
-  };
-
-  // Function to handle proceeding to next level
-  const proceedToNextLevel = () => {
-    if (!user) return;
     
-    showStatusMessage('Preparing to proceed to next level...', 3000);
-    
-    // Call the API to progress to next level
-    fetch('/api/next-level', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        currentLevel: 'beta'
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to progress to next level');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Level progression successful:', data);
-      // Redirect to next level
-      window.location.href = `/levels/${data.nextLevel}`;
-    })
-    .catch(err => {
-      console.error('Error progressing to next level:', err);
-      showStatusMessage('Error: Could not proceed to next level. Please try again.', 5000);
-    });
+    return '';
   };
 
   // Function to handle karma choices
   const handleKarmaChoice = (choiceType: 'purge' | 'investigate') => {
-    setKarmaChoiceMade(true);
+    console.log('BETA LEVEL - handleKarmaChoice called with choice:', choiceType);
+    console.log('BETA LEVEL - Current user state:', user);
     
-    if (!user) return;
+    if (!user) {
+      console.log('BETA LEVEL - No user data available');
+      return;
+    }
+    
+    // Check if user has already made a beta karma choice
+    const choiceId = `beta_${choiceType}`;
+    console.log('BETA LEVEL - Checking for existing choice:', choiceId);
+    console.log('BETA LEVEL - User choices:', user.choices);
+    
+    // Check if user has already made any beta karma choice
+    if (user.choices && Array.isArray(user.choices)) {
+      const betaChoices = user.choices.filter(choice => 
+        choice.startsWith('beta_')
+      );
+      
+      console.log('BETA LEVEL - Existing beta choices:', betaChoices);
+      
+      if (betaChoices.length > 0) {
+        console.log('BETA LEVEL - User already made a beta choice:', betaChoices);
+        showStatusMessage('You have already made a karma choice for this level.', 3000);
+        setKarmaChoiceMade(true);
+        return;
+      }
+      
+      if (user.choices.includes(choiceId)) {
+        console.log('BETA LEVEL - User already made this specific choice:', choiceId);
+        showStatusMessage('You have already made this karma choice.', 3000);
+        setKarmaChoiceMade(true);
+        return;
+      }
+    } else {
+      console.log('BETA LEVEL - User choices is not an array or is undefined:', user.choices);
+    }
+    
+    setKarmaChoiceMade(true);
     
     // Find the karma choice data
     const choiceData = betaChallenge.karmaChoices.find(c => c.id === choiceType);
-    if (!choiceData) return;
+    if (!choiceData) {
+      console.log('BETA LEVEL - Choice data not found for:', choiceType);
+      return;
+    }
+    
+    console.log('BETA LEVEL - Choice data found:', choiceData);
     
     // Update user karma and score
     const karmaType = choiceData.type;
@@ -235,12 +292,34 @@ function BetaLevelContent() {
     // Update the specific karma type
     updatedKarma[karmaType] += karmaValue;
     
-    // Calculate new score
-    const newScore = (user.score || 0) + karmaValue;
+    // Calculate new score - Add a score for making a karma choice
+    const scoreForKarmaChoice = karmaValue; // Same as karma value
+    const newScore = (user.score || 0) + scoreForKarmaChoice;
+    
+    console.log('BETA LEVEL - Karma update:', {
+      type: karmaType,
+      oldValue: user.karma?.[karmaType] || 0,
+      change: karmaValue,
+      newValue: updatedKarma[karmaType]
+    });
+    
+    console.log('BETA LEVEL - Score update:', {
+      oldScore: user.score || 0,
+      change: scoreForKarmaChoice,
+      newScore: newScore
+    });
     
     // Show UI feedback
     triggerGlitch();
-    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score: ${newScore}`, 4000);
+    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score +${scoreForKarmaChoice}, Total Score: ${newScore}`, 4000);
+    
+    // Create updated choices array
+    const updatedChoices = [...(user.choices || [])];
+    if (!updatedChoices.includes(choiceId)) {
+      updatedChoices.push(choiceId);
+    }
+    
+    console.log('BETA LEVEL - Updated choices array:', updatedChoices);
     
     // Update the user object
     try {
@@ -248,23 +327,35 @@ function BetaLevelContent() {
       const updatedUser = {
         ...user,
         karma: updatedKarma,
-        score: newScore
+        score: newScore,
+        choices: updatedChoices
       };
       
+      console.log('BETA LEVEL - Updated user object:', updatedUser);
+      
+      // Update local state immediately for responsive UI
       setUser(updatedUser as any); // Type assertion for karma object
       
       // Better server update with error handling
-      fetch('/api/user/karma-choice', {
+      console.log('BETA LEVEL - Sending update to server with payload:', { 
+        flagId: `flag_beta`,
+        scoreChange: scoreForKarmaChoice,
+        karmaType: karmaType,
+        karmaValue: karmaValue,
+        choiceId: choiceId
+      });
+      
+      fetch('/api/user/force-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          levelId: 'beta',
-          choiceId: choiceType,
+          flagId: `flag_beta`,
+          scoreChange: scoreForKarmaChoice,
           karmaType: karmaType,
           karmaValue: karmaValue,
-          score: karmaValue
+          choiceId: choiceId
         })
       })
       .then(response => {
@@ -275,7 +366,16 @@ function BetaLevelContent() {
       })
       .then(data => {
         console.log('Karma choice saved successfully:', data);
-        showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${newScore}`, 5000);
+        showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${data.score}`, 5000);
+        
+        // Refresh user data to ensure UI is updated
+        if (refreshUser) {
+          setTimeout(() => {
+            refreshUser().then(updatedUser => {
+              console.log('User data auto-refreshed after karma choice:', updatedUser);
+            });
+          }, 500);
+        }
       })
       .catch(err => {
         console.error('Error saving karma choice:', err);
@@ -294,7 +394,7 @@ function BetaLevelContent() {
   return (
     <div className={`relative ${glitchEffect ? 'animate-glitch' : ''}`}>
       {/* Audio player with volume control */}
-      <AudioPlayer ref={audioPlayerRef} levelId="beta" initialVolume={0.5} />
+      <GlobalAudioPlayer ref={audioPlayerRef} levelId="beta" initialVolume={0.5} autoPlay={false} />
       
       {message && (
         <div className="mb-4 p-3 bg-blue-900/50 border border-blue-800 rounded text-blue-200 text-sm font-mono">
@@ -322,20 +422,22 @@ function BetaLevelContent() {
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'AUDIO ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
           `We've intercepted encrypted audio communications from ShadowNet.\n` +
-          `Your task: analyze the audio file to extract the hidden data.\n\n` +
+          `Your task: analyze the audio file to extract the hidden data.\n` +
+          `Use the download button below to save the audio evidence file for analysis.\n\n` +
           `Available commands:\n` +
           `- help            Show all commands\n` +
           `- analyze         Get analysis tips\n` +
           `- capture <flag>  Capture the flag when found\n` +
-          `- next-level      Proceed to the next level\n` +
-          `- choose <choice> Make a karma choice\n\n` +
+          `- choose <choice> Make a karma choice\n` +
+          `- next            Proceed to the next level\n\n` +
           `Begin your audio analysis...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
           `FLAG SUCCESSFULLY CAPTURED!\n` +
           `You have successfully completed the Beta level.\n` +
-          `Type "next-level" to proceed to Gamma level.\n` +
-          `or make a karma choice with:\n` +
+          `Use the Level Select button at the top to access other levels\n` +
+          `or type "next" to proceed to the next level.\n` +
+          `Make a karma choice first with:\n` +
           `- choose purge       (Loyalty +5)\n` +
           `- choose investigate (Curiosity +5)\n` +
           `========================================\n` : '')
@@ -344,6 +446,24 @@ function BetaLevelContent() {
         onCommandExecuted={handleTerminalCommand}
         levelId="beta"
       />
+
+      {/* Audio Download Button */}
+      <div className="my-4 p-3 bg-blue-900/30 border border-blue-700 rounded">
+        <p className="text-blue-300 text-sm mb-2">
+          <span className="mr-2">📂</span>
+          Download the audio evidence file for offline analysis:
+        </p>
+        <a 
+          href="/challenges/beta/audio-evidence.mp3" 
+          download="shadownet-beta-evidence.mp3"
+          className="inline-flex items-center bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+          </svg>
+          Download Audio Evidence
+        </a>
+      </div>
 
       {/* Challenge information */}
       <div className="mt-4 p-4 border border-blue-800 bg-black/80 rounded-md text-blue-300 text-sm max-w-3xl">
