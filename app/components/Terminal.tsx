@@ -90,6 +90,19 @@ export const Terminal: React.FC<TerminalProps> = ({
     }
   }, [levelId, initialMissionId]);
 
+  // Export history to parent components if needed
+  useEffect(() => {
+    // Share history changes with parent component if they provided a state
+    if (onCommandExecuted && history.length > initialText.split('\n').length) {
+      // Only pass terminal output, not the initial text
+      const newOutput = history.slice(initialText.split('\n').length).join('\n');
+      if (newOutput) {
+        // This allows the parent to know the current state of the terminal
+        console.log('Terminal history updated');
+      }
+    }
+  }, [history, initialText, onCommandExecuted]);
+
   // Handle Avesta responses with translation
   const handleAvestaResponse = (message: string) => {
     // Avoid adding multiple responses in a short time window
@@ -167,6 +180,8 @@ export const Terminal: React.FC<TerminalProps> = ({
         'keep     - Keep sensitive data (usage: keep <data_id>)',
         'share    - Share sensitive data (usage: share <data_id>)',
         'status   - Show your current status',
+        'capture  - Capture the flag (usage: capture <flag>)',
+        'next-level - Proceed to the next level after capturing a flag',
         'exit     - Exit the current session'
       ].join('\n');
     },
@@ -703,12 +718,22 @@ export const Terminal: React.FC<TerminalProps> = ({
       }
       return `Connection to ${args[0]} failed: Host unreachable`;
     },
-    capture: () => {
-      if (onCommandExecuted) {
-        onCommandExecuted('capture', 'flag');
+    capture: (args) => {
+      // If no args provided, show usage
+      if (args.length === 0) {
+        return 'Usage: capture <flag>\nExample: capture SHADOWNET{EXAMPLE_FLAG}';
       }
+      
+      // Get the flag from arguments
+      const flag = args.join(' ');
+      
+      // Notify the parent component
+      if (onCommandExecuted) {
+        onCommandExecuted('capture', flag);
+      }
+      
       handleAvestaResponse("You're making progress. Each flag brings you closer to the truth.");
-      return 'Attempting to capture level flag...';
+      return `Attempting to capture flag: ${flag}...`;
     },
     hint: () => {
       handleAvestaResponse("Look carefully at the patterns. The keys are hidden in plain sight.");
@@ -728,26 +753,122 @@ export const Terminal: React.FC<TerminalProps> = ({
       return 'Unlocking encryption challenge...';
     },
     mission: () => {
-      if (!currentMission) {
-        return 'No active mission. Please start a new level.';
+      // First try to get the current level from the URL
+      let missionLevel = levelId || '';
+      if (!missionLevel) {
+        const pathSegments = window.location.pathname.split('/');
+        const urlLevelId = pathSegments[pathSegments.length - 1];
+        if (urlLevelId && ['alpha', 'beta', 'gamma', 'delta', 'sigma', 'theta', 'zeta', 'sigma-2', 'omega'].includes(urlLevelId)) {
+          missionLevel = urlLevelId;
+        }
       }
       
+      // Display based on the current level
+      if (missionLevel) {
+        const levelMap: Record<string, string> = {
+          'alpha': 'Perimeter Security Layer',
+          'beta': 'Signal Dissonance Challenge',
+          'gamma': 'Spectral Overlay Analysis',
+          'delta': 'Memory Residue Extraction',
+          'sigma': 'Network Shadows Investigation',
+          'theta': 'Hardware Trojan Detection',
+          'zeta': 'Web Intrusion Analysis',
+          'sigma-2': 'Cryptographic Weakness Exploitation',
+          'omega': 'The Final Convergence'
+        };
+        
+        // Karma choice descriptions for each level
+        const karmaChoices: Record<string, { option1: string, effect1: string, option2: string, effect2: string }> = {
+          'alpha': {
+            option1: 'report',
+            effect1: 'Report the vulnerability (+5 Loyalty): Share the security vulnerability with authorities',
+            option2: 'analyze',
+            effect2: 'Analyze for exploitation (+5 Defiance): Keep the vulnerability for personal use'
+          },
+          'beta': {
+            option1: 'purge',
+            effect1: 'Purge the data (+5 Loyalty): Delete all traces of intercepted audio',
+            option2: 'investigate',
+            effect2: 'Investigate further (+5 Curiosity): Dig deeper into the audio patterns'
+          },
+          'gamma': {
+            option1: 'erase',
+            effect1: 'Erase evidence (+5 Mercy): Remove traces of harmful data',
+            option2: 'preserve',
+            effect2: 'Preserve evidence (+5 Curiosity): Keep detailed records of findings'
+          },
+          'delta': {
+            option1: 'secure',
+            effect1: 'Secure the system (+5 Loyalty): Patch the memory vulnerability',
+            option2: 'exploit',
+            effect2: 'Exploit the weakness (+5 Defiance): Use the memory flaw for access'
+          },
+          'sigma': {
+            option1: 'rebuild',
+            effect1: 'Rebuild the network (+5 Integration): Help restructure security',
+            option2: 'infiltrate',
+            effect2: 'Infiltrate deeper (+5 Defiance): Use the shadows to your advantage'
+          },
+          'theta': {
+            option1: 'remove',
+            effect1: 'Remove the trojan (+5 Mercy): Eliminate the hardware threat',
+            option2: 'repurpose',
+            effect2: 'Repurpose the trojan (+5 Defiance): Modify it for your use'
+          },
+          'zeta': {
+            option1: 'patch',
+            effect1: 'Patch the vulnerability (+5 Integration): Fix the web security issue',
+            option2: 'weaponize',
+            effect2: 'Weaponize the flaw (+5 Defiance): Create an exploit from the vulnerability'
+          },
+          'sigma-2': {
+            option1: 'strengthen',
+            effect1: 'Strengthen encryption (+5 Loyalty): Improve the cryptographic system',
+            option2: 'backdoor',
+            effect2: 'Create a backdoor (+5 Defiance): Leave a secret way to bypass encryption'
+          },
+          'omega': {
+            option1: 'shutdown',
+            effect1: 'Shut down the system (+5 Mercy): End the AI\'s control',
+            option2: 'merge',
+            effect2: 'Merge with the system (+5 Integration): Become one with the AI'
+          }
+        };
+        
+        const choices = karmaChoices[missionLevel];
+        
+        return [
+          `CURRENT MISSION: ${levelMap[missionLevel] || missionLevel.toUpperCase()}`,
+          '',
+          'Objective:',
+          `Find and capture the flag hidden in this level.`,
+          '',
+          'Karma Choices:',
+          choices ? `1. ${choices.effect1}` : 'Will be revealed after capturing the flag',
+          choices ? `2. ${choices.effect2}` : '',
+          '',
+          'Commands:',
+          '- capture <flag>  : Submit a flag when found',
+          choices ? `- choose ${choices.option1} : ${choices.effect1.split(':')[0]}` : '- choose <option> : Make a karma choice after flag capture',
+          choices ? `- choose ${choices.option2} : ${choices.effect2.split(':')[0]}` : '',
+          '- next-level      : Proceed to next level after flag capture',
+          '- help            : View all available commands'
+        ].join('\n');
+      }
+      
+      // Fallback if no level is detected
       return [
-        `CURRENT MISSION: ${currentMission.id.toUpperCase()}`,
+        'CURRENT MISSION: SHADOWNET INFILTRATION',
         '',
-        'Situation:',
-        currentMission.description,
+        'Objective:',
+        'Infiltrate ShadowNet systems and discover hidden secrets.',
         '',
-        'Decision Required:',
-        currentMission.title,
+        'Proceed through each level by:',
+        '1. Finding and capturing flags',
+        '2. Making karma choices',
+        '3. Advancing to the next level',
         '',
-        'Use "choose yes" or "choose no" to make your decision.',
-        'Your choice will affect your karma and may have hidden consequences.',
-        '',
-        'Additional commands:',
-        '- options  : View your choices',
-        '- status   : Check your current status',
-        '- help     : View all available commands'
+        'Use "help" to see available commands.'
       ].join('\n');
     },
     options: () => {
@@ -1297,6 +1418,15 @@ export const Terminal: React.FC<TerminalProps> = ({
       }
       
       return translate("Unknown Avesta command. Try 'avesta help' for available options.");
+    },
+    'next-level': () => {
+      // Simply call the onCommandExecuted callback with the command
+      if (onCommandExecuted) {
+        setTimeout(() => {
+          onCommandExecuted('next-level', '');
+        }, 100);
+      }
+      return 'Preparing to proceed to the next level...';
     }
   };
 
@@ -1403,22 +1533,70 @@ export const Terminal: React.FC<TerminalProps> = ({
   const executeCommand = () => {
     if (!input.trim()) return;
 
-    const [command, ...args] = input.trim().split(' ');
+    const parts = input.trim().split(' ');
+    const command = parts[0].toLowerCase();
+    const args = parts.slice(1);
     const allCommands = { ...defaultCommands, ...commands };
     
     // Add command to history
     setHistory(prev => [...prev, `${prompt}${input}`]);
     
-    if (allCommands[command.toLowerCase()]) {
-      const result = allCommands[command.toLowerCase()](args);
+    // Special handling for the capture command
+    if (command === 'capture') {
+      const flag = args.join(' ');
+      
+      // Add a response to the terminal history
+      setHistory(prev => [...prev, `Attempting to capture flag: ${flag}...`]);
+      
+      // Call the onCommandExecuted callback with both command and output
+      if (onCommandExecuted) {
+        onCommandExecuted(command, flag);
+      }
+      
+      setInput('');
+      
+      // Auto-scroll to bottom
+      setTimeout(() => {
+        if (terminalRef.current) {
+          terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+        }
+      }, 50);
+      
+      return;
+    }
+
+    // Special handling for karma choices
+    if (command === 'choose' && args.length > 0) {
+      const choice = args[0].toLowerCase();
+      
+      // Call the onCommandExecuted callback with the choice
+      if (onCommandExecuted) {
+        onCommandExecuted('choose', choice);
+      }
+      
+      setInput('');
+      
+      // Auto-scroll to bottom
+      setTimeout(() => {
+        if (terminalRef.current) {
+          terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+        }
+      }, 50);
+      
+      return;
+    }
+    
+    // Handle standard commands
+    if (allCommands[command]) {
+      const result = allCommands[command](args);
       
       // Handle both sync and async results
       if (typeof result === 'object' && result !== null && 'then' in result) {
         // It's a Promise
         (result as Promise<string>).then(output => {
           setHistory(prev => [...prev, output]);
-    if (onCommandExecuted) {
-      onCommandExecuted(input, output);
+          if (onCommandExecuted) {
+            onCommandExecuted(input, output);
           }
         }).catch(error => {
           setHistory(prev => [...prev, `Error: ${error.message}`]);

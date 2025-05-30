@@ -16,6 +16,34 @@ const scoreboardCache: {
 // Cache timeout (5 seconds)
 const CACHE_TIMEOUT = 5000;
 
+// Get normalized karma object
+function normalizeKarmaObject(karma: any) {
+  const defaultKarma = {
+    loyalty: 0,
+    defiance: 0,
+    mercy: 0,
+    curiosity: 0,
+    integration: 0
+  };
+  
+  if (!karma) return defaultKarma;
+  
+  try {
+    const karmaObj = typeof karma === 'string' ? JSON.parse(karma) : karma;
+    
+    return {
+      loyalty: karmaObj.loyalty || 0,
+      defiance: karmaObj.defiance || 0,
+      mercy: karmaObj.mercy || 0,
+      curiosity: karmaObj.curiosity || 0,
+      integration: karmaObj.integration || 0
+    };
+  } catch (error) {
+    console.error('Error normalizing karma:', error);
+    return defaultKarma;
+  }
+}
+
 // Calculate total karma from karma object
 function calculateTotalKarma(karma: any) {
   if (!karma) return 0;
@@ -54,12 +82,15 @@ export async function GET(request: NextRequest) {
       return [];
     });
     
-    // Format user data
-    const formattedUsers = users.map(user => ({
-      username: user.username,
-      score: user.score || 0,
-      karma: calculateTotalKarma(user.karma)
-    }));
+    // Format user data with detailed karma
+    const formattedUsers = users.map(user => {
+      const normalizedKarma = normalizeKarmaObject(user.karma);
+      return {
+        username: user.username,
+        score: user.score || 0,
+        karma: normalizedKarma, // Return full karma object
+      };
+    });
     
     // Prepare response
     const response = {

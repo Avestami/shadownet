@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
     
     // Parse request body
     const body = await request.json();
-    const { flagId, baseScore = 100 } = body;
+    const { flagId, baseScore = 100, allFlags = false, flagList = [] } = body;
     
-    if (!flagId) {
+    if (!flagId && !allFlags) {
       return NextResponse.json(
-        { error: 'Missing flagId' },
+        { error: 'Missing flagId or allFlags parameter' },
         { status: 400 }
       );
     }
@@ -38,6 +38,84 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Get karma as an object
+    let karmaObj;
+    try {
+      karmaObj = typeof user.karma === 'string' 
+        ? JSON.parse(user.karma) 
+        : (user.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 });
+    } catch (error) {
+      console.error('Error parsing karma:', error);
+      karmaObj = { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
+    }
+    
+    // Calculate average karma for multiplier
+    const karmaValues = Object.values(karmaObj);
+    const avgKarma = karmaValues.length > 0 
+      ? karmaValues.reduce((sum, val) => sum + val, 0) / karmaValues.length 
+      : 0;
+    
+    // Calculate score boost based on karma
+    const karmaMultiplier = 1 + avgKarma / 100;
+    
+    // Handle debug mode capturing all flags
+    if (allFlags) {
+      // Define all flags or use the provided list
+      const ALL_FLAGS = flagList.length > 0 ? flagList : [
+        'SHADOWNET{DTHEREFORTH}',
+        'SHADOWNET{SOUND876}',
+        'SHADOWNET{S3CR3T_D34TH}',
+        'SHADOWNET{M3M0RY_DUMP_1337}',
+        'SHADOWNET{P4CK3T_W1Z4RD}',
+        'SHADOWNET{FIRMWARE_BACKDOOR_X23}',
+        'SHADOWNET{VULN_HUNTER_PRO}',
+        'SHADOWNET{CRYPTO_BREAKER_9000}',
+        'SHADOWNET{FINAL_ASCENSION}'
+      ];
+      
+      // Get current flags and add new ones
+      const flagsCaptured = user.flagsCaptured || [];
+      const newFlags = ALL_FLAGS.filter(flag => !flagsCaptured.includes(flag));
+      
+      if (newFlags.length === 0) {
+        return NextResponse.json({
+          success: false,
+          message: 'All flags already captured',
+          score: user.score || 0,
+          flagsCaptured,
+          karma: karmaObj
+        });
+      }
+      
+      // Calculate total score to add
+      const scoreToAdd = Math.round(newFlags.length * baseScore * karmaMultiplier);
+      
+      // Update user with all flags
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          flagsCaptured: [...flagsCaptured, ...newFlags],
+          score: (user.score || 0) + scoreToAdd
+        }
+      });
+      
+      // Invalidate the user cache
+      invalidateUserCache(userId);
+      
+      return NextResponse.json({
+        success: true,
+        message: `${newFlags.length} flags captured successfully`,
+        score: updatedUser.score,
+        scoreAdded: scoreToAdd,
+        flagsCaptured: updatedUser.flagsCaptured,
+        karma: updatedUser.karma,
+        karmaMultiplier: karmaMultiplier.toFixed(2),
+        newFlags,
+        karmaDetails: karmaObj
+      });
+    }
+    
+    // Handle single flag capture (original logic)
     // Check if flag already captured
     const flagsCaptured = user.flagsCaptured || [];
     if (flagsCaptured.includes(flagId)) {
@@ -45,14 +123,11 @@ export async function POST(request: NextRequest) {
         success: false,
         message: 'Flag already captured',
         score: user.score || 0,
-        flagsCaptured
+        flagsCaptured,
+        karma: karmaObj,
+        karmaDetails: karmaObj
       });
     }
-    
-    // Calculate score boost based on user's karma
-    // Higher karma = higher score multiplier (incentive for ethical choices)
-    const karma = user.karma || 0;
-    const karmaMultiplier = 1 + karma / 100; // 0 karma = 1x, 100 karma = 2x, -50 karma = 0.5x
     
     // Calculate final score
     const scoreToAdd = Math.round(baseScore * karmaMultiplier);
@@ -75,7 +150,9 @@ export async function POST(request: NextRequest) {
       score: updatedUser.score,
       scoreAdded: scoreToAdd,
       flagsCaptured: updatedUser.flagsCaptured,
-      karma: updatedUser.karma
+      karma: updatedUser.karma,
+      karmaMultiplier: karmaMultiplier.toFixed(2),
+      karmaDetails: karmaObj
     });
     
   } catch (error) {

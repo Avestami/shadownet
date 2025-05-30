@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from 'next/font/google'
 import "./globals.css";
 import { Providers } from './providers';
+import dynamic from 'next/dynamic';
+
+// Import LevelNavigator with client-side only rendering
+const LevelNavigator = dynamic(() => import('./components/LevelNavigator'), {
+  ssr: false,
+});
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +30,9 @@ export default function RootLayout({
         className="antialiased overflow-hidden m-0 p-0"
       >
         <Providers>
-              {children}
+          {children}
+          {/* Level navigation for easy access */}
+          <LevelNavigator />
         </Providers>
       </body>
     </html>
