@@ -1,9 +1,10 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { useUser } from '../context/UserProvider';
 import MatrixBackground from './MatrixBackground';
 import Scoreboard from './Scoreboard';
+import GlobalAudioPlayer, { GlobalAudioPlayerHandle } from './GlobalAudioPlayer';
 
 interface LevelLayoutProps {
   children: ReactNode;
@@ -27,9 +28,16 @@ export default function LevelLayout({
   loreSubtext = 'The truth is hidden beneath the surface.'
 }: LevelLayoutProps) {
   const { user } = useUser();
+  const audioPlayerRef = useRef<GlobalAudioPlayerHandle>(null);
   
   // Map color codes to CSS variables
-  const colorMap = {
+  const colorMap: Record<string, {
+    text: string;
+    border: string;
+    bg: string;
+    hover: string;
+    matrixColor: string;
+  }> = {
     red: {
       text: 'text-red-500',
       border: 'border-red-800',
@@ -78,7 +86,14 @@ export default function LevelLayout({
   
   return (
     <div className={`page-content min-h-screen bg-black ${colors.text} relative overflow-auto`}>
-      <MatrixBackground colorCode={colors.matrixColor} density="medium" />
+      <MatrixBackground colorCode={colors.matrixColor as "red" | "green" | "blue" | "purple"} density="medium" />
+      
+      <GlobalAudioPlayer 
+        ref={audioPlayerRef} 
+        levelId={levelId} 
+        initialVolume={0.5} 
+        autoPlay={false} 
+      />
       
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
         <div className="mt-16 mb-10">

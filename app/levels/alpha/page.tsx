@@ -8,7 +8,7 @@ import Terminal from '../../../app/components/Terminal';
 import KarmaDisplay from '../../../app/components/KarmaDisplay';
 import Scoreboard from '../../../app/components/Scoreboard';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
-import AudioPlayer, { AudioPlayerHandle } from '../../../app/components/AudioPlayer';
+import GlobalAudioPlayer, { GlobalAudioPlayerHandle } from '../../../app/components/GlobalAudioPlayer';
 
 // Interface for karma object - matches what's used in the User type
 interface KarmaObject {
@@ -31,7 +31,7 @@ function LoadingState() {
 }
 
 function AlphaLevelContent() {
-  const { user, setUser } = useUser();
+  const { user, setUser, refreshUser } = useUser();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +44,7 @@ function AlphaLevelContent() {
   const alphaChallenge = LEVEL_CHALLENGES.alpha;
 
   // Add the audioPlayerRef
-  const audioPlayerRef = useRef<AudioPlayerHandle>(null);
+  const audioPlayerRef = useRef<GlobalAudioPlayerHandle>(null);
 
   // Trigger glitch effect
   const triggerGlitch = () => {
@@ -76,11 +76,29 @@ function AlphaLevelContent() {
   useEffect(() => {
     // Check if user is loaded
     if (user !== undefined) {
+      console.log('ALPHA LEVEL - User data loaded:', user);
       setIsLoading(false);
       
       // Check if user has already captured this flag
       if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{DTHEREFORTH}')) {
+        console.log('ALPHA LEVEL - Flag already captured: SHADOWNET{DTHEREFORTH}');
         setFlagCaptured(true);
+      }
+      
+      // Check if karma choice was already made for this level
+      if (user?.choices && Array.isArray(user.choices)) {
+        console.log('ALPHA LEVEL - User choices on mount:', user.choices);
+        
+        const alphaChoices = user.choices.filter(choice => 
+          choice.startsWith('alpha_')
+        );
+        
+        if (alphaChoices.length > 0) {
+          console.log('ALPHA LEVEL - Alpha karma choices already made:', alphaChoices);
+          setKarmaChoiceMade(true);
+        }
+      } else {
+        console.log('ALPHA LEVEL - No choices found or choices is not an array:', user?.choices);
       }
     }
   }, [user]);
@@ -95,7 +113,6 @@ function AlphaLevelContent() {
       if (flag === 'SHADOWNET{DTHEREFORTH}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
-        showStatusMessage('Flag captured! Your score has increased by 100 points. Choose your next action or type "next-level" to proceed.');
         
         // Play success sound
         if (audioPlayerRef.current) {
@@ -108,24 +125,31 @@ function AlphaLevelContent() {
           if (!updatedFlags.includes(flag)) {
             updatedFlags.push(flag);
             
+            // Calculate score increase - Make sure this is actually applied
+            const scoreIncrease = 100;
+            
             // Update user data with score increase
             const updatedUser = {
               ...user,
               flagsCaptured: updatedFlags,
-              score: (user.score || 0) + 100 // Award points for flag capture
+              score: (user.score || 0) + scoreIncrease // Award points for flag capture
             };
             
+            // Update local state immediately for responsive UI
             setUser(updatedUser);
             
+            // Display success message with score information
+            showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
+            
             // Save to server with better error handling
-            fetch('/api/capture-flag', {
+            fetch('/api/user/force-update', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({ 
                 flagId: flag,
-                baseScore: 100
+                scoreChange: scoreIncrease
               })
             })
             .then(response => {
@@ -136,25 +160,32 @@ function AlphaLevelContent() {
             })
             .then(data => {
               console.log('Flag capture saved successfully:', data);
-              // Update UI with score increase message
-              if (data.scoreAdded) {
-                showStatusMessage(`Flag captured successfully! Score +${data.scoreAdded} points.`, 5000);
+              // Add a message specifically prompting the user to make a karma choice
+              showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
+              
+              // Refresh user data to ensure UI is updated
+              if (refreshUser) {
+                setTimeout(() => {
+                  refreshUser().then(updatedUser => {
+                    console.log('User data auto-refreshed after flag capture:', updatedUser);
+                  });
+                }, 500);
               }
             })
             .catch(err => {
               console.error('Error saving flag:', err);
               showStatusMessage('Warning: Progress may not have saved properly', 3000);
             });
+          } else {
+            // Flag was already captured
+            showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
           }
         }
+        
+        return 'FLAG CAPTURED SUCCESSFULLY! Type "mission" to see karma choices.';
       } else {
-        showStatusMessage('Incorrect flag. Keep analyzing the level.', 3000);
-      }
-    } else if (command.toLowerCase() === 'next-level') {
-      if (flagCaptured) {
-        proceedToNextLevel();
-      } else {
-        showStatusMessage('You must capture the flag before proceeding to the next level.', 3000);
+        // Return the error message to the terminal instead of showing a status message
+        return 'ERROR: Incorrect flag. Keep analyzing the level.';
       }
     } else if (command.toLowerCase() === 'choose') {
       if (flagCaptured && !karmaChoiceMade) {
@@ -167,53 +198,93 @@ function AlphaLevelContent() {
       } else if (!flagCaptured) {
         showStatusMessage('You must capture the flag before making a karma choice.', 3000);
       } else if (karmaChoiceMade) {
-        showStatusMessage('You have already made your karma choice.', 3000);
+        showStatusMessage('You have already made your karma choice. Use the Level Select button at the top or type "next" to continue.', 4000);
       }
+    } else if (command.toLowerCase() === 'next') {
+      // Handle next command - check if requirements are met
+      if (!flagCaptured) {
+        showStatusMessage('You must capture the flag before proceeding to the next level.', 3000);
+        return 'You must capture the flag before proceeding to the next level.';
+      }
+      
+      if (!karmaChoiceMade) {
+        showStatusMessage('You must make a karma choice before proceeding. Type "mission" to see options.', 4000);
+        return 'You must make a karma choice before proceeding. Type "mission" to see options.';
+      }
+      
+      // If we get here, requirements are met, so navigate to the next level
+      const nextLevel = output; // The next level ID is passed in the output
+      window.location.href = `/levels/${nextLevel}`;
+      return `Navigating to the ${nextLevel.toUpperCase()} level...`;
+    } else if (command.toLowerCase() === 'debug-refresh') {
+      // Add a special debug command to force refresh user data
+      if (refreshUser) {
+        refreshUser().then(updatedUser => {
+          console.log('User data manually refreshed:', updatedUser);
+          showStatusMessage(`User data refreshed. Score: ${updatedUser?.score || 0}, Flags: ${updatedUser?.flagsCaptured?.length || 0}`, 5000);
+        }).catch(err => {
+          console.error('Error manually refreshing user data:', err);
+          showStatusMessage('Error refreshing user data. Check console.', 3000);
+        });
+      } else {
+        showStatusMessage('Cannot refresh user data - refresh function not available', 3000);
+      }
+      return 'Manually refreshing user data...';
     }
-  };
-
-  // Function to handle proceeding to next level
-  const proceedToNextLevel = () => {
-    if (!user) return;
     
-    showStatusMessage('Preparing to proceed to next level...', 3000);
-    
-    // Call the API to progress to next level
-    fetch('/api/next-level', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        currentLevel: 'alpha'
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to progress to next level');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Level progression successful:', data);
-      // Redirect to next level
-      window.location.href = `/levels/${data.nextLevel}`;
-    })
-    .catch(err => {
-      console.error('Error progressing to next level:', err);
-      showStatusMessage('Error: Could not proceed to next level. Please try again.', 5000);
-    });
+    return '';
   };
 
   // Function to handle karma choices
   const handleKarmaChoice = (choiceType: 'report' | 'analyze') => {
-    setKarmaChoiceMade(true);
+    console.log('ALPHA LEVEL - handleKarmaChoice called with choice:', choiceType);
+    console.log('ALPHA LEVEL - Current user state:', user);
     
-    if (!user) return;
+    if (!user) {
+      console.log('ALPHA LEVEL - No user data available');
+      return;
+    }
+    
+    // Check if user has already made an alpha karma choice
+    const choiceId = `alpha_${choiceType}`;
+    console.log('ALPHA LEVEL - Checking for existing choice:', choiceId);
+    console.log('ALPHA LEVEL - User choices:', user.choices);
+    
+    // Check if user has already made any alpha karma choice
+    if (user.choices && Array.isArray(user.choices)) {
+      const alphaChoices = user.choices.filter(choice => 
+        choice.startsWith('alpha_')
+      );
+      
+      console.log('ALPHA LEVEL - Existing alpha choices:', alphaChoices);
+      
+      if (alphaChoices.length > 0) {
+        console.log('ALPHA LEVEL - User already made an alpha choice:', alphaChoices);
+        showStatusMessage('You have already made a karma choice for this level.', 3000);
+        setKarmaChoiceMade(true);
+        return;
+      }
+      
+      if (user.choices.includes(choiceId)) {
+        console.log('ALPHA LEVEL - User already made this specific choice:', choiceId);
+        showStatusMessage('You have already made this karma choice.', 3000);
+        setKarmaChoiceMade(true);
+        return;
+      }
+    } else {
+      console.log('ALPHA LEVEL - User choices is not an array or is undefined:', user.choices);
+    }
+    
+    setKarmaChoiceMade(true);
     
     // Find the karma choice data
     const choiceData = alphaChallenge.karmaChoices.find(c => c.id === choiceType);
-    if (!choiceData) return;
+    if (!choiceData) {
+      console.log('ALPHA LEVEL - Choice data not found for:', choiceType);
+      return;
+    }
+    
+    console.log('ALPHA LEVEL - Choice data found:', choiceData);
     
     // Update user karma and score
     const karmaType = choiceData.type;
@@ -236,35 +307,69 @@ function AlphaLevelContent() {
     // Update the specific karma type
     updatedKarma[karmaType] += karmaValue;
     
-    // Calculate new score
-    const newScore = (user.score || 0) + karmaValue;
+    // Calculate new score - Add a score for making a karma choice
+    const scoreForKarmaChoice = karmaValue; // Same as karma value
+    const newScore = (user.score || 0) + scoreForKarmaChoice;
+    
+    console.log('ALPHA LEVEL - Karma update:', {
+      type: karmaType,
+      oldValue: user.karma?.[karmaType] || 0,
+      change: karmaValue,
+      newValue: updatedKarma[karmaType]
+    });
+    
+    console.log('ALPHA LEVEL - Score update:', {
+      oldScore: user.score || 0,
+      change: scoreForKarmaChoice,
+      newScore: newScore
+    });
     
     // Show UI feedback
     triggerGlitch();
-    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score: ${newScore}`, 4000);
+    showStatusMessage(`Karma updated: ${karmaType} +${karmaValue}, Score +${scoreForKarmaChoice}, Total Score: ${newScore}`, 4000);
+    
+    // Create updated choices array
+    const updatedChoices = [...(user.choices || [])];
+    if (!updatedChoices.includes(choiceId)) {
+      updatedChoices.push(choiceId);
+    }
+    
+    console.log('ALPHA LEVEL - Updated choices array:', updatedChoices);
     
     // Update the user object
     try {
       const updatedUser = {
         ...user,
         karma: updatedKarma,
-        score: newScore
+        score: newScore,
+        choices: updatedChoices
       };
       
+      console.log('ALPHA LEVEL - Updated user object:', updatedUser);
+      
+      // Update local state immediately for responsive UI
       setUser(updatedUser as any);
       
       // Better server update with error handling
-      fetch('/api/user/karma-choice', {
+      console.log('ALPHA LEVEL - Sending update to server with payload:', { 
+        flagId: `flag_alpha`,
+        scoreChange: scoreForKarmaChoice,
+        karmaType: karmaType,
+        karmaValue: karmaValue,
+        choiceId: choiceId
+      });
+      
+      fetch('/api/user/force-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          levelId: 'alpha',
-          choiceId: choiceType,
+          flagId: `flag_alpha`,
+          scoreChange: scoreForKarmaChoice,
           karmaType: karmaType,
           karmaValue: karmaValue,
-          score: karmaValue
+          choiceId: choiceId
         })
       })
       .then(response => {
@@ -275,7 +380,16 @@ function AlphaLevelContent() {
       })
       .then(data => {
         console.log('Karma choice saved successfully:', data);
-        showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${newScore}`, 5000);
+        showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${data.score}`, 5000);
+        
+        // Refresh user data to ensure UI is updated
+        if (refreshUser) {
+          setTimeout(() => {
+            refreshUser().then(updatedUser => {
+              console.log('User data auto-refreshed after karma choice:', updatedUser);
+            });
+          }, 500);
+        }
       })
       .catch(err => {
         console.error('Error saving karma choice:', err);
@@ -293,7 +407,7 @@ function AlphaLevelContent() {
 
   return (
     <div className={`relative ${glitchEffect ? 'animate-glitch' : ''}`}>
-      <AudioPlayer ref={audioPlayerRef} levelId="alpha" initialVolume={0.5} />
+      <GlobalAudioPlayer ref={audioPlayerRef} levelId="alpha" initialVolume={0.5} autoPlay={false} />
       
       {message && (
         <div className="mb-4 p-3 bg-red-900/50 border border-red-800 rounded text-red-200 text-sm font-mono">
@@ -333,15 +447,17 @@ function AlphaLevelContent() {
           `- cd <dir>        Change directory\n` +
           `- help            Show all commands\n` +
           `- capture <flag>  Capture a flag when found\n` +
-          `- next-level      Proceed to the next level\n` +
-          `- choose <choice> Make a karma choice\n\n` +
+          `- choose <choice> Make a karma choice\n` +
+          `- next            Proceed to the next level\n` +
+          `- debug-refresh   Manually refresh user data\n\n` +
           `Begin your infiltration...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
           `FLAG SUCCESSFULLY CAPTURED!\n` +
           `You have successfully completed the Alpha level.\n` +
-          `Type "next-level" to proceed to Beta level.\n` +
-          `or make a karma choice with:\n` +
+          `Use the Level Select button at the top to access other levels\n` +
+          `or type "next" to proceed to the next level.\n` +
+          `Make a karma choice first with:\n` +
           `- choose report   (Loyalty +5)\n` +
           `- choose analyze  (Defiance +5)\n` +
           `========================================\n` : '')

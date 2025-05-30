@@ -18,6 +18,8 @@ const CACHE_TIMEOUT = 5000;
 
 // Get normalized karma object
 function normalizeKarmaObject(karma: any) {
+  console.log('[SCOREBOARD] Normalizing karma object:', karma);
+  
   const defaultKarma = {
     loyalty: 0,
     defiance: 0,
@@ -26,34 +28,102 @@ function normalizeKarmaObject(karma: any) {
     integration: 0
   };
   
-  if (!karma) return defaultKarma;
+  if (!karma) {
+    console.log('[SCOREBOARD] No karma data, using defaults');
+    return defaultKarma;
+  }
   
   try {
-    const karmaObj = typeof karma === 'string' ? JSON.parse(karma) : karma;
+    // Handle string format (JSON string)
+    let karmaObj = karma;
     
-    return {
-      loyalty: karmaObj.loyalty || 0,
-      defiance: karmaObj.defiance || 0,
-      mercy: karmaObj.mercy || 0,
-      curiosity: karmaObj.curiosity || 0,
-      integration: karmaObj.integration || 0
-    };
+    if (typeof karma === 'string') {
+      console.log('[SCOREBOARD] Parsing karma from string');
+      try {
+        karmaObj = JSON.parse(karma);
+      } catch (e) {
+        console.error('[SCOREBOARD] Error parsing karma string:', e, karma);
+        return defaultKarma;
+      }
+    }
+    
+    // Handle number format (legacy)
+    if (typeof karmaObj === 'number') {
+      console.log('[SCOREBOARD] Karma is a number value, using defaults');
+      return defaultKarma;
+    }
+    
+    // Handle object format
+    if (typeof karmaObj === 'object' && karmaObj !== null) {
+      console.log('[SCOREBOARD] Using karma object values');
+      const result = {
+        loyalty: Number(karmaObj.loyalty || 0),
+        defiance: Number(karmaObj.defiance || 0),
+        mercy: Number(karmaObj.mercy || 0),
+        curiosity: Number(karmaObj.curiosity || 0),
+        integration: Number(karmaObj.integration || 0)
+      };
+      console.log('[SCOREBOARD] Normalized karma:', result);
+      return result;
+    }
+    
+    console.log('[SCOREBOARD] Unhandled karma format, using defaults');
+    return defaultKarma;
   } catch (error) {
-    console.error('Error normalizing karma:', error);
+    console.error('[SCOREBOARD] Error normalizing karma:', error, karma);
     return defaultKarma;
   }
 }
 
 // Calculate total karma from karma object
 function calculateTotalKarma(karma: any) {
-  if (!karma) return 0;
+  console.log('[SCOREBOARD] Calculating total karma from:', karma);
+  
+  if (!karma) {
+    console.log('[SCOREBOARD] No karma data, returning 0');
+    return 0;
+  }
+  
   try {
-    const karmaObj = typeof karma === 'string' ? JSON.parse(karma) : karma;
-    return Math.round(
-      (karmaObj.loyalty + karmaObj.defiance + karmaObj.mercy + karmaObj.curiosity + karmaObj.integration) / 5
-    );
+    // Handle direct number format
+    if (typeof karma === 'number') {
+      console.log('[SCOREBOARD] Karma is already a number:', karma);
+      return karma;
+    }
+    
+    // Handle string format
+    let karmaObj = karma;
+    if (typeof karma === 'string') {
+      console.log('[SCOREBOARD] Parsing karma string');
+      try {
+        karmaObj = JSON.parse(karma);
+      } catch (e) {
+        console.error('[SCOREBOARD] Failed to parse karma string:', e, karma);
+        return 0;
+      }
+    }
+    
+    // Handle object format
+    if (typeof karmaObj === 'object' && karmaObj !== null) {
+      const values = [
+        Number(karmaObj.loyalty || 0),
+        Number(karmaObj.defiance || 0),
+        Number(karmaObj.mercy || 0),
+        Number(karmaObj.curiosity || 0),
+        Number(karmaObj.integration || 0)
+      ];
+      
+      const sum = values.reduce((acc, val) => acc + val, 0);
+      const result = values.length > 0 ? Math.floor(sum / values.length) : 0;
+      
+      console.log('[SCOREBOARD] Calculated total karma:', {values, sum, result});
+      return result;
+    }
+    
+    console.log('[SCOREBOARD] Unhandled karma format, returning 0');
+    return 0;
   } catch (error) {
-    console.error('Error calculating karma:', error);
+    console.error('[SCOREBOARD] Error calculating total karma:', error, karma);
     return 0;
   }
 }
@@ -84,12 +154,39 @@ export async function GET(request: NextRequest) {
     
     // Format user data with detailed karma
     const formattedUsers = users.map(user => {
-      const normalizedKarma = normalizeKarmaObject(user.karma);
-      return {
-        username: user.username,
-        score: user.score || 0,
-        karma: normalizedKarma, // Return full karma object
-      };
+      console.log('[SCOREBOARD] Processing user:', user.username, 'karma type:', typeof user.karma);
+      
+      try {
+        const normalizedKarma = normalizeKarmaObject(user.karma);
+        const totalKarma = calculateTotalKarma(user.karma);
+        
+        console.log('[SCOREBOARD] User processed:', {
+          username: user.username,
+          totalKarma,
+          normalizedKarma
+        });
+        
+        return {
+          username: user.username,
+          score: user.score || 0,
+          karma: normalizedKarma, // Return full karma object
+          totalKarma // Add the calculated total
+        };
+      } catch (error) {
+        console.error('[SCOREBOARD] Error processing user:', user.username, error);
+        return {
+          username: user.username,
+          score: user.score || 0,
+          karma: { 
+            loyalty: 0, 
+            defiance: 0, 
+            mercy: 0, 
+            curiosity: 0, 
+            integration: 0 
+          },
+          totalKarma: 0
+        };
+      }
     });
     
     // Prepare response
