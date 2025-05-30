@@ -24,7 +24,7 @@ export default function RootLayout({
         className="antialiased overflow-hidden m-0 p-0"
       >
         <Providers>
-          {children}
+              {children}
         </Providers>
       </body>
     </html>
