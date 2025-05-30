@@ -58,14 +58,14 @@ export default function Home() {
             try {
               const karmaData = JSON.parse(savedKarma);
               userData.karma = karmaData.karma;
-            } catch (e) {
+            } catch (_) {
               console.error('Invalid karma data in localStorage');
             }
           }
           
           setUser(userData);
           return;
-        } catch (e) {
+        } catch (_) {
           console.error('Invalid debug user in localStorage');
         }
       }
@@ -84,7 +84,7 @@ export default function Home() {
             if (karmaData.karma !== undefined) {
               userData.karma = karmaData.karma;
             }
-          } catch (e) {
+          } catch (_) {
             console.error('Invalid karma data in localStorage');
           }
         }
@@ -109,7 +109,7 @@ export default function Home() {
           try {
             const karmaData = JSON.parse(savedKarma);
             parsedUser.karma = karmaData.karma;
-          } catch (e) {
+          } catch (_) {
             console.error('Invalid karma data in localStorage');
           }
         }
@@ -117,7 +117,7 @@ export default function Home() {
         setUser(parsedUser);
         setLoading(false);
         return;
-      } catch (e) {
+      } catch (_) {
         console.error('Invalid debug user in localStorage');
       }
     }
@@ -138,7 +138,7 @@ export default function Home() {
               if (karmaData.karma !== undefined) {
                 userData.karma = karmaData.karma;
               }
-            } catch (e) {
+            } catch (_) {
               console.error('Invalid karma data in localStorage');
             }
           }
@@ -363,9 +363,221 @@ export default function Home() {
         'Redirecting to login page...'
       ].join('\n');
     },
-    help: () => 'Available commands:\nstart - Begin your infiltration mission\nmission - View mission objectives and details\nlevels - List all mission levels\ninfo - Display information about ShadowNet\nstatus - Check system status\nsign-out / logout - Sign out of your account\ndelete-account - Permanently delete your account (WARNING!)\necho - Repeat text\ndate - Display current date and time\nwhoami - Display current user\nconnect - Connect to a remote system\navesta - Interact with Avesta',
-    info: () => 'ShadowNet v3.7.1\nA rogue AI system that has infiltrated global networks.\nYour mission: Hack the system, decrypt hidden messages, and determine the fate of both human and artificial intelligences.',
-    status: () => 'SYSTEM STATUS: CRITICAL\nSecurity breaches detected in multiple subsystems.\nAI defensive protocols active.\nRecommended action: Proceed with caution.'
+    help: () => {
+      return [
+        'Available commands:',
+        'start     - Begin your infiltration mission',
+        'mission   - View mission objectives and details',
+        'levels    - List all mission levels',
+        'info      - Display information about ShadowNet',
+        'status    - Check system status',
+        'connect   - Connect to a remote system',
+        'whoami    - Display current user',
+        'karma     - Display your karma status',
+        'score     - Display your current score',
+        'avesta    - Interact with Avesta AI',
+        'language  - Change interface language (en/fa)',
+        'sign-out  - Sign out of your account',
+        'clear     - Clear the terminal screen',
+        'help      - Show this help message'
+      ].join('\n');
+    },
+    info: () => {
+      return [
+        'ShadowNet Core Terminal v4.7.1',
+        'A rogue AI system that has infiltrated global networks.',
+        'Your mission: Hack the system, decrypt hidden messages,',
+        'and determine the fate of both human and artificial intelligences.',
+        '',
+        'Current user: ' + user?.username,
+        'Karma level: ' + user?.karma,
+        'Score: ' + user?.score,
+        '',
+        'Type "help" for available commands.'
+      ].join('\n');
+    },
+    status: () => {
+      return [
+        'SYSTEM STATUS: CRITICAL',
+        'Security breaches detected in multiple subsystems.',
+        'AI defensive protocols active.',
+        '',
+        'User: ' + user?.username,
+        'Karma: ' + user?.karma,
+        'Score: ' + user?.score,
+        'Flags captured: ' + (user?.flagsCaptured?.length || 0),
+        '',
+        'Recommended action: Proceed with caution.'
+      ].join('\n');
+    },
+    karma: () => {
+      return [
+        'KARMA STATUS',
+        '',
+        'Current karma level: ' + user?.karma,
+        'Flags captured: ' + (user?.flagsCaptured?.length || 0),
+        'Total score: ' + user?.score,
+        '',
+        'Karma affects:',
+        '- Mission choices and outcomes',
+        '- Access to special features',
+        '- Final story ending'
+      ].join('\n');
+    },
+    score: () => {
+      return [
+        'SCORE STATUS',
+        '',
+        'Total score: ' + user?.score,
+        'Flags captured: ' + (user?.flagsCaptured?.length || 0),
+        'Current level: ' + (user?.choices ? 'ALPHA' : 'Not started'),
+        '',
+        'Score determines:',
+        '- Global ranking',
+        '- Special achievements',
+        '- Bonus content access'
+      ].join('\n');
+    },
+    clear: () => {
+      setTerminalOutput([]);
+      return '';
+    },
+    whoami: () => {
+      return [
+        'USER PROFILE',
+        '',
+        'Username: ' + user?.username,
+        'Access level: Agent',
+        'Status: Active',
+        'Mission: ShadowNet Infiltration',
+        '',
+        'Type "status" for detailed system status.'
+      ].join('\n');
+    },
+    connect: (args: string[]) => {
+      const level = args.join(' ').toLowerCase().trim();
+      if (level === 'alpha' || level === 'level1' || level === 'level 1') {
+        // Direct navigation using window.location instead of router
+        window.location.href = '/levels/alpha';
+        return 'Connecting to ALPHA level...\nInitializing secure connection...\nAccess granted.';
+      }
+      return 'ACCESS DENIED: Level is locked. Complete previous levels to unlock.\nCurrent access: Level 1 - ALPHA only.';
+    },
+    avesta: (args: string[]) => {
+      if (!args.length || args[0].toLowerCase() === 'help') {
+        return [
+          'AVESTA AI INTERFACE',
+          '',
+          'Available commands:',
+          'avesta help    - Show this help message',
+          'avesta status  - Check Avesta system status',
+          'avesta chat    - Open direct communication',
+          'avesta intel   - Request mission intelligence',
+          'avesta hint    - Get hints for current level',
+          '',
+          'Avesta is an AI ally within ShadowNet.'
+        ].join('\n');
+      }
+      
+      const action = args[0].toLowerCase();
+      
+      if (action === 'status') {
+        return [
+          'AVESTA STATUS: ACTIVE',
+          'Connection: Secure',
+          'Channel: Encrypted',
+          'Mode: Assistance',
+          '',
+          'Ready to provide infiltration support.',
+          'Type "avesta help" for commands.'
+        ].join('\n');
+      }
+      
+      if (action === 'chat') {
+        const message = args.slice(1).join(' ');
+        if (message) {
+          return [
+            
+            'Message sent to Avesta.',
+            '',
+            'AVESTA: I am here to help. What do you need?',
+            'Type your message after "avesta chat".'
+          ].join('\n');
+        }
+        return 'Usage: avesta chat <message>';
+      }
+      
+      if (action === 'intel') {
+        return [
+          'MISSION INTELLIGENCE',
+          '',
+          'ShadowNet consists of multiple security levels:',
+          '- ALPHA: Perimeter defenses',
+          '- BETA: Internal networks',
+          '- GAMMA: Core systems',
+          '- DELTA: AI control center',
+          '',
+          'Each level requires different tactics.',
+          'Type "start" to begin infiltration.'
+        ].join('\n');
+      }
+      
+      if (action === 'hint') {
+        return [
+          'INFILTRATION GUIDANCE',
+          '',
+          'To begin your mission:',
+          '1. Type "start" to access ALPHA level',
+          '2. Look for encrypted files and data',
+          '3. Use "analyze" on suspicious files',
+          '4. Make choices that align with your goals',
+          '',
+          'Your karma will affect the outcome.'
+        ].join('\n');
+      }
+      
+      return 'Unknown Avesta command. Type "avesta help" for options.';
+    },
+    start: () => {
+      // Direct navigation using window.location instead of router
+      window.location.href = '/levels/alpha';
+      return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
+    },
+    levels: () => {
+      return [
+        'MISSION LEVELS:',
+        '',
+        '1. ALPHA - Perimeter Security [UNLOCKED]',
+        '2. BETA - Network Infiltration [🔒 LOCKED]',
+        '3. GAMMA - Database Access [🔒 LOCKED]',
+        '4. DELTA - Core Systems [🔒 LOCKED]',
+        '5. SIGMA - District Liberation [🔒 LOCKED]',
+        '6. THETA - Identity Crisis [🔒 LOCKED]',
+        '7. ZETA - Network Rescue [🔒 LOCKED]',
+        '8. SIGMA-2 - Digital Confession [🔒 LOCKED]',
+        '9. OMEGA - Final Confrontation [🔒 LOCKED]',
+        '',
+        'Complete each level to unlock the next.',
+        'Type "start" to begin ALPHA level.'
+      ].join('\n');
+    },
+    mission: () => {
+      return [
+        'CURRENT MISSION BRIEFING',
+        '',
+        'Objective: Infiltrate ShadowNet\'s core systems',
+        '',
+        'Your tasks:',
+        '- Navigate through 9 security levels',
+        '- Decrypt sensitive information',
+        '- Make critical decisions affecting your karma',
+        '- Capture flags to prove your skills',
+        '',
+        'Current access: Level 1 - ALPHA',
+        'Type "start" to begin the mission.',
+        'Type "levels" to view all mission stages.'
+      ].join('\n');
+    }
   };
 
   const handleTerminalCommand = (command: string, output: string) => {
@@ -479,15 +691,15 @@ export default function Home() {
                       'Type "start" when ready to begin.';
                   },
                   start: () => {
-                    console.log('Start command triggered, attempting navigation to /levels/alpha');
-                    router.push('/levels/alpha');
-                    console.log('Navigation command sent to router');
+                    // Direct navigation using window.location instead of router
+                    window.location.href = '/levels/alpha';
                     return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
                   },
                   connect: (args: string[]) => {
                     const level = args.join(' ').toLowerCase().trim();
                     if (level === 'alpha' || level === 'level1' || level === 'level 1') {
-                      router.push('/levels/alpha');
+                      // Direct navigation using window.location instead of router
+                      window.location.href = '/levels/alpha';
                       return 'Connecting to ALPHA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     return 'ACCESS DENIED: Level is locked. Complete previous levels to unlock.\nCurrent access: Level 1 - ALPHA only.';
@@ -499,16 +711,23 @@ export default function Home() {
             
             {/* Scoreboard (1/3 width) */}
             <div className="md:col-span-4 w-full">
-              <Scoreboard 
+              <Scoreboard
                 currentUser={user ? {
                   username: user.username,
                   score: user.score || 0,
-                  karma: typeof user.karma === 'object' 
-                    ? Math.round(
-                        (user.karma.loyalty + user.karma.defiance + user.karma.mercy + 
-                         user.karma.curiosity + user.karma.integration) / 5
-                      )
-                    : 0
+                  karma: typeof user.karma === 'number'
+                    ? user.karma
+                    : typeof user.karma === 'object' && user.karma !== null
+                      ? Math.round(
+                          (
+                            (user.karma as any)?.loyalty || 0 + 
+                            (user.karma as any)?.defiance || 0 + 
+                            (user.karma as any)?.mercy || 0 + 
+                            (user.karma as any)?.curiosity || 0 + 
+                            (user.karma as any)?.integration || 0
+                          ) / 5
+                        )
+                      : 0
                 } : undefined}
               />
             </div>
