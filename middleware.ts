@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// Flag to bypass level locks - this should be disabled in production
+const BYPASS_LEVEL_LOCKS = true;
+
 export async function middleware(request: NextRequest) {
   // Get the pathname
   const path = request.nextUrl.pathname;
@@ -58,19 +61,7 @@ export async function middleware(request: NextRequest) {
       return response;
     }
     
-    // Allow access to alpha level and non-level routes
-    if (!path.startsWith('/levels/') || path === '/levels/alpha') {
-      return NextResponse.next();
-    }
-
-    // Block access to all other level routes
-    if (path.startsWith('/levels/')) {
-      // Redirect to alpha level with a message
-      const url = new URL('/levels/alpha', request.url);
-      url.searchParams.set('message', 'Level locked. Please complete previous levels first.');
-      return NextResponse.redirect(url);
-    }
-    
+    // Allow access to ALL routes (including level pages)
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);

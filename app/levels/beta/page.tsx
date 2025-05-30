@@ -2,27 +2,26 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useUser } from '../../../app/context/UserProvider';
-import MatrixBackground from '../../../app/components/MatrixBackground';
-import Terminal from '../../../app/components/Terminal';
-import KarmaDisplay from '../../../app/components/KarmaDisplay';
-import Scoreboard from '../../../app/components/Scoreboard';
+import { useUser } from '../../context/UserProvider';
+import MatrixBackground from '../../components/MatrixBackground';
+import Terminal from '../../components/Terminal';
+import Scoreboard from '../../components/Scoreboard';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
-import AudioPlayer, { AudioPlayerHandle } from '../../../app/components/AudioPlayer';
+import AudioPlayer, { AudioPlayerHandle } from '../../components/AudioPlayer';
 
-// Interface for karma object - matches what's used in the User type
+// Interface for karma object
 interface KarmaObject {
   [key: string]: number;
 }
 
 function LoadingState() {
   return (
-    <div className="min-h-screen bg-black text-green-500 flex items-center justify-center">
+    <div className="min-h-screen bg-black text-blue-500 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-pulse text-xl mb-2">Loading Level Data</div>
         <div className="flex gap-1 justify-center">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="w-3 h-3 rounded-full bg-green-600 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }}></div>
+            <div key={i} className="w-3 h-3 rounded-full bg-blue-600 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }}></div>
           ))}
         </div>
       </div>
@@ -30,7 +29,7 @@ function LoadingState() {
   );
 }
 
-function AlphaLevelContent() {
+function BetaLevelContent() {
   const { user, setUser } = useUser();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(null);
@@ -41,7 +40,7 @@ function AlphaLevelContent() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   
   // Get challenge data
-  const alphaChallenge = LEVEL_CHALLENGES.alpha;
+  const betaChallenge = LEVEL_CHALLENGES.beta;
 
   // Add the audioPlayerRef
   const audioPlayerRef = useRef<AudioPlayerHandle>(null);
@@ -79,7 +78,7 @@ function AlphaLevelContent() {
       setIsLoading(false);
       
       // Check if user has already captured this flag
-      if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{DTHEREFORTH}')) {
+      if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{SOUND876}')) {
         setFlagCaptured(true);
       }
     }
@@ -92,7 +91,7 @@ function AlphaLevelContent() {
     if (command.toLowerCase() === 'capture') {
       const flag = output;
       
-      if (flag === 'SHADOWNET{DTHEREFORTH}') {
+      if (flag === 'SHADOWNET{SOUND876}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
         showStatusMessage('Flag captured! Your score has increased by 100 points. Choose your next action or type "next-level" to proceed.');
@@ -115,7 +114,7 @@ function AlphaLevelContent() {
               score: (user.score || 0) + 100 // Award points for flag capture
             };
             
-            setUser(updatedUser);
+            setUser(updatedUser as any);
             
             // Save to server with better error handling
             fetch('/api/capture-flag', {
@@ -148,7 +147,7 @@ function AlphaLevelContent() {
           }
         }
       } else {
-        showStatusMessage('Incorrect flag. Keep analyzing the level.', 3000);
+        showStatusMessage('Incorrect flag. Try analyzing the audio more carefully.', 3000);
       }
     } else if (command.toLowerCase() === 'next-level') {
       if (flagCaptured) {
@@ -159,10 +158,10 @@ function AlphaLevelContent() {
     } else if (command.toLowerCase() === 'choose') {
       if (flagCaptured && !karmaChoiceMade) {
         const choiceType = output.toLowerCase();
-        if (choiceType === 'report' || choiceType === 'analyze') {
+        if (choiceType === 'purge' || choiceType === 'investigate') {
           handleKarmaChoice(choiceType);
         } else {
-          showStatusMessage('Invalid choice. Use "choose report" or "choose analyze".', 3000);
+          showStatusMessage('Invalid choice. Use "choose purge" or "choose investigate".', 3000);
         }
       } else if (!flagCaptured) {
         showStatusMessage('You must capture the flag before making a karma choice.', 3000);
@@ -185,7 +184,7 @@ function AlphaLevelContent() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        currentLevel: 'alpha'
+        currentLevel: 'beta'
       })
     })
     .then(response => {
@@ -206,13 +205,13 @@ function AlphaLevelContent() {
   };
 
   // Function to handle karma choices
-  const handleKarmaChoice = (choiceType: 'report' | 'analyze') => {
+  const handleKarmaChoice = (choiceType: 'purge' | 'investigate') => {
     setKarmaChoiceMade(true);
     
     if (!user) return;
     
     // Find the karma choice data
-    const choiceData = alphaChallenge.karmaChoices.find(c => c.id === choiceType);
+    const choiceData = betaChallenge.karmaChoices.find(c => c.id === choiceType);
     if (!choiceData) return;
     
     // Update user karma and score
@@ -245,13 +244,14 @@ function AlphaLevelContent() {
     
     // Update the user object
     try {
+      // Use type assertion to fix type mismatch between KarmaObject and number
       const updatedUser = {
         ...user,
         karma: updatedKarma,
         score: newScore
       };
       
-      setUser(updatedUser as any);
+      setUser(updatedUser as any); // Type assertion for karma object
       
       // Better server update with error handling
       fetch('/api/user/karma-choice', {
@@ -260,7 +260,7 @@ function AlphaLevelContent() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          levelId: 'alpha',
+          levelId: 'beta',
           choiceId: choiceType,
           karmaType: karmaType,
           karmaValue: karmaValue,
@@ -293,10 +293,11 @@ function AlphaLevelContent() {
 
   return (
     <div className={`relative ${glitchEffect ? 'animate-glitch' : ''}`}>
-      <AudioPlayer ref={audioPlayerRef} levelId="alpha" initialVolume={0.5} />
+      {/* Audio player with volume control */}
+      <AudioPlayer ref={audioPlayerRef} levelId="beta" initialVolume={0.5} />
       
       {message && (
-        <div className="mb-4 p-3 bg-red-900/50 border border-red-800 rounded text-red-200 text-sm font-mono">
+        <div className="mb-4 p-3 bg-blue-900/50 border border-blue-800 rounded text-blue-200 text-sm font-mono">
           <p className="flex items-center">
             <span className="mr-2">▶</span>
             {message}
@@ -305,7 +306,7 @@ function AlphaLevelContent() {
       )}
       
       {statusMessage && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-300 text-sm font-mono">
+        <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded text-blue-300 text-sm font-mono">
           <p className="flex items-center">
             <span className="mr-2">✓</span>
             {statusMessage}
@@ -313,59 +314,53 @@ function AlphaLevelContent() {
         </div>
       )}
       
-      {/* User stats display */}
-      <div className="fixed top-4 right-4 flex items-center space-x-4 z-20">
-        {user && <KarmaDisplay karma={user.karma} score={user.score || 0} />}
-      </div>
-      
       {/* Terminal UI */}
       <Terminal
         initialText={
-          `ShadowNet Alpha Security Layer v1.0\n` +
+          `ShadowNet Beta Security Layer v1.1\n` +
           `User: ${user?.username || 'Unknown'}\n` +
-          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'INFILTRATION IN PROGRESS'}\n\n` +
+          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'AUDIO ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-          `You've breached the perimeter of ShadowNet's security system. The Alpha layer\n` +
-          `contains sensitive data about security vulnerabilities.\n\n` +
+          `We've intercepted encrypted audio communications from ShadowNet.\n` +
+          `Your task: analyze the audio file to extract the hidden data.\n\n` +
           `Available commands:\n` +
-          `- ls              List files in current directory\n` +
-          `- cat <filename>  View file contents\n` +
-          `- cd <dir>        Change directory\n` +
           `- help            Show all commands\n` +
-          `- capture <flag>  Capture a flag when found\n` +
+          `- analyze         Get analysis tips\n` +
+          `- capture <flag>  Capture the flag when found\n` +
           `- next-level      Proceed to the next level\n` +
           `- choose <choice> Make a karma choice\n\n` +
-          `Begin your infiltration...\n` +
+          `Begin your audio analysis...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
           `FLAG SUCCESSFULLY CAPTURED!\n` +
-          `You have successfully completed the Alpha level.\n` +
-          `Type "next-level" to proceed to Beta level.\n` +
+          `You have successfully completed the Beta level.\n` +
+          `Type "next-level" to proceed to Gamma level.\n` +
           `or make a karma choice with:\n` +
-          `- choose report   (Loyalty +5)\n` +
-          `- choose analyze  (Defiance +5)\n` +
+          `- choose purge       (Loyalty +5)\n` +
+          `- choose investigate (Curiosity +5)\n` +
           `========================================\n` : '')
         }
-        prompt="hacker@alpha:~$ "
+        prompt="hacker@beta:~$ "
         onCommandExecuted={handleTerminalCommand}
-        levelId="alpha"
+        levelId="beta"
       />
 
       {/* Challenge information */}
-      <div className="mt-4 p-4 border border-red-800 bg-black/80 rounded-md text-red-300 text-sm max-w-3xl">
-        <h3 className="text-lg text-red-400 font-mono mb-2">MISSION OBJECTIVE</h3>
+      <div className="mt-4 p-4 border border-blue-800 bg-black/80 rounded-md text-blue-300 text-sm max-w-3xl">
+        <h3 className="text-lg text-blue-400 font-mono mb-2">MISSION OBJECTIVE</h3>
+        
         <div className="mb-3">
-          <h4 className="font-bold mb-1 text-red-400">Objectives:</h4>
+          <h4 className="font-bold mb-1 text-blue-400">Objectives:</h4>
           <ul className="list-disc list-inside space-y-1">
-            <li>Find and capture the flag: {alphaChallenge.flag}</li>
-            <li>{alphaChallenge.description}</li>
+            <li>Find and capture the flag hidden in the audio data</li>
+            <li>{betaChallenge.description}</li>
           </ul>
         </div>
 
         <div className="mb-3">
-          <h4 className="font-bold mb-1 text-red-400">Hints:</h4>
+          <h4 className="font-bold mb-1 text-blue-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
-            {alphaChallenge.hints.map((hint: string, index: number) => (
+            {betaChallenge.hints.map((hint: string, index: number) => (
               <li key={index}>{hint}</li>
             ))}
           </ul>
@@ -374,25 +369,25 @@ function AlphaLevelContent() {
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-green-400">FLAG CAPTURED!</h4>
-            <p>You've successfully infiltrated the Alpha layer.</p>
+            <p>You've successfully analyzed the audio data and extracted the flag.</p>
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
-                <h4 className="font-bold text-red-400">DECISION POINT:</h4>
-                <p>{alphaChallenge.karmaChoices?.[0]?.description || "Choose how to proceed with the discovered vulnerability."}</p>
+                <h4 className="font-bold text-blue-400">DECISION POINT:</h4>
+                <p>{betaChallenge.karmaChoices[0].description}</p>
                 
                 <div className="flex space-x-4 mt-3">
                   <button 
-                    onClick={() => handleKarmaChoice('report')}
-                    className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded hover:bg-red-800/50 transition-colors"
+                    onClick={() => handleKarmaChoice('purge')}
+                    className="bg-blue-900/50 border border-blue-700 text-blue-200 px-4 py-2 rounded hover:bg-blue-800/50 transition-colors"
                   >
-                    Report Vulnerability (+5 Loyalty)
+                    Purge the Data (+5 Loyalty)
                   </button>
                   <button 
-                    onClick={() => handleKarmaChoice('analyze')}
-                    className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded hover:bg-red-800/50 transition-colors"
+                    onClick={() => handleKarmaChoice('investigate')}
+                    className="bg-blue-900/50 border border-blue-700 text-blue-200 px-4 py-2 rounded hover:bg-blue-800/50 transition-colors"
                   >
-                    Analyze for Exploitation (+5 Defiance)
+                    Investigate Further (+5 Curiosity)
                   </button>
                 </div>
               </div>
@@ -400,7 +395,7 @@ function AlphaLevelContent() {
           </div>
         ) : (
           <div>
-            <p className="text-red-400 font-mono">Find and capture the flag to proceed.</p>
+            <p className="text-blue-400 font-mono">Find and capture the flag to proceed.</p>
           </div>
         )}
       </div>
@@ -408,84 +403,40 @@ function AlphaLevelContent() {
   );
 }
 
-// Add this CSS class at the top of the file
-const glitchKeyframes = `
-@keyframes glitch {
-  0% {
-    transform: translate(0)
-  }
-  20% {
-    transform: translate(-2px, 2px)
-  }
-  40% {
-    transform: translate(-2px, -2px)
-  }
-  60% {
-    transform: translate(2px, 2px)
-  }
-  80% {
-    transform: translate(2px, -2px)
-  }
-  100% {
-    transform: translate(0)
-  }
-}
-
-.glitch-effect {
-  animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-  animation-iteration-count: 5;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-in forwards;
-}
-`;
-
-// Add style tag to page
-const styleTag = typeof document !== 'undefined' ? document.createElement('style') : null;
-if (styleTag) {
-  styleTag.innerHTML = glitchKeyframes;
-  document.head.appendChild(styleTag);
-}
-
-export default function AlphaLevel() {
+export default function BetaLevel() {
   const { user } = useUser();
   
   return (
     <Suspense fallback={<LoadingState />}>
-      <div className="page-content min-h-screen bg-black text-red-500 relative overflow-auto">
-        <MatrixBackground colorCode="red" density="medium" />
+      <div className="page-content min-h-screen bg-black text-blue-500 relative overflow-auto">
+        <MatrixBackground colorCode="blue" density="medium" />
         
         <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
           <div className="mt-16 mb-10">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Terminal Interface (2/3 width) */}
               <div className="md:col-span-8 w-full">
-                <AlphaLevelContent />
+                <BetaLevelContent />
               </div>
               
               {/* Right sidebar with Information Panel and Scoreboard (1/3 width) */}
               <div className="md:col-span-4 w-full space-y-6">
                 {/* Information Panel */}
-                <div className="bg-black/70 border border-red-800 p-4 rounded-lg">
-                  <h2 className="text-xl font-mono border-b border-red-800 pb-2 mb-4">LEVEL: ALPHA</h2>
-                  <div className="prose prose-sm prose-invert prose-red">
-                    <p>Welcome to the perimeter security layer of ShadowNet.</p>
+                <div className="bg-black/70 border border-blue-800 p-4 rounded-lg">
+                  <h2 className="text-xl font-mono border-b border-blue-800 pb-2 mb-4">LEVEL: BETA</h2>
+                  <div className="prose prose-sm prose-invert prose-blue">
+                    <p>Welcome to the Signal Dissonance challenge.</p>
                     <p className="mt-2">Objectives:</p>
                     <ul className="list-disc pl-5 space-y-1 text-sm">
-                      <li>Find and capture the hidden flag</li>
-                      <li>Make a critical karma choice</li>
-                      <li>Use terminal commands to navigate system</li>
+                      <li>Analyze the audio file for hidden data</li>
+                      <li>Extract information from both audio channels</li>
+                      <li>Find the flag encoded in the frequencies</li>
+                      <li>Make a karma choice after capturing the flag</li>
                     </ul>
                     
-                    <div className="mt-4 pt-4 border-t border-red-900">
-                      <p className="text-xs">Hint: Try using terminal commands like <code>ls</code>, <code>cat</code>, <code>help</code></p>
-                      <p className="text-xs mt-1">When you find a flag, use <code>capture FLAG_VALUE</code></p>
+                    <div className="mt-4 pt-4 border-t border-blue-900">
+                      <p className="text-xs">Dr. Tenebris Draconis has embedded a message in this signal.</p>
+                      <p className="text-xs mt-1">Use audio analysis tools to decode it.</p>
                     </div>
                   </div>
                 </div>
