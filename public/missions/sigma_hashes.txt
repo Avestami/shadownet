@@ -1,0 +1,9 @@
+HASH CRACKING CHALLENGE:
+The admin password is hashed with MD5. Crack it to gain access.
+
+ADMIN HASH: 5d41402abc4b2a76b9719d911017c592
+HINT: The password is a simple English word.
+
+Once cracked, forge a new hash for the access code "fr33d0m" to proceed.
+
+REQUIRED: Submit the MD5 hash of "fr33d0m" to gain admin rights. 

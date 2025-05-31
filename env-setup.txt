@@ -1,0 +1,16 @@
+# Local PostgreSQL Connection
+# Copy the contents below to your .env file
+
+DATABASE_URL="postgresql://postgres:root@localhost:5432/project_control"
+
+# Next Auth (keep your existing keys if you already have them)
+NEXTAUTH_SECRET="your-next-auth-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Session config
+SESSION_MAXAGE=2592000
+
+# Make sure PostgreSQL is running locally on port 5432
+# And that you have a database named 'project_control' created
+# Run this command to create the database if it doesn't exist:
+# createdb project_control 

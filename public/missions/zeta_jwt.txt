@@ -1,0 +1,11 @@
+JWT TOKEN FORGING CHALLENGE:
+
+Current JWT Token (expired):
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+CHALLENGE: Forge a new JWT token with:
+- Algorithm: HS256
+- Payload: {"user": "admin", "level": "zeta", "access": "granted"}
+- Secret: "r3scu3" (the mission key)
+
+Submit the forged JWT token to proceed to the next level. 

@@ -1,0 +1,472 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles below */
+@font-face {
+  font-family: 'Hacker';
+  src: url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+}
+
+:root {
+  --background: #000000;
+  --foreground: #ff0000;
+  --foreground-dim: #990000;
+  --foreground-bright: #ff3333;
+  --terminal-bg: #0a0a0a;
+  --glitch-color-1: #ff0000;
+  --glitch-color-2: #cc0000;
+  --foreground-rgb: 255, 0, 0;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Fix scrolling behavior */
+html, body {
+  min-height: 100%;
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Ensure content is scrollable */
+.page-content {
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+}
+
+/* Scoreboard styling */
+.scoreboard-container {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--foreground-dim) var(--background);
+}
+
+.scoreboard-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scoreboard-container::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+.scoreboard-container::-webkit-scrollbar-thumb {
+  background-color: var(--foreground-dim);
+  border-radius: 6px;
+  border: 2px solid var(--background);
+}
+
+@keyframes textflicker {
+  0% { opacity: 0.8; }
+  10% { opacity: 1; }
+  15% { opacity: 0.9; }
+  20% { opacity: 1; }
+  30% { opacity: 0.8; }
+  40% { opacity: 0.9; }
+  70% { opacity: 1; }
+  80% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+@keyframes matrixRain {
+  0% { 
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(1000%);
+    opacity: 0.3;
+  }
+}
+
+/* Beta level glitch animation */
+@keyframes glitch-animation {
+  0% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  10% {
+    transform: translate(-5px, -5px);
+    filter: hue-rotate(30deg);
+  }
+  20% {
+    transform: translate(5px, 5px);
+    filter: hue-rotate(-30deg);
+  }
+  30% {
+    transform: translate(-5px, 0);
+    filter: hue-rotate(0deg);
+  }
+  40% {
+    transform: translate(0, -5px);
+    filter: hue-rotate(30deg) brightness(1.2);
+  }
+  50% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  60% {
+    transform: translate(5px, 0);
+    filter: hue-rotate(-30deg) contrast(1.2);
+  }
+  70% {
+    transform: translate(-3px, 3px);
+    filter: hue-rotate(0deg);
+  }
+  80% {
+    transform: translate(0);
+    filter: hue-rotate(30deg);
+  }
+  90% {
+    transform: translate(3px, -3px);
+    filter: hue-rotate(-30deg);
+  }
+  100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+}
+
+.animate-glitch {
+  animation: glitch-animation 0.5s linear;
+}
+
+body {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(var(--background-end-rgb))
+  )
+  rgb(var(--background-start-rgb));
+  color: rgb(var(--foreground-rgb));
+  font-family: 'Hacker', 'Source Code Pro', monospace;
+  overflow-x: hidden;
+}
+
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.flicker-text {
+  animation: textflicker 3s linear infinite;
+}
+
+.terminal-text {
+  color: var(--foreground);
+  text-shadow: 0 0 5px var(--foreground-dim);
+}
+
+.console {
+  background-color: rgba(10, 10, 10, 0.85);
+  border: 1px solid var(--foreground-dim);
+  border-radius: 5px;
+  padding: 20px;
+  font-family: 'Hacker', 'Source Code Pro', monospace;
+  color: var(--foreground);
+  text-shadow: 0 0 5px var(--foreground-dim);
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+}
+
+.console-input {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--foreground-dim);
+  color: var(--foreground-bright);
+  font-family: 'Hacker', 'Source Code Pro', monospace;
+  padding: 5px;
+  width: 100%;
+  outline: none;
+}
+
+.console-input:focus {
+  border-bottom: 1px solid var(--foreground);
+  box-shadow: 0 1px 0 0 var(--foreground-dim);
+}
+
+.button {
+  background-color: transparent;
+  border: 1px solid var(--foreground);
+  color: var(--foreground);
+  font-family: 'Hacker', 'Source Code Pro', monospace;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.button:hover {
+  background-color: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 0 15px var(--foreground-dim);
+}
+
+.full-screen-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 10;
+}
+
+/* Typewriter cursor styles */
+.typing-cursor {
+  display: inline-block;
+  color: var(--foreground);
+  margin-left: 2px;
+  font-family: monospace;
+  animation: cursor-blink 0.5s infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Glitch text effect for encrypted messages */
+.message-text.glitching {
+  position: relative;
+}
+
+.message-text.glitching::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  clip: rect(0, 0, 0, 0);
+  text-shadow: 1px 0 red;
+  animation: glitch-effect 0.3s infinite;
+}
+
+.message-text.glitching::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  clip: rect(0, 0, 0, 0);
+  text-shadow: -1px 0 blue;
+  animation: glitch-effect 0.5s infinite;
+}
+
+@keyframes glitch-effect {
+  0% {
+    clip: rect(44px, 9999px, 56px, 0);
+  }
+  5% {
+    clip: rect(12px, 9999px, 23px, 0);
+  }
+  10% {
+    clip: rect(62px, 9999px, 78px, 0);
+  }
+  15% {
+    clip: rect(32px, 9999px, 15px, 0);
+  }
+  20% {
+    clip: rect(90px, 9999px, 13px, 0);
+  }
+  25% {
+    clip: rect(28px, 9999px, 59px, 0);
+  }
+  30% {
+    clip: rect(73px, 9999px, 37px, 0);
+  }
+  100% {
+    clip: rect(14px, 9999px, 65px, 0);
+  }
+}
+
+/* Global terminal effects */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  3% { opacity: 0.8; }
+  6% { opacity: 1; }
+  7% { opacity: 0.9; }
+  9% { opacity: 1; }
+  15% { opacity: 1; }
+  17% { opacity: 0.7; }
+  20% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@keyframes reveal {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+
+@keyframes appear {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Matrix glitch text effect */
+.glitch-text {
+  position: relative;
+  text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+              -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+              0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  animation: glitch 1s infinite;
+}
+
+/* Terminal styling */
+.terminal-container {
+  font-family: "Courier New", monospace;
+}
+
+.scanlines {
+  background: linear-gradient(
+    to bottom,
+    rgba(255,0,0,0.03) 50%,
+    rgba(0,0,0,0) 51%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+.terminal-line {
+  min-height: 1.2em;
+  position: relative;
+  line-height: 1.3;
+}
+
+.terminal-content {
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
+.cursor {
+  animation: blink 1.06s infinite;
+  color: #f88;
+  font-weight: bold;
+}
+
+.terminal-line:nth-child(7n+3) {
+  animation: flicker 4s infinite;
+}
+
+.glitch {
+  animation: glitch 0.5s linear;
+}
+
+/* Avesta styling */
+.avesta-message {
+  color: #a855f7 !important;
+  text-shadow: 0 0 5px rgba(168, 85, 247, 0.5);
+  position: relative;
+  padding-left: 4px;
+  border-left: 2px solid #a855f7;
+  animation: avesta-pulse 3s ease-in-out infinite;
+  margin: 4px 0;
+}
+
+.avesta-header {
+  padding: 4px;
+  background-color: rgba(168, 85, 247, 0.1);
+  border-bottom: 1px solid #a855f7;
+  letter-spacing: 1px;
+  animation: avesta-appear 0.5s ease-out;
+}
+
+@keyframes avesta-pulse {
+  0% { opacity: 0.9; text-shadow: 0 0 3px rgba(168, 85, 247, 0.5); }
+  50% { opacity: 1; text-shadow: 0 0 8px rgba(168, 85, 247, 0.8); }
+  100% { opacity: 0.9; text-shadow: 0 0 3px rgba(168, 85, 247, 0.5); }
+}
+
+@keyframes avesta-appear {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.typing-dots span {
+  opacity: 0;
+  animation: typing-dots 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-dots {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.dialogue-options > div {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dialogue-options > div:hover {
+  background-color: rgba(168, 85, 247, 0.2);
+  border-color: #a855f7;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+/* Add custom animation for the emergency bypass button */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Extend the Tailwind animation configuration */
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+}
