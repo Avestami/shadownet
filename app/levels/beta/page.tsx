@@ -106,9 +106,18 @@ function BetaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
+    const fullCommand = command.toLowerCase();
+    
+    // Special handling for the capture command
+    if (fullCommand.startsWith('capture')) {
+      // Use the output parameter which already contains the extracted flag
+      // Convert to uppercase for consistent comparison
+      const flag = output.toUpperCase();
       
+      console.log("Processing flag capture with command:", fullCommand);
+      console.log("Extracted flag:", flag);
+      
+      // Check for the actual flag
       if (flag === 'SHADOWNET{SOUND876}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
@@ -298,7 +307,7 @@ function BetaLevelContent() {
     
     console.log('BETA LEVEL - Karma update:', {
       type: karmaType,
-      oldValue: user.karma?.[karmaType] || 0,
+      oldValue: typeof user.karma === 'object' && user.karma !== null ? user.karma[karmaType] || 0 : 0,
       change: karmaValue,
       newValue: updatedKarma[karmaType]
     });

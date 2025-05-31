@@ -207,8 +207,8 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       console.log("Current level ID:", levelId); // Debug info
       
-      // Base files always present
-      let files = [
+      // Get list of files for the level
+      const files = [
         'system',
         'network', 
         'users',
@@ -839,13 +839,13 @@ export const Terminal: React.FC<TerminalProps> = ({
         };
         
         const choices = karmaChoices[missionLevel];
-        
-        return [
+      
+      return [
           `CURRENT MISSION: ${levelMap[missionLevel] || missionLevel.toUpperCase()}`,
-          '',
+        '',
           'Objective:',
           `Find and capture the flag hidden in this level using "capture <flag>"`,
-          '',
+        '',
           'KARMA CHOICES:',
           '------------------------',
           choices ? `Option 1: choose ${choices.option1}` : 'Capture the flag first to reveal choices',
@@ -859,7 +859,7 @@ export const Terminal: React.FC<TerminalProps> = ({
           '1. Capture the flag with "capture <flag>"',
           '2. Make a karma choice with "choose <option>"',
           '3. Proceed to next level with "next-level"',
-          '',
+        '',
           'Type "help" for more commands'
         ].join('\n');
       }
@@ -969,8 +969,12 @@ export const Terminal: React.FC<TerminalProps> = ({
     },
     analyze: (args) => {
       if (args.length === 0) {
+        // Get current level if available
+        const pathSegments = window.location.pathname.split('/');
+        const currentLevelId = pathSegments[pathSegments.length - 1];
+        
         // Special handling for Beta level - provide audio analysis tips
-        if (levelId && levelId === 'beta') {
+        if (currentLevelId && currentLevelId === 'beta') {
           return [
             "AUDIO ANALYSIS TIPS:",
             "1. Download the audio file using the button below the terminal",
@@ -1611,11 +1615,12 @@ export const Terminal: React.FC<TerminalProps> = ({
       // Add a response to the terminal history
       setHistory(prev => [...prev, `Attempting to capture flag: ${flag}...`]);
       
-      // Call the onCommandExecuted callback with both command and output
+      // Call the onCommandExecuted callback with both command and full input
       if (onCommandExecuted) {
-        console.log('TERMINAL DEBUG - Calling onCommandExecuted with:', command, flag);
-        const result = onCommandExecuted(input, flag);
-        console.log('TERMINAL DEBUG - Result from onCommandExecuted:', result);
+        console.log('TERMINAL DEBUG - Calling onCommandExecuted with full command:', input);
+        onCommandExecuted(input, flag);
+        
+        console.log('TERMINAL DEBUG - onCommandExecuted call completed');
       } else {
         console.log('TERMINAL DEBUG - No onCommandExecuted callback provided');
       }
@@ -1662,8 +1667,8 @@ export const Terminal: React.FC<TerminalProps> = ({
         // It's a Promise
         (result as Promise<string>).then(output => {
           setHistory(prev => [...prev, output]);
-          if (onCommandExecuted) {
-            onCommandExecuted(input, output);
+    if (onCommandExecuted) {
+      onCommandExecuted(input, output);
           }
         }).catch(error => {
           setHistory(prev => [...prev, `Error: ${error.message}`]);

@@ -73,8 +73,16 @@ function DeltaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
+    const fullCommand = command.toLowerCase();
+    
+    // Special handling for the capture command
+    if (fullCommand.startsWith('capture')) {
+      // Extract the flag from the full command
+      const parts = fullCommand.split(' ');
+      const flag = parts.slice(1).join(' ').toUpperCase();
+      
+      console.log("Processing flag capture with command:", fullCommand);
+      console.log("Extracted flag:", flag);
       
       if (flag === DELTA_FLAG) {
         setFlagCaptured(true);
@@ -398,7 +406,7 @@ function DeltaLevelContent() {
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'MEMORY ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
           `ShadowNet detected an anomalous breach event.\n` +
-          `We've acquired a memory dump from the compromised system.\n` +
+          `We&apos;ve acquired a memory dump from the compromised system.\n` +
           `Your task: identify the breach method and exfiltration channel.\n\n` +
           `Begin your memory forensics analysis...\n` +
           (flagCaptured ? 
@@ -435,19 +443,19 @@ function DeltaLevelContent() {
             <li>Memory dumps contain snapshots of all running processes</li>
             <li>Look for unusual processes and network connections</li>
             <li>Malware often uses memory residue to store sensitive data</li>
-            <li>Strings in memory may reveal the attacker's techniques</li>
+            <li>Strings in memory may reveal the attacker&apos;s techniques</li>
           </ul>
         </div>
 
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-purple-400">FLAG CAPTURED!</h4>
-            <p>You've successfully analyzed the memory dump and identified the compromise.</p>
+            <p>You&apos;ve successfully analyzed the memory dump and identified the compromise.</p>
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
                 <h4 className="font-bold text-purple-400">DECISION POINT:</h4>
-                <p>You've discovered a critical memory vulnerability. What will you do with this knowledge?</p>
+                <p>You&apos;ve discovered a critical memory vulnerability. What will you do with this knowledge?</p>
                 
                 <div className="flex space-x-4 mt-3">
                   <button 
@@ -482,7 +490,7 @@ export default function DeltaLevel() {
       <LevelLayout
         levelId="delta"
         levelTitle="Memory Residue"
-        levelDescription="ShadowNet detected an anomalous breach event. We've acquired a memory dump from the compromised system."
+        levelDescription="ShadowNet detected an anomalous breach event. We&apos;ve acquired a memory dump from the compromised system."
         objectives={[
           'Analyze the memory dump for evidence of compromise',
           'Identify the attack vector and exfiltration method',

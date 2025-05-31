@@ -107,10 +107,20 @@ function AlphaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
+    const fullCommand = command.toLowerCase();
+    
+    // Special handling for the capture command
+    if (fullCommand.startsWith('capture')) {
+      // Extract the flag from the full command
+      const parts = fullCommand.split(' ');
+      const flag = parts.slice(1).join(' ').toUpperCase();
       
+      console.log("Processing flag capture with command:", fullCommand);
+      console.log("Extracted flag:", flag);
+      
+      // Check for the actual flag
       if (flag === 'SHADOWNET{DTHEREFORTH}') {
+        console.log("Flag matched! Capturing flag:", flag);
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
         
@@ -118,13 +128,13 @@ function AlphaLevelContent() {
         if (audioPlayerRef.current) {
           audioPlayerRef.current.playCapture();
         }
-        
+          
         // Update user data
         if (user) {
           const updatedFlags = [...(user.flagsCaptured || [])];
           if (!updatedFlags.includes(flag)) {
             updatedFlags.push(flag);
-            
+              
             // Calculate score increase - Make sure this is actually applied
             const scoreIncrease = 100;
             
@@ -134,22 +144,22 @@ function AlphaLevelContent() {
               flagsCaptured: updatedFlags,
               score: (user.score || 0) + scoreIncrease // Award points for flag capture
             };
-            
+              
             // Update local state immediately for responsive UI
             setUser(updatedUser);
             
             // Display success message with score information
             showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
-            
+              
             // Save to server with better error handling
-            fetch('/api/user/force-update', {
+            fetch('/api/capture-flag', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({ 
                 flagId: flag,
-                scoreChange: scoreIncrease
+                baseScore: scoreIncrease
               })
             })
             .then(response => {
@@ -184,6 +194,7 @@ function AlphaLevelContent() {
         
         return 'FLAG CAPTURED SUCCESSFULLY! Type "mission" to see karma choices.';
       } else {
+        console.log("Flag mismatch. Provided:", flag, "Expected: SHADOWNET{DTHEREFORTH}");
         // Return the error message to the terminal instead of showing a status message
         return 'ERROR: Incorrect flag. Keep analyzing the level.';
       }
@@ -313,7 +324,7 @@ function AlphaLevelContent() {
     
     console.log('ALPHA LEVEL - Karma update:', {
       type: karmaType,
-      oldValue: user.karma?.[karmaType] || 0,
+      oldValue: typeof user.karma === 'object' && user.karma !== null ? user.karma[karmaType] || 0 : 0,
       change: karmaValue,
       newValue: updatedKarma[karmaType]
     });
@@ -413,7 +424,7 @@ function AlphaLevelContent() {
         <div className="mb-4 p-3 bg-red-900/50 border border-red-800 rounded text-red-200 text-sm font-mono">
           <p className="flex items-center">
             <span className="mr-2">▶</span>
-            {message}
+          {message}
           </p>
         </div>
       )}
@@ -422,15 +433,15 @@ function AlphaLevelContent() {
         <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-300 text-sm font-mono">
           <p className="flex items-center">
             <span className="mr-2">✓</span>
-            {statusMessage}
+          {statusMessage}
           </p>
         </div>
       )}
-      
+
       {/* User stats display */}
       <div className="fixed top-4 right-4 flex items-center space-x-4 z-20">
         {user && <KarmaDisplay karma={user.karma} score={user.score || 0} />}
-      </div>
+            </div>
       
       {/* Terminal UI */}
       <Terminal
@@ -439,7 +450,7 @@ function AlphaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'INFILTRATION IN PROGRESS'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-          `You've breached the perimeter of ShadowNet's security system. The Alpha layer\n` +
+          `You&apos;ve breached the perimeter of ShadowNet&apos;s security system. The Alpha layer\n` +
           `contains sensitive data about security vulnerabilities.\n\n` +
           `Available commands:\n` +
           `- ls              List files in current directory\n` +
@@ -477,7 +488,7 @@ function AlphaLevelContent() {
             <li>{alphaChallenge.description}</li>
           </ul>
         </div>
-
+        
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-red-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
@@ -490,7 +501,7 @@ function AlphaLevelContent() {
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-green-400">FLAG CAPTURED!</h4>
-            <p>You've successfully infiltrated the Alpha layer.</p>
+            <p>You&apos;ve successfully infiltrated the Alpha layer.</p>
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
@@ -511,8 +522,8 @@ function AlphaLevelContent() {
                     Analyze for Exploitation (+5 Defiance)
                   </button>
                 </div>
-              </div>
-            )}
+                </div>
+              )}
           </div>
         ) : (
           <div>
@@ -582,7 +593,7 @@ export default function AlphaLevel() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Terminal Interface (2/3 width) */}
               <div className="md:col-span-8 w-full">
-                <AlphaLevelContent />
+      <AlphaLevelContent />
               </div>
               
               {/* Right sidebar with Information Panel and Scoreboard (1/3 width) */}

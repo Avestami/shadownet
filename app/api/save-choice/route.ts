@@ -57,6 +57,24 @@ export async function POST(request: NextRequest) {
       choices = [];
     }
     
+    // Parse current karma value
+    let currentKarma = 0;
+    try {
+      if (user.karma) {
+        if (typeof user.karma === 'number') {
+          currentKarma = user.karma;
+        } else if (typeof user.karma === 'string') {
+          currentKarma = parseInt(user.karma, 10) || 0;
+        } else if (typeof user.karma === 'object') {
+          // If karma is an object with individual values, compute a total
+          const karmaObj = user.karma as Record<string, number>;
+          currentKarma = Object.values(karmaObj).reduce((sum, val) => sum + val, 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing karma:', error);
+    }
+    
     // Find the decision and choice to calculate karma change
     let karmaDelta = 0;
     
@@ -78,12 +96,15 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Calculate new karma value
+    const newKarmaValue = currentKarma + karmaDelta;
+    
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         choices: JSON.stringify([...choices, choiceId]),
-        karma: (user.karma || 0) + karmaDelta
+        karma: newKarmaValue
       }
     });
     

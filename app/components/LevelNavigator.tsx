@@ -32,7 +32,18 @@ export default function LevelNavigator() {
     if (user) {
       // Determine which levels are unlocked and completed based on user data
       const userFlags = user.flagsCaptured || [];
-      const karmaChoices = user.karmaChoices || [];
+      
+      // Use choices array instead of karmaChoices, which doesn't exist on User
+      let userChoices: string[] = [];
+      try {
+        if (typeof user.choices === 'string') {
+          userChoices = JSON.parse(user.choices);
+        } else if (Array.isArray(user.choices)) {
+          userChoices = user.choices.map(c => String(c));
+        }
+      } catch (error) {
+        console.error('Error parsing user choices:', error);
+      }
       
       // Check for flags captured
       const captured: Record<string, boolean> = {
