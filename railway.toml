@@ -10,9 +10,15 @@ healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
 
+[phases.setup]
+nixPkgs = ["openssl", "nodejs", "python3", "gcc", "git", "make", "cairo", "pango", "pixman", "libjpeg", "pkgconfig"]
+aptPkgs = ["libssl-dev"]
+
+[phases.build]
+cmd = "npm run build"
+env = ["NODE_ENV=production", "PRISMA_CLIENT_ENGINE_TYPE=binary"]
+
 [variables]
 NIXPACKS_PKGS = "openssl"
 NODE_OPTIONS = "--max-old-space-size=2048"
-
-[phases.build]
-nixPackages = ["openssl", "nodejs", "python3", "gcc", "git", "make", "cairo", "pango", "pixman", "libjpeg", "pkgconfig"] 
+PRISMA_CLIENT_ENGINE_TYPE = "binary" 

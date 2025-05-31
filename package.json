@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/deploy-setup.js && prisma generate && next build",
+    "prebuild": "node scripts/railway-build-setup.js",
+    "build": "prisma generate && next build",
     "start": "node scripts/railway-entrypoint.js",
     "start:legacy": "node -r ./prisma/runtime.js node_modules/.bin/next start",
     "lint": "next lint",
