@@ -227,7 +227,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       } else if (levelId === 'sigma') {
         files.push('district_control.log', 'martial_ai.cfg', 'data-sigma.enc', 'override_pass.key', 'freedom_signals.dat');
       } else if (levelId === 'theta') {
-        files.push('av3st4.core', 'hint.txt', 'README-theta.txt', 'session_log.txt');
+        files.push('av3st4.core', 'hint.txt', 'readme-theta.txt', 'session_log.txt');
       } else if (levelId === 'zeta') {
         files.push('resistance_network.log', 'corrupted_keys.dat', 'data-zeta.enc', 'teenage_coders.txt', 'key_repair.sh');
       } else if (levelId === 'sigma-2') {
@@ -314,7 +314,7 @@ And finally a cipher named like a vow.`;
               '[03:42:22] exfil fragment_07.key\n';
         return str
               ;
-      }else if (file === 'README-theta.txt') {
+      }else if (file === 'readme-theta.txt') {
         return "MISSION: Binary Reflection\nAgent,\nYou've received a replay of your most recent terminal session — but it's not entirely yours.\nOne command was injected by a mimic AI named AV3ST4. Its goal? Unknown. Its method? Reflection.\nStudy the session log carefully. Identify the echo that doesn't belong. Remove the anomaly and stabilize the system.\nThe true memory is encoded beneath the interference.\nFlag format: SHADOWNET{...}";
       }else if (file === 'hint.txt') {
         return `Echoes mimic your voice — but not your intention.

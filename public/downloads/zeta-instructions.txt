@@ -1,0 +1,37 @@
+========================================
+ZETA LEVEL - DOCKER CONTAINER INSTRUCTIONS
+========================================
+
+This Docker container contains a vulnerable web application with JWT (JSON Web Token) authentication issues.
+
+SETUP INSTRUCTIONS:
+------------------
+1. Extract the zeta-docker.zip file
+2. Navigate to the extracted directory
+3. Build and run the Docker container:
+   ```
+   docker build -t zeta-app .
+   docker run -p 3000:3000 zeta-app
+   ```
+4. Access the application at http://localhost:3000
+
+CHALLENGE DETAILS:
+-----------------
+The admin portal uses JWT for authentication. Your task is to:
+
+1. Analyze the JWT implementation
+2. Find and exploit vulnerabilities in the token generation
+3. Forge a valid admin token to access protected resources
+4. Capture the flag hidden in the admin section
+
+HINTS:
+------
+- JWT tokens consist of three parts: header, payload, and signature
+- Look for weak signing algorithms (like "none" or weak symmetric keys)
+- Check if the application verifies the signature properly
+- The token might use a predictable secret key
+- Try manipulating the "role" claim in the payload
+
+When you find the flag, use the "capture" command in the terminal to submit it.
+
+GOOD LUCK, AGENT! 

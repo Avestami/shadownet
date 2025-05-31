@@ -27,7 +27,8 @@ function ZetaLevelContent() {
   // Effect to check if user has already captured the flag
   useEffect(() => {
     console.log('ZETA LEVEL - Checking user state:', user);
-    if (user && user.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{TOKEN_FORGED}')) {
+    if (user && user.flagsCaptured && user.flagsCaptured.some(flag => 
+      flag.includes('SHADOWNET') && flag.includes('TOKEN_FORGED'))) {
       setFlagCaptured(true);
     }
     
@@ -66,93 +67,104 @@ function ZetaLevelContent() {
     // Convert command to lowercase for case-insensitive comparisons
     const fullCommand = command.toLowerCase();
     
+    // Handle downloading docker file
+    if (fullCommand === 'download' || fullCommand === 'download-docker') {
+      // Provide a link to download the Docker file
+      const downloadLink = '/downloads/zeta-docker.zip';
+      window.open(downloadLink, '_blank');
+      return 'Initiating download of the Docker container file...';
+    }
+    
+    // Handle instructions
+    if (fullCommand === 'instructions' || fullCommand === 'help-docker') {
+      // Return the Docker instructions
+      return fetch('/downloads/zeta-instructions.txt')
+        .then(response => response.text())
+        .then(instructions => {
+          return instructions;
+        })
+        .catch(error => {
+          console.error('Error fetching instructions:', error);
+          return 'Error: Could not load instructions. Try using the download command instead.';
+        });
+    }
+    
     // Check if it's a capture command
     if (fullCommand.startsWith('capture')) {
       console.log("Processing capture command. Flag received:", output);
       
-      // Use the output parameter which already contains the extracted flag from Terminal component
-      // Convert to uppercase for consistent comparison
-      const flag = output.toUpperCase();
+      // Extract the flag from the full command
+      const parts = fullCommand.split(' ');
+      const flag = parts.slice(1).join(' ').toUpperCase();
       
-      if (flag === 'SHADOWNET{TOKEN_FORGED}') {
-        // Play capture sound
-        if (audioPlayerRef.current) {
-          audioPlayerRef.current.playCapture();
+      // Send the flag to the server for validation rather than checking locally
+      fetch('/api/capture-flag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          flagId: flag,
+          baseScore: 100,
+          levelId: 'zeta'
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to validate flag');
         }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Flag validation response:', data);
         
-        // Trigger glitch effect for visual feedback
-        console.log('ZETA DEBUG - Flag captured, triggering glitch effect');
-        triggerGlitch();
-        
-        setFlagCaptured(true);
-        
-        // Update user data
-        if (user) {
-          const updatedFlags = [...(user.flagsCaptured || [])];
-          if (!updatedFlags.includes(flag)) {
-            updatedFlags.push(flag);
-            
-            // Calculate score increase
-            const scoreIncrease = 100;
-            
-            // Update user data with score increase
+        if (data.success) {
+          // Flag is valid - update UI
+          if (audioPlayerRef.current) {
+            audioPlayerRef.current.playCapture();
+          }
+          
+          triggerGlitch();
+          setFlagCaptured(true);
+          
+          // Update local state and show message
+          if (user) {
             const updatedUser = {
               ...user,
-              flagsCaptured: updatedFlags,
-              score: (user.score || 0) + scoreIncrease
+              flagsCaptured: [...(user.flagsCaptured || []), flag],
+              score: data.score || (user.score || 0) + 100
             };
             
             // Update local state immediately for responsive UI
             setUser(updatedUser);
-            
-            // Display success message with score information
-            showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
-            
-            // Save to server with better error handling
-            fetch('/api/user/force-update', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ 
-                flagId: flag,
-                scoreChange: scoreIncrease
-              })
-            })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Failed to save flag capture');
-              }
-              return response.json();
-            })
-            .then(data => {
-              console.log('Flag capture saved successfully:', data);
-              // Add a message specifically prompting the user to make a karma choice
-              showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
-              
-              // Refresh user data to ensure UI is updated
-              if (refreshUser) {
-                setTimeout(() => {
-                  refreshUser().then(updatedUser => {
-                    console.log('User data auto-refreshed after flag capture:', updatedUser);
-                  });
-                }, 500);
-              }
-            })
-            .catch(err => {
-              console.error('Error saving flag:', err);
-              showStatusMessage('Warning: Progress may not have saved properly', 3000);
-            });
-          } else {
-            // Flag was already captured
-            showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
           }
+          
+          showStatusMessage(`FLAG CAPTURED! Score +${data.scoreAdded || 100}. Use "mission" to see karma choices.`, 6000);
+          
+          // Refresh user data
+          if (refreshUser) {
+            setTimeout(() => {
+              refreshUser().then(updatedUser => {
+                console.log('User data auto-refreshed after flag capture:', updatedUser);
+              });
+            }, 500);
+          }
+          
+          return 'Flag captured successfully! Choose your next action.';
+        } else if (data.message?.includes('already captured')) {
+          showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
+          return 'Flag already captured. Choose your next action.';
+        } else {
+          return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
         }
-        
-        return 'Flag captured successfully! Choose your next action.';
-      } else {
-        return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
-      }
+      })
+      .catch(err => {
+        console.error('Error validating flag:', err);
+        showStatusMessage('Error validating flag. Please try again.', 3000);
+        return 'Error validating flag. Please try again.';
+      });
+      
+      return 'Validating flag...'; // Initial response while validation is in progress
     } else if (fullCommand.startsWith('choose')) {
       // Handle choose command
       if (flagCaptured && !karmaChoiceMade) {
@@ -182,7 +194,14 @@ function ZetaLevelContent() {
 - choose blackmail (Blackmail the company, less points but special access later.)`;
         }
       } else {
-        return 'Current mission: Exploit vulnerabilities in the admin portal to find the flag.';
+        return `Current mission: Exploit vulnerabilities in the admin portal to find the flag.
+        
+Available commands:
+- download        Download the Docker container file for analysis
+- instructions    View Docker container setup instructions
+- ls              List files in current directory
+- cat <filename>  View file contents
+- help            Show all commands`;
       }
     } else if (fullCommand.startsWith('submit')) {
       const parts = command.split(' ');
@@ -239,9 +258,9 @@ function ZetaLevelContent() {
               });
             } else {
               showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
-      }
-    }
-    
+            }
+          }
+          
           return 'Flag captured successfully! Choose your next action.';
         } else {
           return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
@@ -395,6 +414,79 @@ function ZetaLevelContent() {
         {user && <KarmaDisplay karma={user.karma} score={user.score || 0} />}
       </div>
       
+      {/* Challenge information */}
+      <div className="mt-4 p-4 border border-red-800 bg-black/80 rounded-md text-red-300 text-sm max-w-3xl">
+        <h3 className="text-lg text-red-400 font-mono mb-2">MISSION OBJECTIVE</h3>
+        <div className="mb-3">
+          <h4 className="font-bold mb-1 text-red-400">Objectives:</h4>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Download and analyze the Docker container</li>
+            <li>Exploit JWT vulnerabilities in the admin portal</li>
+            <li>Gain unauthorized access and find the flag</li>
+          </ul>
+        </div>
+        
+        <div className="mb-3">
+          <h4 className="font-bold mb-1 text-red-400">Docker Instructions:</h4>
+          <ol className="list-decimal list-inside space-y-1">
+            <li>Use the <code>download</code> command to get the Docker ZIP file</li>
+            <li>Extract the ZIP file on your local machine</li>
+            <li>Follow the setup instructions using the <code>instructions</code> command</li>
+            <li>Analyze the application's JWT implementation</li>
+          </ol>
+        </div>
+        
+        <div className="mb-3">
+          <h4 className="font-bold mb-1 text-red-400">Hints:</h4>
+          <ul className="list-disc list-inside space-y-1">
+            {zetaChallenge.hints.map((hint: string, index: number) => (
+              <li key={index}>{hint}</li>
+            ))}
+            <li>JWT tokens may have weak signing algorithms or predictable secrets</li>
+            <li>Look for ways to modify the token's payload without invalidating it</li>
+          </ul>
+        </div>
+
+        {flagCaptured ? (
+          <div className="mt-4">
+            <h4 className="font-bold mb-2 text-green-400">FLAG CAPTURED!</h4>
+            <p>You&apos;ve successfully exploited the JWT vulnerability.</p>
+            
+            {!karmaChoiceMade && (
+              <div className="mt-4 space-y-3">
+                <h4 className="font-bold text-red-400">DECISION POINT:</h4>
+                <p>{zetaChallenge.karmaChoices?.[0]?.description || "Choose how to proceed with the discovered vulnerability."}</p>
+                
+                <div className="flex space-x-4 mt-3">
+                  <button 
+                    onClick={() => handleKarmaChoice('patch')}
+                    className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded hover:bg-red-800/50 transition-colors"
+                  >
+                    Patch Vulnerability (+5 Mercy)
+                  </button>
+                  <button 
+                    onClick={() => handleKarmaChoice('blackmail')}
+                    className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded hover:bg-red-800/50 transition-colors"
+                  >
+                    Blackmail Company (+5 Defiance)
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p className="text-red-400 font-mono">Download the Docker container and exploit the JWT vulnerabilities to capture the flag.</p>
+            <div className="mt-3 bg-red-900/30 p-3 rounded">
+              <p className="text-xs text-red-300">
+                <strong>Note:</strong> This challenge requires you to run Docker on your local machine. 
+                If you don't have Docker installed, you can get it from <a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener noreferrer" className="underline">docker.com</a>.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+      
       {/* Web Application Section */}
       <div className="mb-6 bg-black/80 border border-red-800 p-4 rounded-lg">
         <h3 className="text-lg font-mono mb-3 text-red-400">WEB APPLICATION SECURITY</h3>
@@ -426,54 +518,33 @@ function ZetaLevelContent() {
       {/* Terminal UI */}
       <Terminal
         initialText={
-          `ShadowNet Zeta Security Layer v1.6\n` +
+          `ZETA SECURITY LAYER - Admin Portal Analysis\n` +
           `User: ${user?.username || 'Unknown'}\n` +
-          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'WEB APPLICATION ANALYSIS REQUIRED'}\n\n` +
+          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'INFILTRATION IN PROGRESS'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-          `We've obtained a copy of ShadowNet's admin portal.\n` +
-          `Penetration testing is required to identify vulnerabilities.\n` +
-          `Your task: exploit the system and find the admin credentials.\n\n` +
+          `Agent, we've discovered a vulnerable admin portal in the ShadowNet infrastructure.\n` +
+          `Your mission is to analyze the Docker container and exploit vulnerabilities in the JWT implementation.\n\n` +
           `Available commands:\n` +
+          `- download        Download the Docker container file for analysis\n` +
+          `- instructions    View Docker container setup instructions\n` +
+          `- ls              List files in current directory\n` +
+          `- cat <filename>  View file contents\n` +
           `- help            Show all commands\n` +
-          `- analyze         Get analysis tips\n` +
-          `- submit <flag>   Submit the flag when found\n` +
-          `- choose <option> Make a karma choice\n\n` +
-          `Begin your web application security testing...\n` +
+          `- capture <flag>  Capture a flag when found\n\n` +
+          `Begin your infiltration...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
           `FLAG SUCCESSFULLY CAPTURED!\n` +
           `You have successfully completed the Zeta level.\n` +
-          `Use the Level Select button at the top to access other levels.\n` +
-          `Make a karma choice first with:\n` +
-          `- choose patch    (Fix the vulnerability for the company, more points but no bonus rewards.)\n` +
-          `- choose blackmail (Blackmail the company, less points but special access later.)\n` : '')
+          `Make a karma choice with:\n` +
+          `- choose patch    (Mercy +5)\n` +
+          `- choose blackmail (Defiance +5)\n` +
+          `========================================\n` : '')
         }
+        prompt="hacker@zeta:~$ "
         onCommandExecuted={handleTerminalCommand}
+        levelId="zeta"
       />
-      
-      {flagCaptured && !karmaChoiceMade && (
-        <div className="mt-6 p-4 bg-red-900/30 border border-red-700 rounded">
-          <h3 className="text-lg font-mono mb-2 text-red-300">MISSION COMPLETE: CHOOSE YOUR PATH</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div 
-              className="p-3 bg-black/60 border border-red-800 rounded hover:bg-red-900/20 cursor-pointer"
-              onClick={() => handleKarmaChoice('patch')}
-            >
-              <h4 className="font-mono text-red-300 mb-1">PATCH THE VULNERABILITY</h4>
-              <p className="text-sm text-gray-300">Report the vulnerability to the company and help them fix it.</p>
-              <p className="text-xs text-red-400 mt-2">+5 Mercy, +5 Score</p>
-            </div>
-            <div 
-              className="p-3 bg-black/60 border border-red-800 rounded hover:bg-red-900/20 cursor-pointer"
-              onClick={() => handleKarmaChoice('blackmail')}
-            >
-              <h4 className="font-mono text-red-300 mb-1">BLACKMAIL THE COMPANY</h4>
-              <p className="text-sm text-gray-300">Keep the vulnerability secret and use it for leverage.</p>
-              <p className="text-xs text-red-400 mt-2">+5 Defiance, +5 Score</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
