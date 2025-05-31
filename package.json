@@ -1,0 +1,63 @@
+{
+  "name": "project-control",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "prisma migrate reset --force",
+    "postinstall": "prisma generate",
+    "start:3000": "PORT=3000 npm start",
+    "start:3001": "PORT=3001 npm start",
+    "start:3002": "PORT=3002 npm start",
+    "start:3003": "PORT=3003 npm start",
+    "start:3004": "PORT=3004 npm start",
+    "start:3005": "PORT=3005 npm start",
+    "start:all": "concurrently \"npm run start:3000\" \"npm run start:3001\" \"npm run start:3002\" \"npm run start:3003\" \"npm run start:3004\" \"npm run start:3005\""
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@next/swc-win32-x64-msvc": "^15.1.8",
+    "@prisma/client": "^5.10.0",
+    "@types/uuid": "^9.0.8",
+    "bcryptjs": "^2.4.3",
+    "canvas": "^3.1.0",
+    "gsap": "^3.12.5",
+    "jsonwebtoken": "^9.0.2",
+    "next": "^15.4.0-canary.56",
+    "next-auth": "^4.24.5",
+    "prisma": "^5.10.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-use": "^17.6.0",
+    "socket.io": "^4.7.4",
+    "socket.io-client": "^4.7.4",
+    "uuid": "^9.0.1",
+    "web-audio-api": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.61",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.18",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.1.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

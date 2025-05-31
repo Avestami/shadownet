@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ctfuser:ctfpass@db:5432/shadownet
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-secret-key-here-change-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./public:/app/public
+    networks:
+      - ctf-network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=ctfuser
+      - POSTGRES_PASSWORD=ctfpass
+      - POSTGRES_DB=shadownet
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ctfuser -d shadownet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ctf-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ctf-network:
+    driver: bridge

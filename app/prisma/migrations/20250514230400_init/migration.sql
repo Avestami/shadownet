@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "choices" JSONB NOT NULL DEFAULT '[]',
+ADD COLUMN     "flagsCaptured" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "karma" INTEGER NOT NULL DEFAULT 0;
