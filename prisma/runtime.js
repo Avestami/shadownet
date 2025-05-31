@@ -11,6 +11,9 @@ if (os.platform() === 'linux') {
   console.log('[Prisma Runtime] Running on Linux, checking OpenSSL compatibility...');
   
   try {
+    // Set environment variable for binary targets
+    process.env.PRISMA_CLIENT_ENGINE_TYPE = 'binary';
+    
     // Create library path if it doesn't exist
     const libraryPaths = [
       { path: '/usr/lib', exists: fs.existsSync('/usr/lib') },
@@ -31,112 +34,42 @@ if (os.platform() === 'linux') {
       console.log(`[Prisma Runtime] LD_LIBRARY_PATH set to ${process.env.LD_LIBRARY_PATH}`);
     }
     
-    // Check for OpenSSL libraries and create symlinks if needed
-    const libsslPaths = [
-      '/usr/lib/libssl.so',
-      '/usr/lib/libssl.so.3',
-      '/usr/lib/x86_64-linux-gnu/libssl.so',
-      '/lib/libssl.so'
+    // Simplified OpenSSL compatibility
+    const sources = [
+      { path: '/usr/lib/libssl.so', name: 'libssl.so' },
+      { path: '/usr/lib/libssl.so.3', name: 'libssl.so.3' },
+      { path: '/usr/lib/libcrypto.so', name: 'libcrypto.so' },
+      { path: '/usr/lib/libcrypto.so.3', name: 'libcrypto.so.3' }
     ];
     
-    const libcryptoPaths = [
-      '/usr/lib/libcrypto.so',
-      '/usr/lib/libcrypto.so.3',
-      '/usr/lib/x86_64-linux-gnu/libcrypto.so',
-      '/lib/libcrypto.so'
+    const targets = [
+      { path: '/usr/lib/libssl.so.1.1', name: 'libssl.so.1.1' },
+      { path: '/usr/lib/libcrypto.so.1.1', name: 'libcrypto.so.1.1' }
     ];
     
-    // Try to create symlinks for libssl.so.1.1 if it doesn't exist
-    if (!fs.existsSync('/usr/lib/libssl.so.1.1')) {
-      for (const source of libsslPaths) {
-        if (fs.existsSync(source)) {
-          console.log(`[Prisma Runtime] Creating symlink for libssl.so.1.1 -> ${source}`);
-          try {
-            // Attempt symlink creation in different directories
-            const targets = [
-              '/usr/lib/libssl.so.1.1',
-              '/usr/local/lib/libssl.so.1.1',
-              '/lib/libssl.so.1.1'
-            ];
-            
-            for (const target of targets) {
-              try {
-                const dir = path.dirname(target);
-                if (!fs.existsSync(dir)) {
-                  fs.mkdirSync(dir, { recursive: true });
-                }
-                if (!fs.existsSync(target)) {
-                  fs.symlinkSync(source, target);
-                  console.log(`[Prisma Runtime] Created symlink ${target} -> ${source}`);
-                  break;
-                }
-              } catch (e) {
-                console.warn(`[Prisma Runtime] Could not create symlink ${target}: ${e.message}`);
-                // Try with execSync as a fallback
-                try {
-                  execSync(`ln -sf ${source} ${target}`);
-                  console.log(`[Prisma Runtime] Created symlink with execSync: ${target} -> ${source}`);
-                  break;
-                } catch (e2) {
-                  console.warn(`[Prisma Runtime] Could not create symlink with execSync: ${e2.message}`);
-                }
-              }
+    // Create symlinks if needed
+    for (const target of targets) {
+      if (!fs.existsSync(target.path)) {
+        for (const source of sources) {
+          if (fs.existsSync(source.path) && source.name.startsWith(target.name.split('.')[0])) {
+            try {
+              console.log(`[Prisma Runtime] Creating symlink ${target.path} -> ${source.path}`);
+              execSync(`ln -sf ${source.path} ${target.path}`);
+              console.log(`[Prisma Runtime] Created symlink successfully`);
+              break;
+            } catch (e) {
+              console.warn(`[Prisma Runtime] Could not create symlink: ${e.message}`);
             }
-            
-            break;
-          } catch (e) {
-            console.warn(`[Prisma Runtime] Error creating symlink: ${e.message}`);
           }
         }
+      } else {
+        console.log(`[Prisma Runtime] ${target.path} already exists`);
       }
     }
     
-    // Repeat for libcrypto
-    if (!fs.existsSync('/usr/lib/libcrypto.so.1.1')) {
-      for (const source of libcryptoPaths) {
-        if (fs.existsSync(source)) {
-          console.log(`[Prisma Runtime] Creating symlink for libcrypto.so.1.1 -> ${source}`);
-          try {
-            // Attempt symlink creation in different directories
-            const targets = [
-              '/usr/lib/libcrypto.so.1.1',
-              '/usr/local/lib/libcrypto.so.1.1',
-              '/lib/libcrypto.so.1.1'
-            ];
-            
-            for (const target of targets) {
-              try {
-                const dir = path.dirname(target);
-                if (!fs.existsSync(dir)) {
-                  fs.mkdirSync(dir, { recursive: true });
-                }
-                if (!fs.existsSync(target)) {
-                  fs.symlinkSync(source, target);
-                  console.log(`[Prisma Runtime] Created symlink ${target} -> ${source}`);
-                  break;
-                }
-              } catch (e) {
-                console.warn(`[Prisma Runtime] Could not create symlink ${target}: ${e.message}`);
-                // Try with execSync as a fallback
-                try {
-                  execSync(`ln -sf ${source} ${target}`);
-                  console.log(`[Prisma Runtime] Created symlink with execSync: ${target} -> ${source}`);
-                  break;
-                } catch (e2) {
-                  console.warn(`[Prisma Runtime] Could not create symlink with execSync: ${e2.message}`);
-                }
-              }
-            }
-            
-            break;
-          } catch (e) {
-            console.warn(`[Prisma Runtime] Error creating symlink: ${e.message}`);
-          }
-        }
-      }
-    }
+    console.log('[Prisma Runtime] OpenSSL compatibility setup completed');
   } catch (error) {
-    console.warn(`[Prisma Runtime] Error checking OpenSSL compatibility: ${error.message}`);
+    console.warn(`[Prisma Runtime] Error in OpenSSL compatibility setup: ${error.message}`);
   }
 }
 

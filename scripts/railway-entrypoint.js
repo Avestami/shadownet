@@ -8,7 +8,6 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync, spawn } = require('child_process');
-const { initializeDatabase } = require('./db-init');
 
 console.log('🚂 Railway entrypoint script starting...');
 
@@ -104,6 +103,24 @@ function setupEnvironment() {
   } else {
     console.log(`DATABASE_URL is set to: ${process.env.DATABASE_URL.replace(/:([^:@]+)@/, ':****@')}`);
   }
+  
+  // Ensure PRISMA_CLIENT_ENGINE_TYPE is set to binary
+  process.env.PRISMA_CLIENT_ENGINE_TYPE = 'binary';
+  console.log(`PRISMA_CLIENT_ENGINE_TYPE set to: ${process.env.PRISMA_CLIENT_ENGINE_TYPE}`);
+}
+
+// Initialize the database
+function initializeDatabase() {
+  console.log('Initializing database...');
+  try {
+    // Run our dedicated db-init script
+    execSync('node scripts/db-init.js', { stdio: 'inherit' });
+    console.log('✅ Database initialization completed successfully.');
+    return true;
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    return false;
+  }
 }
 
 // Start the application
@@ -111,7 +128,7 @@ function startApp() {
   console.log('Starting application...');
   
   // Use the npm start command
-  const nextStart = spawn('node', ['-r', './prisma/runtime.js', 'node_modules/.bin/next', 'start'], {
+  const nextStart = spawn('node', ['node_modules/.bin/next', 'start'], {
     stdio: 'inherit',
     env: process.env
   });
@@ -140,17 +157,13 @@ function startApp() {
 setupOpenSSL();
 setupEnvironment();
 
-// Use an async IIFE to allow for await
-(async () => {
-  console.log('Initializing database...');
-  const dbInitialized = await initializeDatabase();
-  
-  if (dbInitialized) {
-    console.log('Database initialization successful, starting application...');
-    startApp();
-  } else {
-    console.error('❌ Database initialization failed. Application may not function correctly.');
-    console.log('Starting application anyway for debugging purposes...');
-    startApp();
-  }
-})(); 
+// Run database initialization and start app
+const dbInitialized = initializeDatabase();
+if (dbInitialized) {
+  console.log('Database initialization successful, starting application...');
+  startApp();
+} else {
+  console.error('❌ Database initialization failed. Application may not function correctly.');
+  console.log('Starting application anyway for debugging purposes...');
+  startApp();
+} 
