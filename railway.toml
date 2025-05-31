@@ -8,4 +8,4 @@ healthcheckPath = "/"
 healthcheckTimeout = 300
 
 [variables]
-NIXPACKS_PKGS = "openssl openssl-1.1.1 openssl-1.1.1-dev" 
+NIXPACKS_PKGS = "openssl" 

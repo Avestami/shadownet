@@ -10,8 +10,15 @@ RUN apk add --no-cache \
     pango-dev \
     libjpeg-turbo-dev \
     giflib-dev \
-    openssl-dev \
-    openssl1.1-compat
+    openssl-dev
+
+# Create a symlink for libssl.so.1.1 if it doesn't exist
+RUN if [ ! -f /lib/libssl.so.1.1 ]; then \
+      if [ -f /usr/lib/libssl.so.3 ]; then \
+        ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1; \
+        ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1; \
+      fi; \
+    fi
 
 # Create app directory
 WORKDIR /app

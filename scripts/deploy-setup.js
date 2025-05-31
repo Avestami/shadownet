@@ -5,6 +5,28 @@ const { execSync } = require('child_process');
 // Ensure the OpenSSL libraries are properly linked
 console.log('Setting up deployment environment...');
 
+// Check for OpenSSL compatibility
+try {
+  console.log('Checking OpenSSL compatibility...');
+  // Try to create symlinks if the libraries don't exist but newer versions do
+  if (process.platform === 'linux') {
+    const libsslPath = '/usr/lib/libssl.so.1.1';
+    const libcryptoPath = '/usr/lib/libcrypto.so.1.1';
+    
+    if (!fs.existsSync(libsslPath) && fs.existsSync('/usr/lib/libssl.so.3')) {
+      console.log('Creating symlink for libssl.so.1.1 -> libssl.so.3');
+      execSync('ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 || true', { stdio: 'inherit' });
+    }
+    
+    if (!fs.existsSync(libcryptoPath) && fs.existsSync('/usr/lib/libcrypto.so.3')) {
+      console.log('Creating symlink for libcrypto.so.1.1 -> libcrypto.so.3');
+      execSync('ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1 || true', { stdio: 'inherit' });
+    }
+  }
+} catch (error) {
+  console.warn('⚠️ Could not create OpenSSL symlinks:', error.message);
+}
+
 // Set environment variables if not already set
 if (!process.env.DATABASE_URL) {
   console.warn('⚠️ DATABASE_URL environment variable not set. Using fallback value.');
