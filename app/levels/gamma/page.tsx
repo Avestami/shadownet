@@ -74,8 +74,16 @@ function GammaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
+    const fullCommand = command.toLowerCase();
+    
+    // Special handling for the capture command
+    if (fullCommand.startsWith('capture')) {
+      // Extract the flag from the full command
+      const parts = fullCommand.split(' ');
+      const flag = parts.slice(1).join(' ').toUpperCase();
+      
+      console.log("Processing flag capture with command:", fullCommand);
+      console.log("Extracted flag:", flag);
       
       if (flag === GAMMA_FLAG) {
         setFlagCaptured(true);
@@ -280,7 +288,7 @@ function GammaLevelContent() {
     
     console.log('GAMMA LEVEL - Karma update:', {
       type: karmaType,
-      oldValue: user.karma?.[karmaType] || 0,
+      oldValue: typeof user.karma === 'object' && user.karma !== null ? user.karma[karmaType] || 0 : 0,
       change: karmaValue,
       newValue: updatedKarma[karmaType]
     });

@@ -108,7 +108,7 @@ export default function LevelLayout({
               {/* Information Panel */}
               <div className={`bg-black/70 border ${colors.border} p-4 rounded-lg`}>
                 <h2 className={`text-xl font-mono border-b ${colors.border} pb-2 mb-4`}>
-                  LEVEL: {levelId.toUpperCase()}
+                  LEVEL: {levelId ? levelId.toUpperCase() : ''}
                 </h2>
                 <div className="prose prose-sm prose-invert prose-blue">
                   <p>{levelTitle}</p>

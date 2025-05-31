@@ -64,9 +64,22 @@ export async function generateGammaChallenge() {
     Buffer.from('Check the shadows for truth').toString('base64'),
     width
   );
+  
+  // Create an image from the QR code buffer
   const qrImage = await createCanvas(width, height);
   const qrCtx = qrImage.getContext('2d');
-  qrCtx.drawImage(qrBuffer, 0, 0, width, height);
+  
+  // Create a temporary file to load the image
+  const tempQrPath = path.join(process.cwd(), 'temp-qr.png');
+  fs.writeFileSync(tempQrPath, qrBuffer);
+  
+  // Load the image from file
+  const { loadImage } = require('canvas');
+  const qrImg = await loadImage(tempQrPath);
+  qrCtx.drawImage(qrImg, 0, 0, width, height);
+  
+  // Clean up temporary file
+  fs.unlinkSync(tempQrPath);
 
   // Blend QR code into blue channel
   const baseImageData = ctx.getImageData(0, 0, width, height);

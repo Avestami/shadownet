@@ -3,8 +3,8 @@ export interface User {
   username: string;
   email: string | null;
   password: string;
-  karma: Record<string, number> | null;
-  choices: string[];  // Array of choice identifiers
+  karma: Record<string, number> | number | null;
+  choices: string | string[];  // Can be a JSON string or an array of choice identifiers
   flagsCaptured: string[];
   score: number;
   createdAt: Date;

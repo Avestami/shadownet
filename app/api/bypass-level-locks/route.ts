@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        levelUnlocks: true
+        unlockedLevels: true
       }
     });
     
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Create level unlock records for all levels
-    const existingLevelIds = user.levelUnlocks.map(unlock => unlock.levelId);
+    const existingLevelIds = user.unlockedLevels.map(unlock => unlock.levelId);
     const missingLevelIds = ALL_LEVEL_IDS.filter(id => !existingLevelIds.includes(id));
     
     if (missingLevelIds.length > 0) {

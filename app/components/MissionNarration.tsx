@@ -46,10 +46,9 @@ export default function MissionNarration({
   return (
     <div className="relative">
       <AudioPlayer 
-        src={audioSrc} 
-        isPlaying={isAudioPlaying} 
-        loop={true} 
-        volume={0.3} 
+        levelId="narration" 
+        autoPlay={isAudioPlaying} 
+        initialVolume={0.3} 
       />
       
       <div className="bg-black bg-opacity-90 border border-cyan-500 rounded-lg p-6 mb-6 shadow-2xl">

@@ -13,7 +13,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   },
   log: [
     {
-      emit: 'event',
+      emit: 'stdout',
       level: 'query',
     },
     {
@@ -29,13 +29,6 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
       level: 'warn',
     },
   ],
-});
-
-// Add logging for all database operations
-prisma.$on('query', (e) => {
-  console.log('[DB] Query:', e.query);
-  console.log('[DB] Params:', e.params);
-  console.log('[DB] Duration:', `${e.duration}ms`);
 });
 
 if (process.env.NODE_ENV !== 'production') {

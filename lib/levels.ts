@@ -119,7 +119,7 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
-          karmaChoices: JSON.stringify(challenge.karmaChoices),
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         },
@@ -128,7 +128,7 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
-          karmaChoices: JSON.stringify(challenge.karmaChoices),
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         }
@@ -177,14 +177,14 @@ export async function processKarmaChoice(
   try {
     const level = await prisma.level.findUnique({
       where: { id: levelId },
-      select: { karmaChoices: true }
+      select: { availableKarmaChoices: true }
     });
 
     if (!level) {
       throw new Error('Level not found');
     }
 
-    const choices: KarmaChoice[] = JSON.parse(level.karmaChoices as string);
+    const choices: KarmaChoice[] = JSON.parse(level.availableKarmaChoices as string);
     const selectedChoice = choices.find(c => c.id === choiceId);
 
     if (!selectedChoice) {

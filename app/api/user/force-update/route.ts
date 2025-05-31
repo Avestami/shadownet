@@ -46,9 +46,11 @@ export async function POST(request: NextRequest) {
     console.log('[FORCE-UPDATE] Current user state:', { 
       id: user.id, 
       score: user.score, 
-      flagsCount: user.flagsCaptured?.length,
+      flagsCount: Array.isArray(user.flagsCaptured) ? user.flagsCaptured.length : 0,
       karma: user.karma,
-      choices: user.choices?.length
+      choicesType: typeof user.choices,
+      choicesCount: Array.isArray(user.choices) ? user.choices.length : 
+                  (typeof user.choices === 'string' ? JSON.parse(user.choices || '[]').length : 0)
     });
     
     // Debug choices handling
@@ -118,7 +120,8 @@ export async function POST(request: NextRequest) {
           currentChoices = JSON.parse(user.choices || '[]');
           console.log('[FORCE-UPDATE] Parsed choices from string:', currentChoices);
         } else if (Array.isArray(user.choices)) {
-          currentChoices = user.choices;
+          // Ensure all elements are strings
+          currentChoices = user.choices.map(item => String(item));
           console.log('[FORCE-UPDATE] Using existing array choices:', currentChoices);
         } else {
           console.log('[FORCE-UPDATE] Choices is neither string nor array, using empty array');
@@ -179,11 +182,25 @@ export async function POST(request: NextRequest) {
       console.log('[FORCE-UPDATE] User updated successfully:', { 
         oldScore: user.score, 
         newScore: updatedUser.score,
-        oldFlags: user.flagsCaptured?.length,
-        newFlags: updatedUser.flagsCaptured?.length,
-        oldChoices: user.choices?.length,
-        newChoices: updatedUser.choices?.length
+        oldFlags: Array.isArray(user.flagsCaptured) ? user.flagsCaptured.length : 0,
+        newFlags: Array.isArray(updatedUser.flagsCaptured) ? updatedUser.flagsCaptured.length : 0,
+        oldChoicesCount: getChoicesCount(user.choices),
+        newChoicesCount: getChoicesCount(updatedUser.choices)
       });
+      
+      // Function to safely get choices count
+      function getChoicesCount(choices: any): number {
+        if (Array.isArray(choices)) {
+          return choices.length;
+        } else if (typeof choices === 'string') {
+          try {
+            return JSON.parse(choices || '[]').length;
+          } catch {
+            return 0;
+          }
+        }
+        return 0;
+      }
       
       // Invalidate the user cache
       invalidateUserCache(userId);
