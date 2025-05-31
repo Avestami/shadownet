@@ -79,8 +79,8 @@ function BetaLevelContent() {
       setIsLoading(false);
       
       // Check if user has already captured this flag
-      if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{SOUND876}')) {
-        console.log('BETA LEVEL - Flag already captured: SHADOWNET{SOUND876}');
+      if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{876}')) {
+        console.log('BETA LEVEL - Flag already captured: SHADOWNET{876}');
         setFlagCaptured(true);
       }
       
@@ -118,7 +118,7 @@ function BetaLevelContent() {
       console.log("Extracted flag:", flag);
       
       // Check for the actual flag
-      if (flag === 'SHADOWNET{SOUND876}') {
+      if (flag === 'SHADOWNET{876}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
         

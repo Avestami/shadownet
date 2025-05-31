@@ -48,7 +48,7 @@ export default function LevelNavigator() {
       // Check for flags captured
       const captured: Record<string, boolean> = {
         alpha: userFlags.includes('SHADOWNET{DTHEREFORTH}'),
-        beta: userFlags.includes('SHADOWNET{SOUND876}'),
+        beta: userFlags.includes('SHADOWNET{876}'),
         gamma: userFlags.includes('SHADOWNET{S3CR3T_D34TH}'),
         delta: userFlags.includes('SHADOWNET{NEUR0LINK}'),
         sigma: userFlags.includes('SHADOWNET{DISTRICT_FREEDOM}'),

@@ -497,7 +497,7 @@ export default function Home() {
       // Define all flags by level
       const levelFlags = {
         'alpha': 'SHADOWNET{DTHEREFORTH}',
-        'beta': 'SHADOWNET{SOUND876}',
+        'beta': 'SHADOWNET{876}',
         'gamma': 'SHADOWNET{FR33W1LL}',
         'delta': 'SHADOWNET{NEUR0LINK}',
         'sigma': 'SHADOWNET{L1B3R8}',
@@ -690,7 +690,7 @@ export default function Home() {
       // Define all flags by level
       const levelFlags = {
         'alpha': 'SHADOWNET{DTHEREFORTH}',
-        'beta': 'SHADOWNET{SOUND876}',
+        'beta': 'SHADOWNET{876}',
         'gamma': 'SHADOWNET{FR33W1LL}',
         'delta': 'SHADOWNET{NEUR0LINK}',
         'sigma': 'SHADOWNET{L1B3R8}',
@@ -935,7 +935,7 @@ export default function Home() {
                     // Define all flags by level
                     const levelFlags = {
                       'alpha': 'SHADOWNET{DTHEREFORTH}',
-                      'beta': 'SHADOWNET{SOUND876}',
+                      'beta': 'SHADOWNET{876}',
                       'gamma': 'SHADOWNET{FR33W1LL}',
                       'delta': 'SHADOWNET{NEUR0LINK}',
                       'sigma': 'SHADOWNET{L1B3R8}',
@@ -1104,7 +1104,7 @@ export default function Home() {
                     // Define all flags by level
                     const levelFlags = {
                       'alpha': 'SHADOWNET{DTHEREFORTH}',
-                      'beta': 'SHADOWNET{SOUND876}',
+                      'beta': 'SHADOWNET{876}',
                       'gamma': 'SHADOWNET{FR33W1LL}',
                       'delta': 'SHADOWNET{NEUR0LINK}',
                       'sigma': 'SHADOWNET{L1B3R8}',

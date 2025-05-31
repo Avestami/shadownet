@@ -451,7 +451,7 @@ Alpha Level: Echoed Transmission
   - Completed: ${user?.flagsCaptured?.includes('SHADOWNET{DTHEREFORTH}') ? 'YES' : 'NO'}
 
 Beta Level: Signal Dissonance
-  - Completed: ${user?.flagsCaptured?.includes('SHADOWNET{SOUND876}') ? 'YES' : 'NO'}
+  - Completed: ${user?.flagsCaptured?.includes('SHADOWNET{876}') ? 'YES' : 'NO'}
 
 Gamma Level: Spectral Overlay
   - Completed: ${user?.flagsCaptured?.includes('SHADOWNET{S3CR3T_D34TH}') ? 'YES' : 'NO'}
