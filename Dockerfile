@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 
-# Install dependencies required for canvas
+# Install dependencies required for canvas and Prisma
 RUN apk add --no-cache \
     python3 \
     make \
@@ -9,7 +9,9 @@ RUN apk add --no-cache \
     cairo-dev \
     pango-dev \
     libjpeg-turbo-dev \
-    giflib-dev
+    giflib-dev \
+    openssl-dev \
+    openssl1.1-compat
 
 # Create app directory
 WORKDIR /app
@@ -17,6 +19,11 @@ WORKDIR /app
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps --ignore-scripts
+
+# Create a placeholder .env file with DATABASE_URL for Prisma
+RUN echo "DATABASE_URL=\"postgresql://postgres:postgres@database:5432/project-control?schema=public\"" > .env
+RUN echo "NEXTAUTH_URL=\"http://localhost:3000\"" >> .env
+RUN echo "NEXTAUTH_SECRET=\"supersecretkey12345\"" >> .env
 
 # Copy application code
 COPY . .
@@ -40,5 +47,19 @@ ENV HOSTNAME "0.0.0.0"
 # Expose port
 EXPOSE 3000
 
+# Create an entrypoint script to handle database connection and startup
+RUN echo '#!/bin/sh' > /app/entrypoint.sh
+RUN echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/entrypoint.sh
+RUN echo '  echo "DATABASE_URL=$DATABASE_URL" > .env' >> /app/entrypoint.sh
+RUN echo 'fi' >> /app/entrypoint.sh
+RUN echo 'if [ -n "$NEXTAUTH_URL" ]; then' >> /app/entrypoint.sh
+RUN echo '  echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env' >> /app/entrypoint.sh
+RUN echo 'fi' >> /app/entrypoint.sh
+RUN echo 'if [ -n "$NEXTAUTH_SECRET" ]; then' >> /app/entrypoint.sh
+RUN echo '  echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env' >> /app/entrypoint.sh
+RUN echo 'fi' >> /app/entrypoint.sh
+RUN echo 'exec npm start' >> /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Start the application
-CMD ["npm", "start"]
+CMD ["/app/entrypoint.sh"]

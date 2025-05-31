@@ -1,67 +1,80 @@
-# Deployment Guide for Vercel
+# Deployment Guide
+
+This document outlines how to deploy the application to Railway.
 
 ## Prerequisites
 
-1. A PostgreSQL database (you can use Vercel Postgres, Supabase, or any other provider)
-2. A Vercel account
+- A [Railway](https://railway.app/) account
+- [Railway CLI](https://docs.railway.app/develop/cli) installed (optional)
 
 ## Environment Variables
 
-Set these environment variables in your Vercel project settings:
+The following environment variables are required for deployment:
 
-```bash
-# Database
-DATABASE_URL="postgresql://username:password@host:port/database"
-
-# NextAuth
-NEXTAUTH_SECRET="your-secret-key-here-generate-a-random-string"
-NEXTAUTH_URL="https://your-app.vercel.app"
-
-# Optional
-NODE_ENV="production"
-```
+- `DATABASE_URL`: PostgreSQL connection string
+- `NEXTAUTH_URL`: The public URL of your deployed application
+- `NEXTAUTH_SECRET`: A secret for NextAuth session encryption
 
 ## Deployment Steps
 
-1. **Push your code to GitHub**
-   ```bash
-   git add .
-   git commit -m "Fix Vercel deployment"
-   git push origin main
-   ```
+### 1. Deploy with Railway Dashboard
 
-2. **Import project in Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
+1. Fork or clone this repository to your GitHub account
+2. Connect your GitHub account to Railway
+3. Create a new project in Railway from your GitHub repository
+4. Add a PostgreSQL database service to your project
+5. Configure the required environment variables
+6. Deploy the application
 
-3. **Configure Environment Variables**
-   - In Vercel dashboard, go to your project settings
-   - Add all the environment variables listed above
+### 2. Deploy with Railway CLI
 
-4. **Deploy**
-   - Vercel will automatically deploy when you push to main
-   - The build process now includes `prisma generate`
+```bash
+# Login to Railway
+railway login
 
-## Database Setup
+# Link to your Railway project
+railway link
 
-If using Vercel Postgres:
+# Add PostgreSQL service
+railway add
 
-1. Go to your Vercel project dashboard
-2. Click on "Storage" tab
-3. Create a new Postgres database
-4. Copy the connection string to `DATABASE_URL`
+# Set environment variables
+railway variables set DATABASE_URL=...
+railway variables set NEXTAUTH_URL=...
+railway variables set NEXTAUTH_SECRET=...
+
+# Deploy
+railway up
+```
 
 ## Troubleshooting
 
-- If you get Prisma errors, make sure `DATABASE_URL` is correctly set
-- If NextAuth errors occur, verify `NEXTAUTH_SECRET` and `NEXTAUTH_URL`
-- Check Vercel function logs for detailed error messages
+### OpenSSL Issues
 
-## Build Process
+If you encounter OpenSSL-related errors during deployment, the application includes configuration files to resolve these issues:
 
-The updated build process:
-1. `prisma generate` - Generates Prisma client
-2. `next build` - Builds the Next.js application
+- `railway.toml`: Configures the Railway deployment
+- `nixpacks.toml`: Specifies system dependencies including OpenSSL
+- `scripts/deploy-setup.js`: Handles Prisma client generation
 
-This ensures Prisma client is available during the build on Vercel. 
+### Prisma Client Generation
+
+The application is configured to generate the Prisma client during the build process. If you need to manually generate the client:
+
+```bash
+npm run prisma:generate
+```
+
+### Database Migration
+
+To run database migrations on Railway:
+
+```bash
+railway run npx prisma migrate deploy
+```
+
+## Additional Resources
+
+- [Railway Documentation](https://docs.railway.app/)
+- [Prisma Deployment Guide](https://www.prisma.io/docs/guides/deployment)
+- [Next.js Deployment](https://nextjs.org/docs/deployment) 
