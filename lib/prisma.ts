@@ -8,28 +8,13 @@ export const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Configuration for the Prisma client
-const prismaClientOptions = {
-  log: [
-    {
-      emit: 'stdout',
-      level: 'error',
-    },
-    {
-      emit: 'stdout',
-      level: 'warn',
-    },
-    ...(process.env.NODE_ENV === 'development' 
-      ? [{ emit: 'stdout', level: 'info' }] 
-      : []),
-  ],
-  // Use 'pretty' as a specific value of the errorFormat enum
-  errorFormat: 'pretty' as const,
-};
-
 // Function to create a new Prisma client with error handling
 function createPrismaClient() {
-  const client = new PrismaClient(prismaClientOptions);
+  const client = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' 
+      ? ['query', 'error', 'warn'] 
+      : ['error', 'warn'],
+  });
 
   // Add global error handler
   client.$use(async (params, next) => {
@@ -42,23 +27,11 @@ function createPrismaClient() {
       // Check for connection errors
       if (error.code === 'P1001' || error.code === 'P1002') {
         console.error('[Prisma] Database connection error. Attempting reconnect...');
-        
-        // If we're in a long-running process like a server, we could try to reconnect
-        // But in a serverless function, it's better to let the request fail and retry
       }
       
       throw error;
     }
   });
-
-  // Log queries in development
-  if (process.env.NODE_ENV === 'development') {
-    client.$on('query' as any, (e: any) => {
-      console.log('[DB] Query:', e.query);
-      console.log('[DB] Params:', e.params);
-      console.log('[DB] Duration:', `${e.duration}ms`);
-    });
-  }
 
   return client;
 }
