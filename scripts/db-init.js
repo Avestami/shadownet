@@ -3,13 +3,9 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Create Prisma client with more verbose error handling
+// Create Prisma client with simplified options
 const prisma = new PrismaClient({
-  log: [
-    { emit: 'stdout', level: 'error' },
-    { emit: 'stdout', level: 'warn' },
-  ],
-  errorFormat: 'pretty',
+  log: ['error', 'warn']
 });
 
 /**
