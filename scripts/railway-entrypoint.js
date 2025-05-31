@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync, spawn } = require('child_process');
+const { initializeDatabase } = require('./db-init');
 
 console.log('🚂 Railway entrypoint script starting...');
 
@@ -95,9 +96,13 @@ function setupEnvironment() {
     console.log(`LD_LIBRARY_PATH set to ${process.env.LD_LIBRARY_PATH}`);
   }
   
-  // Make sure DATABASE_URL is set
+  // Check DATABASE_URL
   if (!process.env.DATABASE_URL) {
-    console.warn('⚠️ DATABASE_URL environment variable not set. App may not work correctly.');
+    console.error('❌ DATABASE_URL environment variable not set. Application will not work.');
+    console.log('Please set the DATABASE_URL environment variable in Railway dashboard.');
+    process.exit(1);
+  } else {
+    console.log(`DATABASE_URL is set to: ${process.env.DATABASE_URL.replace(/:([^:@]+)@/, ':****@')}`);
   }
 }
 
@@ -134,4 +139,18 @@ function startApp() {
 // Run setup steps
 setupOpenSSL();
 setupEnvironment();
-startApp(); 
+
+// Use an async IIFE to allow for await
+(async () => {
+  console.log('Initializing database...');
+  const dbInitialized = await initializeDatabase();
+  
+  if (dbInitialized) {
+    console.log('Database initialization successful, starting application...');
+    startApp();
+  } else {
+    console.error('❌ Database initialization failed. Application may not function correctly.');
+    console.log('Starting application anyway for debugging purposes...');
+    startApp();
+  }
+})(); 

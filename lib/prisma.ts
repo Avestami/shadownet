@@ -8,8 +8,8 @@ export const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Create a new PrismaClient instance or reuse existing one
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+// Configuration for the Prisma client
+const prismaClientOptions = {
   log: [
     {
       emit: 'stdout',
@@ -17,28 +17,71 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
     },
     {
       emit: 'stdout',
-      level: 'info',
-    },
-    {
-      emit: 'stdout',
       level: 'warn',
     },
+    ...(process.env.NODE_ENV === 'development' 
+      ? [{ emit: 'stdout', level: 'info' }] 
+      : []),
   ],
-});
+  errorFormat: 'pretty',
+  // Maximum number of connections in the connection pool
+  // Higher in production, lower in development
+  connectionLimit: process.env.NODE_ENV === 'production' ? 20 : 5,
+};
 
-// Only log queries in development
-if (process.env.NODE_ENV === 'development') {
-  // @ts-ignore - Prisma has issues with the type definitions for event listeners
-  prisma.$on('query' as any, (e: any) => {
-    console.log('[DB] Query:', e.query);
-    console.log('[DB] Params:', e.params);
-    console.log('[DB] Duration:', `${e.duration}ms`);
+// Function to create a new Prisma client with error handling
+function createPrismaClient() {
+  const client = new PrismaClient(prismaClientOptions);
+
+  // Add global error handler
+  client.$use(async (params, next) => {
+    try {
+      return await next(params);
+    } catch (error: any) {
+      // Enhance error with more context
+      console.error(`[Prisma Error] ${params.model}.${params.action} failed:`, error);
+      
+      // Check for connection errors
+      if (error.code === 'P1001' || error.code === 'P1002') {
+        console.error('[Prisma] Database connection error. Attempting reconnect...');
+        
+        // If we're in a long-running process like a server, we could try to reconnect
+        // But in a serverless function, it's better to let the request fail and retry
+      }
+      
+      throw error;
+    }
   });
+
+  // Log queries in development
+  if (process.env.NODE_ENV === 'development') {
+    client.$on('query' as any, (e: any) => {
+      console.log('[DB] Query:', e.query);
+      console.log('[DB] Params:', e.params);
+      console.log('[DB] Duration:', `${e.duration}ms`);
+    });
+  }
+
+  return client;
 }
+
+// Create a new PrismaClient instance or reuse existing one
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 // Store the instance in the global object to prevent multiple instances in development
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
+}
+
+// Connection test function
+export async function testConnection() {
+  try {
+    const result = await prisma.$queryRaw`SELECT 1 as test`;
+    return { success: true, result };
+  } catch (error: any) {
+    console.error('[Prisma] Connection test failed:', error.message);
+    return { success: false, error: error.message };
+  }
 }
 
 export default prisma;
