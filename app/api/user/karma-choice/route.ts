@@ -126,35 +126,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-<<<<<<< HEAD
-} 
-      
-      // Invalidate the user cache to ensure fresh data
-      invalidateUserCache(userId);
-      console.log('[API] User cache invalidated');
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Karma choice recorded',
-        karma: updatedUser.karma,
-        score: updatedUser.score,
-        karmaUpdated: {
-          type: karmaType,
-          value: karmaValue
-        }
-      });
-    } catch (dbError) {
-      console.error('[API] Database update error:', dbError);
-      throw dbError;
-    }
-    
-  } catch (error) {
-    console.error('[API] Error recording karma choice:', error);
-    return NextResponse.json(
-      { error: 'Failed to record karma choice', details: String(error) },
-      { status: 500 }
-    );
-  }
-=======
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 } 

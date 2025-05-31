@@ -60,6 +60,99 @@ function ZetaLevelContent() {
   };
   
   // Function to handle terminal commands
+  const handleTerminalCommand = (command: string) => {
+    if (command.toLowerCase().startsWith('submit') || command.toLowerCase().startsWith('capture')) {
+      const parts = command.split(' ');
+      if (parts.length > 1) {
+        const flag = parts.slice(1).join(' ');
+        
+        if (flag === 'SHADOWNET{TOKEN_FORGED}') {
+          // Play capture sound
+          if (audioPlayerRef.current) {
+            audioPlayerRef.current.playCapture();
+          }
+          
+          // Trigger glitch effect for visual feedback
+          console.log('ZETA DEBUG - Flag captured, triggering glitch effect');
+          triggerGlitch();
+          
+          setFlagCaptured(true);
+          
+          // Update user data
+          if (user) {
+            const updatedFlags = [...(user.flagsCaptured || [])];
+            if (!updatedFlags.includes(flag)) {
+              updatedFlags.push(flag);
+              
+              // Calculate score increase
+              const scoreIncrease = 100;
+              
+              // Update user data with score increase
+              const updatedUser = {
+                ...user,
+                flagsCaptured: updatedFlags,
+                score: (user.score || 0) + scoreIncrease
+              };
+              
+              // Update local state immediately for responsive UI
+              setUser(updatedUser);
+              
+              // Display success message with score information
+              showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Use "mission" to see karma choices.`, 6000);
+              
+              // Save to server with better error handling
+              fetch('/api/user/force-update', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                  flagId: flag,
+                  scoreChange: scoreIncrease
+                })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to save flag capture');
+                }
+                return response.json();
+              })
+              .then(data => {
+                console.log('Flag capture saved successfully:', data);
+                // Add a message specifically prompting the user to make a karma choice
+                showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
+                
+                // Refresh user data to ensure UI is updated
+                if (refreshUser) {
+                  setTimeout(() => {
+                    refreshUser().then(updatedUser => {
+                      console.log('User data auto-refreshed after flag capture:', updatedUser);
+                    });
+                  }, 500);
+                }
+              })
+              .catch(err => {
+                console.error('Error saving flag:', err);
+                showStatusMessage('Warning: Progress may not have saved properly', 3000);
+              });
+            } else {
+              // Flag was already captured
+              showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
+            }
+          }
+          
+          return 'Flag captured successfully! Choose your next action.';
+        } else {
+          return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
+        }
+      }
+    } else if (command.toLowerCase() === 'choose') {
+      if (flagCaptured && !karmaChoiceMade) {
+        const choiceType = command.split(' ')[1]?.toLowerCase();
+        if (choiceType === 'patch' || choiceType === 'blackmail') {
+          handleKarmaChoice(choiceType);
+        } else {
+          showStatusMessage('Invalid choice. Use "choose patch" or "choose blackmail".', 3000);
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
@@ -168,90 +261,13 @@ function ZetaLevelContent() {
           showStatusMessage('Please specify a choice: "choose patch" or "choose blackmail".', 3000);
         }
       } else if (!flagCaptured) {
-        return 'You need to capture the flag first before making a karma choice.';
+        showStatusMessage('You must capture the flag before making a karma choice.', 3000);
       } else if (karmaChoiceMade) {
-        return 'You have already made your karma choice for this level.';
-      }
-    } else if (fullCommand === 'mission') {
-      if (flagCaptured) {
-        if (karmaChoiceMade) {
-          return 'You have completed this mission and made your karma choice. Proceed to the next level.';
-        } else {
-          return `Mission complete! Now make your karma choice:
-- choose patch    (Fix the vulnerability for the company, more points but no bonus rewards.)
-- choose blackmail (Blackmail the company, less points but special access later.)`;
-        }
-      } else {
-        return 'Current mission: Exploit vulnerabilities in the admin portal to find the flag.';
-      }
-    } else if (fullCommand.startsWith('submit')) {
-      const parts = command.split(' ');
-      if (parts.length > 1) {
-        const flag = parts[1].toUpperCase();
-        if (flag === 'SHADOWNET{TOKEN_FORGED}') {
-          // Handle successful flag submission same as capture
-          if (audioPlayerRef.current) {
-            audioPlayerRef.current.playCapture();
-          }
-          
-          triggerGlitch();
-          setFlagCaptured(true);
-          
-          // Update user data with score
-          if (user) {
-            const updatedFlags = [...(user.flagsCaptured || [])];
-            if (!updatedFlags.includes(flag)) {
-              updatedFlags.push(flag);
-              const scoreIncrease = 100;
-              
-              // Update local state
-              setUser({
-                ...user,
-                flagsCaptured: updatedFlags,
-                score: (user.score || 0) + scoreIncrease
-              });
-              
-              showStatusMessage(`FLAG CAPTURED! Score +${scoreIncrease}. Type "mission" for karma choices.`, 6000);
-              
-              // Save to server
-              fetch('/api/user/force-update', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                  flagId: flag,
-                  scoreChange: scoreIncrease
-                })
-              })
-              .then(response => response.json())
-              .then(data => {
-                showStatusMessage(`Your score is now ${data.score}. Type "mission" to view karma choices.`, 5000);
-                
-                // Refresh user data
-                if (refreshUser) {
-                  setTimeout(() => refreshUser(), 500);
-                }
-              })
-              .catch(err => {
-                console.error('Error saving flag:', err);
-                showStatusMessage('Warning: Progress may not have saved properly', 3000);
-              });
-            } else {
-              showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
-            }
-          }
-          
-          return 'Flag captured successfully! Choose your next action.';
-        } else {
-          return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';
-        }
-      } else {
-        return 'Usage: submit <flag>';
+        showStatusMessage('You have already made your karma choice. Use the Level Select button at the top or type "next" to continue.', 4000);
       }
     }
     
-    return undefined; // Let the Terminal component handle other commands
+    return null;
   };
   
   // Function to handle karma choices
@@ -422,6 +438,9 @@ function ZetaLevelContent() {
           </div>
         </div>
       </div>
+    </div>
+
+  );}
       
       {/* Terminal UI */}
       <Terminal
