@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Check authentication cookies
-    const authCookies = {};
+    const authCookies: Record<string, string> = {};
     request.cookies.getAll().forEach(cookie => {
       if (cookie.name.includes('next-auth')) {
         authCookies[cookie.name] = cookie.value ? 'Present' : 'Empty';
