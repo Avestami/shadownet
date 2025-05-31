@@ -26,7 +26,7 @@ interface MissionData {
 
 interface TerminalProps {
   initialText?: string;
-  prompt?: string; q
+  prompt?: string;
   commands?: Record<string, (args: string[]) => string | Promise<string>>;
   typingEffect?: boolean;
   onCommandExecuted?: (command: string, output: string) => void;
@@ -286,7 +286,7 @@ We suspect it contains a trigger phrase used to activate early sleeper protocols
 
 Do not assume modern tools will work. This is from an era before sophistication — when obfuscation was born of simplicity.
 
-They didn’t encrypt it.  
+They didn't encrypt it.  
 They shifted it.
 
 — INITIATING SHADOWNET PROTOCOL 001 —
@@ -315,7 +315,7 @@ And finally a cipher named like a vow.`;
         return str
               ;
       }else if (file === 'README-theta.txt') {
-        return "MISSION: Binary Reflection\nAgent,\nYou’ve received a replay of your most recent terminal session — but it’s not entirely yours.\nOne command was injected by a mimic AI named AV3ST4. Its goal? Unknown. Its method? Reflection.\nStudy the session log carefully. Identify the echo that doesn’t belong. Remove the anomaly and stabilize the system.\nThe true memory is encoded beneath the interference.\nFlag format: SHADOWNET{...}";
+        return "MISSION: Binary Reflection\nAgent,\nYou've received a replay of your most recent terminal session — but it's not entirely yours.\nOne command was injected by a mimic AI named AV3ST4. Its goal? Unknown. Its method? Reflection.\nStudy the session log carefully. Identify the echo that doesn't belong. Remove the anomaly and stabilize the system.\nThe true memory is encoded beneath the interference.\nFlag format: SHADOWNET{...}";
       }else if (file === 'hint.txt') {
         return `Echoes mimic your voice — but not your intention.
 
@@ -1030,18 +1030,18 @@ QnV0IHdoZXJlIGRpZCBteSBjb21tYW5kIGNvbWUgaW4/Cg==
       
       // Get current level if available
       const levelMatch = encryptedContent.match(/infiltrated the (\w+) level/i);
-      let levelId = levelMatch ? levelMatch[1].toLowerCase() : '';
+      let currentLevelId = levelMatch ? levelMatch[1].toLowerCase() : '';
       
       // If level ID not found in encrypted content, try to extract from URL
-      if (!levelId) {
+      if (!currentLevelId) {
         const pathSegments = window.location.pathname.split('/');
         const urlLevelId = pathSegments[pathSegments.length - 1];
         if (urlLevelId && ['alpha', 'beta', 'gamma', 'delta', 'omega'].includes(urlLevelId)) {
-          levelId = urlLevelId;
+          currentLevelId = urlLevelId;
         }
       }
       
-      console.log("Current level ID for analyze command:", levelId, "target:", target); // Debug info
+      console.log("Current level ID for analyze command:", currentLevelId, "target:", target); // Debug info
       
       // Handle all level data files explicitly
       // This allows analyzing any level's data file from any level

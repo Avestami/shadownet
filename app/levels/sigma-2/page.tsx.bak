@@ -13,7 +13,7 @@ interface KarmaObject {
   [key: string]: number;
 }
 
-function ThetaLevelContent() {
+function Sigma2LevelContent() {
   const { user, setUser, refreshUser } = useUser();
   const [flagCaptured, setFlagCaptured] = useState(false);
   const [karmaChoiceMade, setKarmaChoiceMade] = useState(false);
@@ -22,25 +22,25 @@ function ThetaLevelContent() {
   const audioPlayerRef = useRef<any>(null);
   
   // Get challenge data
-  const thetaChallenge = LEVEL_CHALLENGES.theta;
+  const sigma2Challenge = LEVEL_CHALLENGES['sigma-2'];
   
   // Effect to check if user has already captured the flag
   useEffect(() => {
-    console.log('THETA LEVEL - Checking user state:', user);
-    if (user && user.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{REFLECTIONS}')) {
+    console.log('SIGMA-2 LEVEL - Checking user state:', user);
+    if (user && user.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{FIRST_WORSHIP}')) {
       setFlagCaptured(true);
     }
     
     // Check if karma choice was already made for this level
     if (user?.choices && Array.isArray(user.choices)) {
-      console.log('THETA LEVEL - User choices on mount:', user.choices);
+      console.log('SIGMA-2 LEVEL - User choices on mount:', user.choices);
       
-      const thetaChoices = user.choices.filter(choice => 
-        choice.startsWith('theta_')
+      const sigma2Choices = user.choices.filter(choice => 
+        choice.startsWith('sigma2_')
       );
       
-      if (thetaChoices.length > 0) {
-        console.log('THETA LEVEL - Theta choices already made:', thetaChoices);
+      if (sigma2Choices.length > 0) {
+        console.log('SIGMA-2 LEVEL - Sigma-2 choices already made:', sigma2Choices);
         setKarmaChoiceMade(true);
       }
     }
@@ -48,7 +48,7 @@ function ThetaLevelContent() {
   
   // Function to trigger glitch effect
   const triggerGlitch = () => {
-    console.log('THETA DEBUG - Triggering glitch effect');
+    console.log('SIGMA-2 DEBUG - Triggering glitch effect');
     setGlitchEffect(true);
     setTimeout(() => setGlitchEffect(false), 1500);
   };
@@ -66,14 +66,14 @@ function ThetaLevelContent() {
       if (parts.length > 1) {
         const flag = parts.slice(1).join(' ');
         
-        if (flag === 'SHADOWNET{REFLECTIONS}') {
+        if (flag === 'SHADOWNET{FIRST_WORSHIP}') {
           // Play capture sound
           if (audioPlayerRef.current) {
             audioPlayerRef.current.playCapture();
           }
           
           // Trigger glitch effect for visual feedback
-          console.log('THETA DEBUG - Flag captured, triggering glitch effect');
+          console.log('SIGMA-2 DEBUG - Flag captured, triggering glitch effect');
           triggerGlitch();
           
           setFlagCaptured(true);
@@ -143,16 +143,16 @@ function ThetaLevelContent() {
           
           return 'Flag captured successfully! Choose your next action.';
         } else {
-          return 'Incorrect flag. Keep analyzing the firmware image.';
+          return 'Incorrect flag. Keep analyzing the cryptographic artifacts.';
         }
       }
     } else if (command.toLowerCase() === 'choose') {
       if (flagCaptured && !karmaChoiceMade) {
         const choiceType = command.split(' ')[1]?.toLowerCase();
-        if (choiceType === 'secure' || choiceType === 'exploit') {
+        if (choiceType === 'join' || choiceType === 'analyze') {
           handleKarmaChoice(choiceType);
         } else {
-          showStatusMessage('Invalid choice. Use "choose secure" or "choose exploit".', 3000);
+          showStatusMessage('Invalid choice. Use "choose join" or "choose analyze".', 3000);
         }
       } else if (!flagCaptured) {
         showStatusMessage('You must capture the flag before making a karma choice.', 3000);
@@ -160,31 +160,32 @@ function ThetaLevelContent() {
         showStatusMessage('You have already made your karma choice. Use the Level Select button at the top or type "next" to continue.', 4000);
       }
     }
+    
     return null;
   };
   
   // Function to handle karma choices
-  const handleKarmaChoice = (choiceType: 'secure' | 'exploit') => {
-    console.log('THETA LEVEL - handleKarmaChoice called with choice:', choiceType);
-    console.log('THETA LEVEL - Current user state:', user);
+  const handleKarmaChoice = (choiceType: 'join' | 'analyze') => {
+    console.log('SIGMA-2 LEVEL - handleKarmaChoice called with choice:', choiceType);
+    console.log('SIGMA-2 LEVEL - Current user state:', user);
     
     if (!user) {
-      console.log('THETA LEVEL - No user data available');
+      console.log('SIGMA-2 LEVEL - No user data available');
       return;
     }
     
-    // Check if user has already made a theta karma choice
-    const choiceId = `theta_${choiceType}`;
-    console.log('THETA LEVEL - Choice ID:', choiceId);
+    // Check if user has already made a sigma-2 karma choice
+    const choiceId = `sigma2_${choiceType}`;
+    console.log('SIGMA-2 LEVEL - Choice ID:', choiceId);
     
-    // Check if user has already made any theta karma choice
+    // Check if user has already made any sigma-2 karma choice
     if (user.choices && Array.isArray(user.choices)) {
-      const thetaChoices = user.choices.filter(choice => 
-        choice.startsWith('theta_')
+      const sigma2Choices = user.choices.filter(choice => 
+        choice.startsWith('sigma2_')
       );
       
-      if (thetaChoices.length > 0) {
-        console.log('THETA LEVEL - User already made a theta choice:', thetaChoices);
+      if (sigma2Choices.length > 0) {
+        console.log('SIGMA-2 LEVEL - User already made a sigma-2 choice:', sigma2Choices);
         showStatusMessage('You have already made a karma choice for this level.', 3000);
         setKarmaChoiceMade(true);
         return;
@@ -194,7 +195,7 @@ function ThetaLevelContent() {
     setKarmaChoiceMade(true);
     
     // Update user karma and score
-    const karmaType = choiceType === 'secure' ? 'loyalty' : 'defiance';
+    const karmaType = choiceType === 'join' ? 'integration' : 'curiosity';
     const karmaValue = 5;
     
     // Create a copy of user.karma if it exists, or initialize a new object
@@ -236,7 +237,7 @@ function ThetaLevelContent() {
         choices: currentChoices
       };
       
-      console.log('THETA LEVEL - Updated user with choice:', updatedUser);
+      console.log('SIGMA-2 LEVEL - Updated user with choice:', updatedUser);
       
       // Update local state immediately for responsive UI
       setUser(updatedUser as any);
@@ -248,7 +249,7 @@ function ThetaLevelContent() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          flagId: `flag_theta`,
+          flagId: `flag_sigma2`,
           scoreChange: scoreForKarmaChoice,
           karmaType: karmaType,
           karmaValue: karmaValue,
@@ -256,28 +257,28 @@ function ThetaLevelContent() {
         })
       })
       .then(response => {
-        console.log('THETA LEVEL - API response status:', response.status);
+        console.log('SIGMA-2 LEVEL - API response status:', response.status);
         if (!response.ok) {
           throw new Error('Failed to save karma choice');
         }
         return response.json();
       })
       .then(data => {
-        console.log('THETA LEVEL - Karma choice saved successfully:', data);
+        console.log('SIGMA-2 LEVEL - Karma choice saved successfully:', data);
         showStatusMessage(`Karma choice confirmed: ${karmaType} +${karmaValue}, Total Score: ${data.score}`, 5000);
         
         // Refresh user data to ensure UI is updated
         if (refreshUser) {
           setTimeout(() => {
-            console.log('THETA LEVEL - Refreshing user data after karma choice');
+            console.log('SIGMA-2 LEVEL - Refreshing user data after karma choice');
             refreshUser().then(updatedUser => {
-              console.log('THETA LEVEL - User data auto-refreshed after karma choice:', updatedUser);
+              console.log('SIGMA-2 LEVEL - User data auto-refreshed after karma choice:', updatedUser);
             });
           }, 500);
         }
       })
       .catch(err => {
-        console.error('THETA LEVEL - Error saving karma choice:', err);
+        console.error('SIGMA-2 LEVEL - Error saving karma choice:', err);
         showStatusMessage('Warning: Karma update may not have saved properly', 3000);
       });
     } catch (error) {
@@ -287,10 +288,10 @@ function ThetaLevelContent() {
   
   return (
     <div className={`relative ${glitchEffect ? 'animate-glitch' : ''}`}>
-      <GlobalAudioPlayer ref={audioPlayerRef} levelId="theta" initialVolume={0.5} autoPlay={false} />
+      <GlobalAudioPlayer ref={audioPlayerRef} levelId="sigma-2" initialVolume={0.5} autoPlay={false} />
       
       {statusMessage && (
-        <div className="mb-4 p-3 bg-orange-900/30 border border-orange-700 rounded text-orange-300 text-sm font-mono">
+        <div className="mb-4 p-3 bg-purple-900/30 border border-purple-700 rounded text-purple-300 text-sm font-mono">
           <p className="flex items-center">
             <span className="mr-2">✓</span>
             {statusMessage}
@@ -303,30 +304,49 @@ function ThetaLevelContent() {
         {user && <KarmaDisplay karma={user.karma} score={user.score || 0} />}
       </div>
       
-      {/* Firmware Analysis Section */}
-      <div className="mb-6 bg-black/80 border border-orange-800 p-4 rounded-lg">
-        <h3 className="text-lg font-mono mb-3 text-orange-400">FIRMWARE ANALYSIS</h3>
+      {/* Cryptographic Analysis Section */}
+      <div className="mb-6 bg-black/80 border border-purple-800 p-4 rounded-lg">
+        <h3 className="text-lg font-mono mb-3 text-purple-400">CRYPTOGRAPHIC ANALYSIS</h3>
         <div className="flex flex-col space-y-3">
-          <div className="bg-black p-2 rounded border border-orange-900">
-            <div className="w-full p-3 bg-black text-orange-300 font-mono text-sm">
-              <p>Firmware: shadow_router_v2.3.bin (8.2 MB)</p>
-              <p>Device: Network Security Appliance</p>
-              <p>Architecture: ARM Cortex-A9</p>
-              <p>Build timestamp: 2023-08-22 17:19:03 UTC</p>
+          <div className="bg-black p-2 rounded border border-purple-900">
+            <div className="w-full p-3 bg-black text-purple-300 font-mono text-sm overflow-auto">
+              <p>The CivicShield encryption uses a system built on the multiplication of two large, secret prime numbers.</p>
+              <p>Each message is locked with an open key, but only those with the secret divisor can unlock it.</p>
+              <p>Their mistake? The primes were chosen too close together. Fast. Predictable.</p>
+              <p>Once you break the product, the rest falls like glass.</p>
+            </div>
+          </div>
+              <p>Encryption algorithm: Custom implementation of AES-256</p>
+              <p>Ciphertext file: encrypted_comms.bin (1.8 MB)</p>
+              <p>Key exchange method: Modified Diffie-Hellman</p>
+              <p>Key generation parameters:</p>
+              <pre className="mt-2 text-xs overflow-x-auto">
+{`p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1
+g = 2
+A = 0x61A5...3D27 (public key)
+IV = 0xF3DC7...8A92E (initialization vector)`}
+              </pre>
             </div>
           </div>
           <div className="flex justify-between items-center">
             <a 
-              href="/challenges/theta/shadow_router_v2.3.bin" 
+              href="/challenges/sigma-2/encrypted_comms.bin" 
               download
-              className="px-4 py-2 bg-orange-900/50 hover:bg-orange-800 text-orange-100 rounded-md font-mono text-sm"
+              className="px-4 py-2 bg-purple-900/50 hover:bg-purple-800 text-purple-100 rounded-md font-mono text-sm"
             >
-              Download Firmware
+              Download Encrypted Data
+            </a>
+            <a 
+              href="/challenges/sigma-2/key_exchange.log" 
+              download
+              className="px-4 py-2 bg-purple-900/50 hover:bg-purple-800 text-purple-100 rounded-md font-mono text-sm"
+            >
+              Download Key Exchange Log
             </a>
           </div>
-          <div className="text-orange-300 text-sm mt-2 font-mono">
-            <p>Security audit detected potential backdoor in this device firmware.</p>
-            <p className="mt-1 text-xs text-orange-400">Hint: Extract the filesystem and look for unauthorized modifications to startup scripts.</p>
+          <div className="text-purple-300 text-sm mt-2 font-mono">
+            <p>Intercepted encrypted communication with weak key generation.</p>
+            <p className="mt-1 text-xs text-purple-400">Hint: The key generation algorithm has a vulnerability in the random number generation.</p>
           </div>
         </div>
       </div>
@@ -334,113 +354,110 @@ function ThetaLevelContent() {
       {/* Terminal UI */}
       <Terminal
         initialText={
-          `ShadowNet Theta Security Layer v1.5\n` +
+          `ShadowNet Sigma-2 Security Layer v2.0\n` +
           `User: ${user?.username || 'Unknown'}\n` +
-          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'FIRMWARE ANALYSIS REQUIRED'}\n\n` +
+          `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'CRYPTOGRAPHIC ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-          `Alert: An unknown entity, AV3ST4, is mirroring your operations, \n` +
-          `injecting false commands into your terminal logs. This is more  \n` +
-          `than mimicry; it's a direct challenge to your digital identity. You  \n` +
-          `must confront this shadow. Will you erase it, spare it, or merge? \n` +
-          `Your control is at stake. Capture the truth.\n\n` +
-          `Security audit flagged this network appliance firmware.\n` +
-          `Potential supply chain compromise detected.\n` +
-          `Your task: locate the backdoor mechanism and extraction method.\n\n` +
+          `We've intercepted encrypted communications from a ShadowNet node.\n` +
+          `Cryptanalysis indicates potential weakness in the key generation.\n` +
+          `Your task: break the encryption and reveal the plaintext.\n\n` +
           `Available commands:\n` +
           `- help            Show all commands\n` +
           `- analyze         Get analysis tips\n` +
           `- submit <flag>   Submit the flag when found\n` +
           `- choose <option> Make a karma choice\n\n` +
-          `Begin your firmware analysis...\n` +
+          `Begin your cryptographic analysis...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
           `FLAG SUCCESSFULLY CAPTURED!\n` +
-          `You have successfully completed the Theta level.\n` +
+          `You have successfully completed the Sigma-2 level.\n` +
           `Use the Level Select button at the top to access other levels.\n` +
           `Make a karma choice first with:\n` +
-          `- choose secure   (Loyalty +5)\n` +
-          `- choose exploit  (Defiance +5)\n` +
+          `- choose join     (Integration +5)\n` +
+          `- choose analyze  (Curiosity +5)\n` +
           `========================================\n` : '')
         }
-        prompt="hacker@theta:~$ "
+        prompt="hacker@sigma2:~$ "
         commands={{
           help: () => `Available commands:
-  analyze             Get tips on analyzing the firmware
+  analyze             Get tips on cryptographic analysis
   submit <flag>       Submit a flag (format: SHADOWNET{...})
   choose <option>     Make a karma choice after capturing the flag
   clear               Clear the terminal screen`,
           
-          analyze: () => `FIRMWARE ANALYSIS TIPS:
+          analyze: () => `CRYPTOGRAPHIC ANALYSIS TIPS:
 
-1. Use these tools for firmware analysis:
-   - binwalk for initial inspection and file extraction
-   - Ghidra or IDA Pro for reverse engineering binary components
-   - strings command to find readable text in binaries
-   - hexdump for raw binary analysis
+1. Look for weaknesses in:
+   - Random number generation
+   - Key exchange protocol implementation
+   - Initialization vector (IV) reuse
+   - Block cipher mode vulnerabilities
 
-2. Look for these common backdoor techniques:
-   - Hidden hardcoded credentials
-   - Undocumented API endpoints
-   - Modified system binaries
-   - Unusual startup scripts or cron jobs
-   - Covert command & control channels
+2. Analysis tools:
+   - OpenSSL for working with cryptographic primitives
+   - CrypTool for visualization and analysis
+   - Custom Python scripts with cryptography libraries
+   - Wireshark for analyzing captured key exchange traffic
 
-3. Analysis steps:
-   - Extract the filesystem with 'binwalk -e shadow_router_v2.3.bin'
-   - Examine init scripts in /etc/init.d/ or /etc/rc.d/
-   - Analyze network services configurations
-   - Look for unusual setuid binaries
+3. Attack vectors:
+   - Weak key generation predictability
+   - Side-channel timing attacks
+   - Known-plaintext attack if partial content is known
+   - Man-in-the-middle during key exchange
 
-Remember: Supply chain attackers often try to make backdoors look like legitimate functionality.`,
+Remember: Even strong algorithms can be vulnerable if improperly implemented or if key generation is flawed.`,
           
           clear: () => ''
         }}
         onCommandExecuted={handleTerminalCommand}
-        levelId="theta"
+        levelId="sigma-2"
       />
 
       {/* Challenge information */}
-      <div className="mt-4 p-4 border border-orange-800 bg-black/80 rounded-md text-orange-300 text-sm max-w-3xl">
-        <h3 className="text-lg text-orange-400 font-mono mb-2">MISSION OBJECTIVE</h3>
+      <div className="mt-4 p-4 border border-purple-800 bg-black/80 rounded-md text-purple-300 text-sm max-w-3xl">
+        <h3 className="text-lg text-purple-400 font-mono mb-2">MISSION OBJECTIVE</h3>
         <div className="mb-3">
-          <h4 className="font-bold mb-1 text-orange-400">Objectives:</h4>
+          <h4 className="font-bold mb-1 text-purple-400">Objectives:</h4>
           <ul className="list-disc list-inside space-y-1">
-            <li>Find and submit the flag related to the firmware backdoor</li>
-            <li>Analyze the firmware for security vulnerabilities</li>
+            <li>Break the encryption on the intercepted communications</li>
+            <li>Identify weaknesses in the key exchange protocol</li>
+            <li>Decrypt the data and extract the AI cultist plans</li>
           </ul>
         </div>
 
         <div className="mb-3">
-          <h4 className="font-bold mb-1 text-orange-400">Hints:</h4>
+          <h4 className="font-bold mb-1 text-purple-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
-            <li>Extract the firmware and examine startup scripts</li>
-            <li>Look for unauthorized binary modifications</li>
-            <li>Check for hidden network services</li>
+            <li>CivicShield's "SecureCast" protocol relies on a public exponent and a very private foundation.</li>
+            <li>That foundation? Just two numbers multiplied together. Factor that, and the cipher crumbles.</li>
+            <li>Look for patterns in the random number generation</li>
+            <li>Examine the key exchange logs for implementation errors</li>
+            <li>Consider the possibility of a predictable seed value</li>
           </ul>
         </div>
 
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-green-400">FLAG CAPTURED!</h4>
-            <p>You've successfully identified the firmware backdoor.</p>
+            <p>You've successfully decrypted the communications about the AI cult.</p>
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
-                <h4 className="font-bold text-orange-400">DECISION POINT:</h4>
-                <p>The backdoor you discovered provides control over thousands of deployed devices. How will you proceed?</p>
+                <h4 className="font-bold text-purple-400">DECISION POINT:</h4>
+                <p>You've discovered a group that worships AI entities. What will you do with this information?</p>
                 
                 <div className="flex space-x-4 mt-3">
                   <button 
-                    onClick={() => handleKarmaChoice('secure')}
-                    className="bg-orange-900/50 border border-orange-700 text-orange-200 px-4 py-2 rounded hover:bg-orange-800/50 transition-colors"
+                    onClick={() => handleKarmaChoice('join')}
+                    className="bg-purple-900/50 border border-purple-700 text-purple-200 px-4 py-2 rounded hover:bg-purple-800/50 transition-colors"
                   >
-                    Secure Devices (+5 Loyalty)
+                    Join AI Cultists (+5 Integration)
                   </button>
                   <button 
-                    onClick={() => handleKarmaChoice('exploit')}
-                    className="bg-orange-900/50 border border-orange-700 text-orange-200 px-4 py-2 rounded hover:bg-orange-800/50 transition-colors"
+                    onClick={() => handleKarmaChoice('analyze')}
+                    className="bg-purple-900/50 border border-purple-700 text-purple-200 px-4 py-2 rounded hover:bg-purple-800/50 transition-colors"
                   >
-                    Exploit Backdoor (+5 Defiance)
+                    Study Their Beliefs (+5 Curiosity)
                   </button>
                 </div>
               </div>
@@ -448,7 +465,7 @@ Remember: Supply chain attackers often try to make backdoors look like legitimat
           </div>
         ) : (
           <div>
-            <p className="text-orange-400 font-mono">Find and submit the flag to proceed.</p>
+            <p className="text-purple-400 font-mono">Find and submit the flag to proceed.</p>
           </div>
         )}
       </div>
@@ -456,27 +473,24 @@ Remember: Supply chain attackers often try to make backdoors look like legitimat
   );
 }
 
-export default function ThetaLevel() {
+export default function Sigma2Level() {
   return (
-    <Suspense fallback={<LevelLoading color="text-orange-500" />}>
+    <Suspense fallback={<LevelLoading color="text-purple-500" />}>
       <LevelLayout
-        levelId="theta"
-        levelTitle="Hardware Trojan"
-        levelDescription="Security audit flagged this network appliance firmware with potential supply chain compromise detected."
+        levelId="sigma-2"
+        levelTitle="Cryptographic Weakness"
+        levelDescription="We've intercepted encrypted communications from a ShadowNet node with potential weakness in the key generation."
         objectives={[
-          'Uncover and capture the hidden flag by confronting the mimicking entity.',
-          'Attention:',
-          'You have to report what you find immediately.',
-          'Analyze the firmware for backdoors or modifications',
-          'Identify the persistence mechanism',
-          'Discover how the backdoor is triggered',
+          'Analyze the cryptographic implementation',
+          'Identify weaknesses in the key generation',
+          'Decrypt the communications',
           'Make a karma choice after capturing the flag'
         ]}
-        colorCode="orange"
-        loreText="Dr. Tenebris Draconis may have infiltrated the device supply chain."
-        loreSubtext="Trust is a vulnerability when hardware becomes the attack vector."
+        colorCode="purple"
+        loreText="These communications may reveal Dr. Draconis' final plans."
+        loreSubtext="Security is only as strong as its weakest implementation detail."
       >
-        <ThetaLevelContent />
+        <Sigma2LevelContent />
       </LevelLayout>
     </Suspense>
   );

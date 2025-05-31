@@ -63,22 +63,14 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
       setVolume(newVolume);
     }
   }));
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
   // Update audio volume when volume state changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
   // Auto-play if specified
   useEffect(() => {
     if (autoPlay && audioRef.current) {
@@ -97,11 +89,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
   // Toggle play/pause
   const togglePlayPause = () => {
     if (audioRef.current) {
-<<<<<<< HEAD
       if (isPlaying) {
-=======
-    if (isPlaying) {
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         audioRef.current.pause();
       } else {
         audioRef.current.play().catch(error => {

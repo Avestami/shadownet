@@ -8,17 +8,9 @@ export const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// Create a new PrismaClient instance or reuse existing one
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  },
   log: [
-    {
-      emit: 'event',
-      level: 'query',
-    },
     {
       emit: 'stdout',
       level: 'error',
@@ -34,13 +26,17 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   ],
 });
 
-// Add logging for all database operations
-prisma.$on('query', (e) => {
-  console.log('[DB] Query:', e.query);
-  console.log('[DB] Params:', e.params);
-  console.log('[DB] Duration:', `${e.duration}ms`);
-});
+// Only log queries in development
+if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore - Prisma has issues with the type definitions for event listeners
+  prisma.$on('query' as any, (e: any) => {
+    console.log('[DB] Query:', e.query);
+    console.log('[DB] Params:', e.params);
+    console.log('[DB] Duration:', `${e.duration}ms`);
+  });
+}
 
+// Store the instance in the global object to prevent multiple instances in development
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }

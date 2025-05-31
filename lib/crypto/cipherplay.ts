@@ -163,27 +163,16 @@ export function generateCipherplayChallenge(): string {
   let message = CIPHERPLAY_DATA.initialMessage;
   
   // Apply Caesar
-<<<<<<< HEAD
-  message = caesarCipher(message, CIPHERPLAY_DATA.encryptionSteps[0].key);
-  
-  // Apply Playfair
-  message = playfairCipher(message, CIPHERPLAY_DATA.encryptionSteps[1].key);
-=======
   message = caesarCipher(message, CIPHERPLAY_DATA.encryptionSteps[0].key as number);
   
   // Apply Playfair
   message = playfairCipher(message, CIPHERPLAY_DATA.encryptionSteps[1].key as string);
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
   
   // Apply Base64
   message = Buffer.from(message).toString('base64');
   
   // Apply Vigenere
-<<<<<<< HEAD
-  message = vigenereEncrypt(message, CIPHERPLAY_DATA.encryptionSteps[3].key);
-=======
   message = vigenereEncrypt(message, CIPHERPLAY_DATA.encryptionSteps[3].key as string);
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
   
   return message;
 }

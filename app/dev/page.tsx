@@ -30,7 +30,7 @@ export default function DevToolsPage() {
                 <strong>Level 3:</strong> STARGATE47 (Image key)
               </li>
               <li className="mb-2">
-                <strong>Level 4:</strong> ZOROASTER (Avesta's identity)
+                <strong>Level 4:</strong> ZOROASTER (Avesta&apos;s identity)
               </li>
             </ul>
             
@@ -40,13 +40,6 @@ export default function DevToolsPage() {
           <div>
             <h2 className="text-2xl font-mono text-red-400 mb-4">Development Notes</h2>
             <div className="bg-black/80 border border-red-600 rounded-lg shadow-lg p-4 font-mono text-sm">
-<<<<<<< HEAD
-              <p className="mb-2 text-yellow-500">// TODO: Complete final ending sequence</p>
-              <p className="mb-2 text-green-400">// Audio files for level 3 need to be remixed</p>
-              <p className="mb-2 text-blue-400">// Update Mars background for level 4</p>
-              <p className="mb-2 text-purple-400">// Fix terminal animation glitch when typing too fast</p>
-              <p className="mb-2 text-red-400">// Add more encryption challenges for advanced difficulty</p>
-=======
               <p className="mb-6 mt-2 text-gray-300">
                 Dr. Draconis&apos;s experimental development console for ShadowNet access.
               </p>
@@ -73,7 +66,6 @@ export default function DevToolsPage() {
                   Run System Diagnostics
                 </button>
               </div>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             </div>
             
             <div className="mt-8">

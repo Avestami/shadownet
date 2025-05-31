@@ -466,7 +466,7 @@ export default function ThetaLevel() {
         objectives={[
           'Uncover and capture the hidden flag by confronting the mimicking entity.',
           'Attention:',
-          'You have to report what you find immediately.',
+          'You have to report what you find immediately.'
           'Analyze the firmware for backdoors or modifications',
           'Identify the persistence mechanism',
           'Discover how the backdoor is triggered',
@@ -480,4 +480,5 @@ export default function ThetaLevel() {
       </LevelLayout>
     </Suspense>
   );
+}
 } 

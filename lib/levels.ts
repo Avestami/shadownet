@@ -32,7 +32,7 @@ export const LEVEL_CHALLENGES: Record<string, Challenge> = {
     files: ['file6.txt'],
     hints: [
       'The filename might be more than just a name...',
-      'Some archives weren’t meant to be decoded... just re-aligned.'
+      'Some archives weren\'t meant to be decoded... just re-aligned.'
     ],
     karmaChoices: [
       {
@@ -121,7 +121,7 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
-          karmaChoices: JSON.stringify(challenge.karmaChoices),
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         },
@@ -130,7 +130,7 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
-          karmaChoices: JSON.stringify(challenge.karmaChoices),
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         }
