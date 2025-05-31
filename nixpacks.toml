@@ -1,0 +1,14 @@
+[phases.setup]
+nixpkgs = ["openssl", "openssl_1_1", "nodejs", "python3", "gcc", "make", "libjpeg", "cairo", "pango", "pixman"]
+
+[phases.install]
+cmds = ["npm ci --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production" 

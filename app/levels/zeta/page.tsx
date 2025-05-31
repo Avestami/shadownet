@@ -239,9 +239,9 @@ function ZetaLevelContent() {
               });
             } else {
               showStatusMessage('You have already captured this flag. Type "mission" to view karma choices.', 4000);
-            }
-          }
-          
+      }
+    }
+    
           return 'Flag captured successfully! Choose your next action.';
         } else {
           return 'Incorrect flag. Keep analyzing the web application vulnerabilities.';

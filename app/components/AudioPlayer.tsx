@@ -63,14 +63,14 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
       setVolume(newVolume);
     }
   }));
-
+  
   // Update audio volume when volume state changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
-
+  
   // Auto-play if specified
   useEffect(() => {
     if (autoPlay && audioRef.current) {
