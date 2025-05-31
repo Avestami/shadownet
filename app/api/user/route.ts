@@ -19,15 +19,27 @@ export async function GET(request: NextRequest) {
       console.log('[USER-API] Refresh request detected');
     }
     
+    // Check authentication cookies
+    const authCookies = {};
+    request.cookies.getAll().forEach(cookie => {
+      if (cookie.name.includes('next-auth')) {
+        authCookies[cookie.name] = cookie.value ? 'Present' : 'Empty';
+      }
+    });
+    console.log('[USER-API] Auth cookies present:', authCookies);
+    
     // Get the user ID from the token
-    const token = await getToken({ req: request });
+    const token = await getToken({ 
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET 
+    });
     
     if (!token) {
       console.error('[USER-API] No token found in request');
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      
+      // Redirect to login instead of returning 401
+      console.log('[USER-API] Redirecting to login page');
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
     const userId = token.id as string;
@@ -48,7 +60,28 @@ export async function GET(request: NextRequest) {
       console.log('[USER-API] User cache invalidated for refresh');
     }
 
+    // Try to get cached user first
+    const cachedUser = getCachedUser(userId);
+    if (cachedUser && !isRefresh) {
+      console.log('[USER-API] Using cached user data');
+      return NextResponse.json({
+        user: {
+          id: cachedUser.id,
+          email: cachedUser.email,
+          username: cachedUser.username,
+          karma: cachedUser.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 },
+          score: cachedUser.score || 0,
+          choices: cachedUser.choices || [],
+          flagsCaptured: cachedUser.flagsCaptured || [],
+          currentLevel: cachedUser.currentLevel || "alpha",
+          createdAt: cachedUser.createdAt,
+          updatedAt: cachedUser.updatedAt
+        }
+      });
+    }
+
     // Get user data from the database
+    console.log('[USER-API] Fetching user data from database for ID:', userId);
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
