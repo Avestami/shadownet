@@ -6,11 +6,7 @@ import dynamic from 'next/dynamic';
 
 // Import LevelNavigator with client-side only rendering
 const LevelNavigator = dynamic(() => import('./components/LevelNavigator'), {
-<<<<<<< HEAD
-  
-=======
   ssr: false,
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 });
 
 const inter = Inter({ subsets: ['latin'] })
