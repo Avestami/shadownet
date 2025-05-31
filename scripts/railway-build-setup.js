@@ -68,13 +68,28 @@ function setupPrisma() {
       console.log('Updated Prisma schema with binary targets');
     }
     
+    // Add engineType = "binary" if not present
+    if (!schemaContent.includes('engineType')) {
+      console.log('Adding engine type to Prisma schema...');
+      schemaContent = schemaContent.replace(
+        'generator client {',
+        'generator client {\n  engineType = "binary"'
+      );
+      fs.writeFileSync(schemaPath, schemaContent);
+      console.log('Updated Prisma schema with engine type');
+    }
+    
     // Create a .env file if it doesn't exist
     const envPath = path.join(process.cwd(), '.env');
     if (!fs.existsSync(envPath)) {
       console.log('Creating .env file for Prisma...');
-      const envContent = `DATABASE_URL="${process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/project-control'}"
-NEXTAUTH_URL="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}"
-NEXTAUTH_SECRET="${process.env.NEXTAUTH_SECRET || 'supersecretkey12345'}"
+      const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:bXbWmMFKrKqabvxkeHExZOSmqaAqwxzH@postgres.railway.internal:5432/railway';
+      const nextAuthUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      const nextAuthSecret = process.env.NEXTAUTH_SECRET || 'supersecretkey12345';
+      
+      const envContent = `DATABASE_URL="${dbUrl}"
+NEXTAUTH_URL="${nextAuthUrl}"
+NEXTAUTH_SECRET="${nextAuthSecret}"
 `;
       fs.writeFileSync(envPath, envContent);
       console.log('Created .env file');
