@@ -23,10 +23,8 @@ const prismaClientOptions = {
       ? [{ emit: 'stdout', level: 'info' }] 
       : []),
   ],
-  errorFormat: 'pretty',
-  // Maximum number of connections in the connection pool
-  // Higher in production, lower in development
-  connectionLimit: process.env.NODE_ENV === 'production' ? 20 : 5,
+  // Use 'pretty' as a specific value of the errorFormat enum
+  errorFormat: 'pretty' as const,
 };
 
 // Function to create a new Prisma client with error handling
