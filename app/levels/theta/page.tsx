@@ -338,11 +338,17 @@ function ThetaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'FIRMWARE ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
+<<<<<<< HEAD
           `Alert: An unknown entity, AV3ST4, is mirroring your operations, \n` +
           `injecting false commands into your terminal logs. This is more  \n` +
           `than mimicry; it's a direct challenge to your digital identity. You  \n` +
           `must confront this shadow. Will you erase it, spare it, or merge? \n` +
           `Your control is at stake. Capture the truth.\n\n` +
+=======
+          `Security audit flagged this network appliance firmware.\n` +
+          `Potential supply chain compromise detected.\n` +
+          `Your task: locate the backdoor mechanism and extraction method.\n\n` +
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           `Available commands:\n` +
           `- help            Show all commands\n` +
           `- analyze         Get analysis tips\n` +
@@ -461,9 +467,16 @@ export default function ThetaLevel() {
         levelTitle="Hardware Trojan"
         levelDescription="Security audit flagged this network appliance firmware with potential supply chain compromise detected."
         objectives={[
+<<<<<<< HEAD
           'Uncover and capture the hidden flag by confronting the mimicking entity.',
           'Attention:',
           'You have to report what you find immediately.'
+=======
+          'Analyze the firmware for backdoors or modifications',
+          'Identify the persistence mechanism',
+          'Discover how the backdoor is triggered',
+          'Make a karma choice after capturing the flag'
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         ]}
         colorCode="orange"
         loreText="Dr. Tenebris Draconis may have infiltrated the device supply chain."
@@ -473,4 +486,8 @@ export default function ThetaLevel() {
       </LevelLayout>
     </Suspense>
   );
+<<<<<<< HEAD
 }
+=======
+} 
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f

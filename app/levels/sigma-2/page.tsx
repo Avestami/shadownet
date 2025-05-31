@@ -310,12 +310,47 @@ function Sigma2LevelContent() {
         <div className="flex flex-col space-y-3">
           <div className="bg-black p-2 rounded border border-purple-900">
             <div className="w-full p-3 bg-black text-purple-300 font-mono text-sm overflow-auto">
+<<<<<<< HEAD
               <p>The CivicShield encryption uses a system built on the multiplication of two large, secret prime numbers.</p>
               <p>Each message is locked with an open key, but only those with the secret divisor can unlock it.</p>
               <p>Their mistake? The primes were chosen too close together. Fast. Predictable.</p>
               <p>Once you break the product, the rest falls like glass.</p>
             </div>
           </div>
+=======
+              <p>Encryption algorithm: Custom implementation of AES-256</p>
+              <p>Ciphertext file: encrypted_comms.bin (1.8 MB)</p>
+              <p>Key exchange method: Modified Diffie-Hellman</p>
+              <p>Key generation parameters:</p>
+              <pre className="mt-2 text-xs overflow-x-auto">
+{`p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1
+g = 2
+A = 0x61A5...3D27 (public key)
+IV = 0xF3DC7...8A92E (initialization vector)`}
+              </pre>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <a 
+              href="/challenges/sigma-2/encrypted_comms.bin" 
+              download
+              className="px-4 py-2 bg-purple-900/50 hover:bg-purple-800 text-purple-100 rounded-md font-mono text-sm"
+            >
+              Download Encrypted Data
+            </a>
+            <a 
+              href="/challenges/sigma-2/key_exchange.log" 
+              download
+              className="px-4 py-2 bg-purple-900/50 hover:bg-purple-800 text-purple-100 rounded-md font-mono text-sm"
+            >
+              Download Key Exchange Log
+            </a>
+          </div>
+          <div className="text-purple-300 text-sm mt-2 font-mono">
+            <p>Intercepted encrypted communication with weak key generation.</p>
+            <p className="mt-1 text-xs text-purple-400">Hint: The key generation algorithm has a vulnerability in the random number generation.</p>
+          </div>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         </div>
       </div>
       
@@ -396,8 +431,14 @@ Remember: Even strong algorithms can be vulnerable if improperly implemented or 
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-purple-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
+<<<<<<< HEAD
             <li>CivicShield's "SecureCast" protocol relies on a public exponent and a very private foundation.</li>
             <li>That foundation? Just two numbers multiplied together. Factor that, and the cipher crumbles.</li>
+=======
+            <li>Look for patterns in the random number generation</li>
+            <li>Examine the key exchange logs for implementation errors</li>
+            <li>Consider the possibility of a predictable seed value</li>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
@@ -449,6 +490,10 @@ export default function Sigma2Level() {
           'Analyze the cryptographic implementation',
           'Identify weaknesses in the key generation',
           'Decrypt the communications',
+<<<<<<< HEAD
+=======
+          'Make a karma choice after capturing the flag'
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         ]}
         colorCode="purple"
         loreText="These communications may reveal Dr. Draconis' final plans."

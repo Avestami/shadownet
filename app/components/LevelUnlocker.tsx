@@ -207,9 +207,22 @@ const LevelUnlocker = () => {
 
           {levelId === 'level1' && (
             <div className="mt-4 p-2 font-mono text-xs text-gray-400 border border-gray-700 rounded">
+<<<<<<< HEAD
               <strong>Hint for Level 1:</strong> The unlock code is "AVES2100_KHUZESTAN_ACCESS" (Base64 decoded)
             </div>
           )}
+=======
+              <strong>Hint for Level 1:</strong> The unlock code is &quot;AVES2100_KHUZESTAN_ACCESS&quot; (Base64 decoded)
+            </div>
+          )}
+
+          <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500 rounded-md">
+            <p className="text-yellow-300 text-sm">
+              <span className="font-semibold">WARNING:</span> This process requires admin authentication. 
+              Are you sure you want to bypass Dr. Draconis&apos;s security protocols?
+            </p>
+          </div>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         </div>
       )}
 

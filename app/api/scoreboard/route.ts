@@ -175,8 +175,13 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         console.error('[SCOREBOARD] Error processing user:', user.username, error);
         return {
+<<<<<<< HEAD
           username: user.username,
           score: user.score || 0,
+=======
+      username: user.username,
+      score: user.score || 0,
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           karma: { 
             loyalty: 0, 
             defiance: 0, 

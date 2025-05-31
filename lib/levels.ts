@@ -32,7 +32,11 @@ export const LEVEL_CHALLENGES: Record<string, Challenge> = {
     files: ['file6.txt'],
     hints: [
       'The filename might be more than just a name...',
+<<<<<<< HEAD
       'Some archives weren’t meant to be decoded... just re-aligned.'
+=======
+      'What happens when you shift each character by the number in the filename?'
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     ],
     karmaChoices: [
       {
@@ -58,10 +62,15 @@ export const LEVEL_CHALLENGES: Record<string, Challenge> = {
     flag: 'SHADOWNET{SOUND876}',
     files: ['dissonance.wav'],
     hints: [
+<<<<<<< HEAD
       'The signal has two faces.',
       'Did you notice the tones? may be draconis was right about the frequencies.',
       'The Morse code might tell you what to do with the numbers...'
       
+=======
+      'Have you checked both audio channels separately?',
+      'The Morse code might tell you what to do with the numbers...'
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     ],
     karmaChoices: [
       {
@@ -121,7 +130,11 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
+<<<<<<< HEAD
           karmaChoices: JSON.stringify(challenge.karmaChoices),
+=======
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         },
@@ -130,7 +143,11 @@ export async function initializeLevels() {
           name: challenge.title,
           description: challenge.description,
           unlockCode: challenge.flag,
+<<<<<<< HEAD
           karmaChoices: JSON.stringify(challenge.karmaChoices),
+=======
+          availableKarmaChoices: JSON.stringify(challenge.karmaChoices),
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           documents: JSON.stringify(challenge.documents || []),
           hints: JSON.stringify(challenge.hints)
         }
@@ -179,14 +196,22 @@ export async function processKarmaChoice(
   try {
     const level = await prisma.level.findUnique({
       where: { id: levelId },
+<<<<<<< HEAD
       select: { karmaChoices: true }
+=======
+      select: { availableKarmaChoices: true }
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     });
 
     if (!level) {
       throw new Error('Level not found');
     }
 
+<<<<<<< HEAD
     const choices: KarmaChoice[] = JSON.parse(level.karmaChoices as string);
+=======
+    const choices: KarmaChoice[] = JSON.parse(level.availableKarmaChoices as string);
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     const selectedChoice = choices.find(c => c.id === choiceId);
 
     if (!selectedChoice) {

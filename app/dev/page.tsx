@@ -40,11 +40,40 @@ export default function DevToolsPage() {
           <div>
             <h2 className="text-2xl font-mono text-red-400 mb-4">Development Notes</h2>
             <div className="bg-black/80 border border-red-600 rounded-lg shadow-lg p-4 font-mono text-sm">
+<<<<<<< HEAD
               <p className="mb-2 text-yellow-500">// TODO: Complete final ending sequence</p>
               <p className="mb-2 text-green-400">// Audio files for level 3 need to be remixed</p>
               <p className="mb-2 text-blue-400">// Update Mars background for level 4</p>
               <p className="mb-2 text-purple-400">// Fix terminal animation glitch when typing too fast</p>
               <p className="mb-2 text-red-400">// Add more encryption challenges for advanced difficulty</p>
+=======
+              <p className="mb-6 mt-2 text-gray-300">
+                Dr. Draconis&apos;s experimental development console for ShadowNet access.
+              </p>
+              
+              {/* Options for the user */}
+              <div className="space-y-4">
+                {/* Option 1: Unlock All Levels */}
+                <button className="w-full p-2 bg-blue-800 hover:bg-blue-700 rounded">
+                  Unlock All Levels
+                </button>
+                
+                {/* Option 2: Reset Progress */}
+                <button className="w-full p-2 bg-red-800 hover:bg-red-700 rounded">
+                  Reset Progress
+                </button>
+                
+                {/* Option 3: Test Audio */}
+                <button className="w-full p-2 bg-green-800 hover:bg-green-700 rounded">
+                  Test Audio Features
+                </button>
+                
+                {/* Option 4: System Diagnostics */}
+                <button className="w-full p-2 bg-purple-800 hover:bg-purple-700 rounded">
+                  Run System Diagnostics
+                </button>
+              </div>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             </div>
             
             <div className="mt-8">

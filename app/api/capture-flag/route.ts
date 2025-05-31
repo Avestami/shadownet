@@ -62,7 +62,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate average karma for multiplier
+<<<<<<< HEAD
     const karmaValues = Object.values(karmaObj);
+=======
+    const karmaValues = Object.values(karmaObj) as number[];
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     const avgKarma = karmaValues.length > 0 
       ? karmaValues.reduce((sum, val) => sum + val, 0) / karmaValues.length 
       : 0;
@@ -88,7 +92,11 @@ export async function POST(request: NextRequest) {
       
       // Get current flags and add new ones
       const flagsCaptured = user.flagsCaptured || [];
+<<<<<<< HEAD
       const newFlags = ALL_FLAGS.filter(flag => !flagsCaptured.includes(flag));
+=======
+      const newFlags = ALL_FLAGS.filter((flag: string) => !flagsCaptured.includes(flag));
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       console.log('[API] New flags to add:', newFlags);
       
       if (newFlags.length === 0) {
@@ -205,6 +213,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+<<<<<<< HEAD
 } 
     
     // Update user
@@ -248,4 +257,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+=======
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 } 

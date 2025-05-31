@@ -518,8 +518,20 @@ export default function LevelPage() {
         
         const updatedUser = {
           ...user,
+<<<<<<< HEAD
           karma: (user.karma || 0) + choice.karmaDelta,
           choices: JSON.stringify([...(JSON.parse(user.choices || '[]')), choiceId])
+=======
+          karma: typeof user.karma === 'number' 
+            ? (user.karma || 0) + choice.karmaDelta 
+            : user.karma, // If karma is an object, preserve it
+          choices: JSON.stringify([
+            ...(typeof user.choices === 'string' 
+              ? JSON.parse(user.choices || '[]') as string[]
+              : []),
+            choiceId
+          ])
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         };
         
         console.log("Debug mode: updating local storage with new choice");
@@ -588,7 +600,13 @@ export default function LevelPage() {
     if (user) {
       const updatedUser = {
         ...user,
+<<<<<<< HEAD
         karma: (user.karma || 0) + karmaReward
+=======
+        karma: typeof user.karma === 'number'
+          ? (user.karma || 0) + karmaReward
+          : user.karma // If karma is an object, preserve it
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       };
       
       if (user.id === 'debug-user') {
@@ -617,7 +635,13 @@ export default function LevelPage() {
       const updatedUser = {
         ...user,
         score: (user.score || 0) + 100, // Higher score boost
+<<<<<<< HEAD
         karma: (user.karma || 0) - 5 // Karma penalty
+=======
+        karma: typeof user.karma === 'number'
+          ? (user.karma || 0) - 5 // Karma penalty
+          : user.karma // If karma is an object, preserve it
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       };
       
       localStorage.setItem('debugUser', JSON.stringify(updatedUser));
@@ -680,7 +704,13 @@ export default function LevelPage() {
       const updatedUser = {
         ...user,
         score: (user.score || 0) + 25, // Smaller score boost
+<<<<<<< HEAD
         karma: (user.karma || 0) + 5 // Karma bonus
+=======
+        karma: typeof user.karma === 'number'
+          ? (user.karma || 0) + 5 // Karma bonus
+          : user.karma // If karma is an object, preserve it
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       };
       
       localStorage.setItem('debugUser', JSON.stringify(updatedUser));
