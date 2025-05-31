@@ -46,17 +46,11 @@ export async function POST(request: NextRequest) {
     console.log('[FORCE-UPDATE] Current user state:', { 
       id: user.id, 
       score: user.score, 
-<<<<<<< HEAD
-      flagsCount: user.flagsCaptured?.length,
-      karma: user.karma,
-      choices: user.choices?.length
-=======
       flagsCount: Array.isArray(user.flagsCaptured) ? user.flagsCaptured.length : 0,
       karma: user.karma,
       choicesType: typeof user.choices,
       choicesCount: Array.isArray(user.choices) ? user.choices.length : 
                   (typeof user.choices === 'string' ? JSON.parse(user.choices || '[]').length : 0)
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     });
     
     // Debug choices handling
@@ -126,12 +120,8 @@ export async function POST(request: NextRequest) {
           currentChoices = JSON.parse(user.choices || '[]');
           console.log('[FORCE-UPDATE] Parsed choices from string:', currentChoices);
         } else if (Array.isArray(user.choices)) {
-<<<<<<< HEAD
-          currentChoices = user.choices;
-=======
           // Ensure all elements are strings
           currentChoices = user.choices.map(item => String(item));
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           console.log('[FORCE-UPDATE] Using existing array choices:', currentChoices);
         } else {
           console.log('[FORCE-UPDATE] Choices is neither string nor array, using empty array');
@@ -192,14 +182,6 @@ export async function POST(request: NextRequest) {
       console.log('[FORCE-UPDATE] User updated successfully:', { 
         oldScore: user.score, 
         newScore: updatedUser.score,
-<<<<<<< HEAD
-        oldFlags: user.flagsCaptured?.length,
-        newFlags: updatedUser.flagsCaptured?.length,
-        oldChoices: user.choices?.length,
-        newChoices: updatedUser.choices?.length
-      });
-      
-=======
         oldFlags: Array.isArray(user.flagsCaptured) ? user.flagsCaptured.length : 0,
         newFlags: Array.isArray(updatedUser.flagsCaptured) ? updatedUser.flagsCaptured.length : 0,
         oldChoicesCount: getChoicesCount(user.choices),
@@ -220,7 +202,6 @@ export async function POST(request: NextRequest) {
         return 0;
       }
       
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       // Invalidate the user cache
       invalidateUserCache(userId);
       console.log('[FORCE-UPDATE] User cache invalidated');
@@ -253,4 +234,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

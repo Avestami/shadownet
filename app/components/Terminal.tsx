@@ -207,13 +207,8 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       console.log("Current level ID:", levelId); // Debug info
       
-<<<<<<< HEAD
       // Base files always present
       let files = [
-=======
-      // Get list of files for the level
-      const files = [
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         'system',
         'network', 
         'users',
@@ -226,35 +221,17 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       // Add level-specific files
       if (levelId === 'alpha') {
-<<<<<<< HEAD
         files.push('file6.enc','README-alpha.md');
       } else if (levelId === 'delta') {
         files.push('see_the_starts.td');
       } else if (levelId === 'sigma') {
-        files.push('pcap-readme.txt');
+        files.push('district_control.log', 'martial_ai.cfg', 'data-sigma.enc', 'override_pass.key', 'freedom_signals.dat');
       } else if (levelId === 'theta') {
         files.push('av3st4.core', 'hint.txt', 'README-theta.txt', 'session_log.txt');
       } else if (levelId === 'zeta') {
         files.push('resistance_network.log', 'corrupted_keys.dat', 'data-zeta.enc', 'teenage_coders.txt', 'key_repair.sh');
       } else if (levelId === 'sigma-2') {
         files.push('r5@_pub.txt', 'cipher.txt');
-=======
-        files.push('perimeter_security.log', 'data-alpha.enc', 'access_points.txt');
-      } else if (levelId === 'beta') {
-        files.push('network.log', 'network.dat', 'proxy_settings.cfg', 'data-beta.enc', 'traffic_analysis.bin');
-      } else if (levelId === 'gamma') {
-        files.push('db_schema.log', 'database.bak', 'data-gamma.enc', 'user_records.sql', 'query_cache.tmp');
-      } else if (levelId === 'delta') {
-        files.push('security_protocol.exe', 'core_access.bin', 'system_override.log', 'data-delta.enc', 'ai_fragments.dat');
-      } else if (levelId === 'sigma') {
-        files.push('district_control.log', 'martial_ai.cfg', 'data-sigma.enc', 'override_pass.key', 'freedom_signals.dat');
-      } else if (levelId === 'theta') {
-        files.push('mirror_system.log', 'clone_data.bin', 'data-theta.enc', 'identity_matrix.dat', 'trace_analysis.log');
-      } else if (levelId === 'zeta') {
-        files.push('resistance_network.log', 'corrupted_keys.dat', 'data-zeta.enc', 'teenage_coders.txt', 'key_repair.sh');
-      } else if (levelId === 'sigma-2') {
-        files.push('historical_archives.log', 'audio_logs.wav', 'data-sigma-2.enc', 'cultist_confession.txt', 'deletion_protocol.sh');
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       } else if (levelId === 'omega') {
         files.push('consciousness.log', 'ai_core.dat', 'neural_network.bin', 'data-omega.enc', 'fragments.mem');
       }
@@ -296,9 +273,8 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       // Handle level-specific data files by explicitly checking file names
       // This ensures files are accessible regardless of level detection
-<<<<<<< HEAD
       if (file == 'README-alpha.md') {
-        return `MISSION: Echoed Transmission
+        return`MISSION: Echoed Transmission
 
 Agent,
 
@@ -310,7 +286,7 @@ We suspect it contains a trigger phrase used to activate early sleeper protocols
 
 Do not assume modern tools will work. This is from an era before sophistication — when obfuscation was born of simplicity.
 
-They didn't encrypt it.  
+They didn’t encrypt it.  
 They shifted it.
 
 — INITIATING SHADOWNET PROTOCOL 001 —
@@ -339,7 +315,7 @@ And finally a cipher named like a vow.`;
         return str
               ;
       }else if (file === 'README-theta.txt') {
-        return "MISSION: Binary Reflection\nAgent,\nYou've received a replay of your most recent terminal session — but it's not entirely yours.\nOne command was injected by a mimic AI named AV3ST4. Its goal? Unknown. Its method? Reflection.\nStudy the session log carefully. Identify the echo that doesn't belong. Remove the anomaly and stabilize the system.\nThe true memory is encoded beneath the interference.\nFlag format: SHADOWNET{...}";
+        return "MISSION: Binary Reflection\nAgent,\nYou’ve received a replay of your most recent terminal session — but it’s not entirely yours.\nOne command was injected by a mimic AI named AV3ST4. Its goal? Unknown. Its method? Reflection.\nStudy the session log carefully. Identify the echo that doesn’t belong. Remove the anomaly and stabilize the system.\nThe true memory is encoded beneath the interference.\nFlag format: SHADOWNET{...}";
       }else if (file === 'hint.txt') {
         return `Echoes mimic your voice — but not your intention.
 
@@ -352,37 +328,6 @@ Cut the reflection to reveal the truth.
         return `VGhlIHJlZmxlY3Rpb24gaXMgbm90IG1pbmUuIFlvdSBqZXN0IGxvb2sgbGlrZSBtZS4K
 QnV0IHdoZXJlIGRpZCBteSBjb21tYW5kIGNvbWUgaW4/Cg==
 `;
-      } else if (file === 'pcap-readme.txt') {
-        return `
-        MISSION: Intercepted Freedom
-
-Agent,
-
-A civic mesh relay at District-07 was compromised. We believe a rogue courier exfiltrated a classified phrase during a burst of DNS activity. The transmissions were unencrypted — but fragmented and stealthy.
-
-We've recovered the packet capture file: freedom_trace.pcap.
-
-Your task:
-- Analyze the DNS requests.
-- Reconstruct the leaked information.
-- Identify the final embedded phrase and report it back.
-
-Remember: traffic is noisy. Truth hides in patterns.
-
-Flag format: SHADOWNET{...}
-        `;
-=======
-      if (file === 'data-alpha.enc') {
-        return `This file contains encrypted alpha level data.\nFile appears to contain sensitive corporate information.\nUse "analyze data-alpha" to examine contents.`;
-      } else if (file === 'data-beta.enc') {
-        return `This file contains encrypted beta level data.\nFile appears to contain sensitive corporate information.\nUse "analyze data-beta" to examine contents.`;
-      } else if (file === 'data-gamma.enc') {
-        return `This file contains encrypted gamma level data.\nFile appears to contain sensitive corporate information.\nUse "analyze data-gamma" to examine contents.`;
-      } else if (file === 'data-delta.enc') {
-        return `This file contains encrypted delta level data.\nFile appears to contain sensitive corporate information.\nUse "analyze data-delta" to examine contents.`;
-      } else if (file === 'data-omega.enc') {
-        return `This file contains encrypted omega level data.\nFile appears to contain sensitive corporate information.\nUse "analyze data-omega" to examine contents.`;
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       }
       
       if (file === 'backdoor.sh') {
@@ -935,7 +880,6 @@ Flag format: SHADOWNET{...}
         };
         
         const choices = karmaChoices[missionLevel];
-<<<<<<< HEAD
         
         return [
           `CURRENT MISSION: ${levelMap[missionLevel] || missionLevel.toUpperCase()}`,
@@ -943,15 +887,6 @@ Flag format: SHADOWNET{...}
           'Objective:',
           `Find and capture the flag hidden in this level using "capture <flag>"`,
           '',
-=======
-      
-      return [
-          `CURRENT MISSION: ${levelMap[missionLevel] || missionLevel.toUpperCase()}`,
-        '',
-          'Objective:',
-          `Find and capture the flag hidden in this level using "capture <flag>"`,
-        '',
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           'KARMA CHOICES:',
           '------------------------',
           choices ? `Option 1: choose ${choices.option1}` : 'Capture the flag first to reveal choices',
@@ -965,11 +900,7 @@ Flag format: SHADOWNET{...}
           '1. Capture the flag with "capture <flag>"',
           '2. Make a karma choice with "choose <option>"',
           '3. Proceed to next level with "next-level"',
-<<<<<<< HEAD
           '',
-=======
-        '',
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           'Type "help" for more commands'
         ].join('\n');
       }
@@ -1079,17 +1010,8 @@ Flag format: SHADOWNET{...}
     },
     analyze: (args) => {
       if (args.length === 0) {
-<<<<<<< HEAD
         // Special handling for Beta level - provide audio analysis tips
         if (levelId && levelId === 'beta') {
-=======
-        // Get current level if available
-        const pathSegments = window.location.pathname.split('/');
-        const currentLevelId = pathSegments[pathSegments.length - 1];
-        
-        // Special handling for Beta level - provide audio analysis tips
-        if (currentLevelId && currentLevelId === 'beta') {
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           return [
             "AUDIO ANALYSIS TIPS:",
             "1. Download the audio file using the button below the terminal",
@@ -1730,20 +1652,11 @@ Flag format: SHADOWNET{...}
       // Add a response to the terminal history
       setHistory(prev => [...prev, `Attempting to capture flag: ${flag}...`]);
       
-<<<<<<< HEAD
       // Call the onCommandExecuted callback with both command and output
       if (onCommandExecuted) {
         console.log('TERMINAL DEBUG - Calling onCommandExecuted with:', command, flag);
         const result = onCommandExecuted(input, flag);
         console.log('TERMINAL DEBUG - Result from onCommandExecuted:', result);
-=======
-      // Call the onCommandExecuted callback with both command and full input
-      if (onCommandExecuted) {
-        console.log('TERMINAL DEBUG - Calling onCommandExecuted with full command:', input);
-        onCommandExecuted(input, flag);
-        
-        console.log('TERMINAL DEBUG - onCommandExecuted call completed');
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       } else {
         console.log('TERMINAL DEBUG - No onCommandExecuted callback provided');
       }
@@ -1790,13 +1703,8 @@ Flag format: SHADOWNET{...}
         // It's a Promise
         (result as Promise<string>).then(output => {
           setHistory(prev => [...prev, output]);
-<<<<<<< HEAD
           if (onCommandExecuted) {
             onCommandExecuted(input, output);
-=======
-    if (onCommandExecuted) {
-      onCommandExecuted(input, output);
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           }
         }).catch(error => {
           setHistory(prev => [...prev, `Error: ${error.message}`]);

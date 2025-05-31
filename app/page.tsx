@@ -709,11 +709,7 @@ export default function Home() {
         Object.values(user.karma).some(value => value > 0);
       
       // First level is always unlocked
-<<<<<<< HEAD
-      let levelStatus = [
-=======
       const levelStatus = [
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         '1. ALPHA - Perimeter Security [UNLOCKED]'
       ];
       
@@ -958,11 +954,7 @@ export default function Home() {
                       Object.values(user.karma).some(value => value > 0);
                     
                     // First level is always unlocked
-<<<<<<< HEAD
-                    let levelStatus = [
-=======
                     const levelStatus = [
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                       '1. ALPHA - Perimeter Security [UNLOCKED]'
                     ];
                     

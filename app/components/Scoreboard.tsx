@@ -140,11 +140,7 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
         const res = await fetch('/api/scoreboard');
         if (res.ok) {
           const data = await res.json();
-<<<<<<< HEAD
-          setUsers((data.users || []).map(user => ({
-=======
           setUsers((data.users || []).map((user: any) => ({
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             ...user,
             expandedView: false
           })));
@@ -249,21 +245,12 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
         </div>
       ) : (
         <div className="max-h-[320px] overflow-y-auto pr-1 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarColor: '#7f1d1d #000' }}>
-<<<<<<< HEAD
           <div className="space-y-2">
             {sortedUsers.map((user, index) => (
               <div 
                 key={`${user.username}-${index}`}
                 className={`flex flex-col p-2 border-b border-red-900/50 ${
                   currentUser && user.username === currentUser.username 
-=======
-        <div className="space-y-2">
-          {sortedUsers.map((user, index) => (
-            <div 
-                key={`${user.username}-${index}`}
-                className={`flex flex-col p-2 border-b border-red-900/50 ${
-                currentUser && user.username === currentUser.username 
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                     ? 'bg-red-900/30 border border-red-700 shadow-[0_0_8px_rgba(255,0,0,0.2)]' 
                     : 'hover:bg-red-950/30'
                 } transition-colors`}
@@ -271,7 +258,6 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
                 <div 
                   className="flex justify-between items-center cursor-pointer" 
                   onClick={() => toggleUserExpand(index)}
-<<<<<<< HEAD
                 >
                   <div className="flex items-center">
                     <span className="text-gray-500 mr-2 font-mono">{index + 1}.</span>
@@ -293,29 +279,6 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
                     </div>
                     <div>
                       <span className="text-gray-500 mr-1">Karma:</span>
-=======
-            >
-              <div className="flex items-center">
-                    <span className="text-gray-500 mr-2 font-mono">{index + 1}.</span>
-                <span className={
-                  currentUser && user.username === currentUser.username 
-                    ? 'text-red-300 font-bold' 
-                    : 'text-red-500'
-                }>
-                  {user.username}
-                </span>
-                    <span className="text-gray-500 ml-2 text-xs">
-                      {user.expandedView ? '▼' : '▶'}
-                    </span>
-              </div>
-                  <div className="flex space-x-4 text-sm font-mono">
-                <div>
-                  <span className="text-gray-500 mr-1">Score:</span>
-                      <span className="text-red-400">{user.score || 0}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 mr-1">Karma:</span>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                       <span className={getKarmaColor(user.totalKarma !== undefined ? user.totalKarma : normalizeKarma(user.karma))}>
                         {user.totalKarma !== undefined ? user.totalKarma : normalizeKarma(user.karma) || 0}
                       </span>
@@ -328,13 +291,10 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
                   <div className="mt-2 pl-6 grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
                     {Object.entries(getKarmaValues(user.karma)).map(([type, value]) => (
                       <div key={type} className="flex justify-between">
-                        <span className={`${getKarmaTypeColor(type)} capitalize`}>
-                          {type}:
-                        </span>
-                        <span className="text-white">{value}</span>
+                        <span className={getKarmaTypeColor(type)}>{type}:</span>
+                        <span className="text-gray-400">{value}</span>
                       </div>
                     ))}
-<<<<<<< HEAD
                   </div>
                 )}
               </div>
@@ -345,18 +305,6 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ currentUser }) => {
                 No users have scored points yet
               </div>
             )}
-=======
-              </div>
-                )}
-            </div>
-          ))}
-          
-          {users.length === 0 && (
-            <div className="text-center text-gray-500 py-4">
-              No users have scored points yet
-            </div>
-          )}
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </div>
         </div>
       )}

@@ -62,11 +62,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate average karma for multiplier
-<<<<<<< HEAD
-    const karmaValues = Object.values(karmaObj);
-=======
     const karmaValues = Object.values(karmaObj) as number[];
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
     const avgKarma = karmaValues.length > 0 
       ? karmaValues.reduce((sum, val) => sum + val, 0) / karmaValues.length 
       : 0;
@@ -92,11 +88,7 @@ export async function POST(request: NextRequest) {
       
       // Get current flags and add new ones
       const flagsCaptured = user.flagsCaptured || [];
-<<<<<<< HEAD
-      const newFlags = ALL_FLAGS.filter(flag => !flagsCaptured.includes(flag));
-=======
       const newFlags = ALL_FLAGS.filter((flag: string) => !flagsCaptured.includes(flag));
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       console.log('[API] New flags to add:', newFlags);
       
       if (newFlags.length === 0) {
@@ -213,50 +205,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-<<<<<<< HEAD
-} 
-    
-    // Update user
-    try {
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          flagsCaptured: [...flagsCaptured, flagId],
-          score: (user.score || 0) + scoreToAdd
-        }
-      });
-      console.log('[API] User updated successfully', { 
-        oldScore: user.score, 
-        newScore: updatedUser.score,
-        addedFlag: flagId
-      });
-      
-      // Invalidate the user cache to ensure fresh data
-      invalidateUserCache(userId);
-      console.log('[API] User cache invalidated');
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Flag captured successfully',
-        score: updatedUser.score,
-        scoreAdded: scoreToAdd,
-        flagsCaptured: updatedUser.flagsCaptured,
-        karma: updatedUser.karma,
-        karmaMultiplier: karmaMultiplier.toFixed(2),
-        karmaDetails: karmaObj
-      });
-    } catch (dbError) {
-      console.error('[API] Database update error:', dbError);
-      throw dbError;
-    }
-    
-  } catch (error) {
-    console.error('[API] Error capturing flag:', error);
-    return NextResponse.json(
-      { error: 'Failed to capture flag', details: String(error) },
-      { status: 500 }
-    );
-  }
-=======
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 } 

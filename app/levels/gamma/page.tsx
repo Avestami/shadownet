@@ -74,10 +74,6 @@ function GammaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-<<<<<<< HEAD
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
-=======
     const fullCommand = command.toLowerCase();
     
     // Special handling for the capture command
@@ -88,7 +84,6 @@ function GammaLevelContent() {
       
       console.log("Processing flag capture with command:", fullCommand);
       console.log("Extracted flag:", flag);
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       
       if (flag === GAMMA_FLAG) {
         setFlagCaptured(true);
@@ -293,11 +288,7 @@ function GammaLevelContent() {
     
     console.log('GAMMA LEVEL - Karma update:', {
       type: karmaType,
-<<<<<<< HEAD
-      oldValue: user.karma?.[karmaType] || 0,
-=======
       oldValue: typeof user.karma === 'object' && user.karma !== null ? user.karma[karmaType] || 0 : 0,
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       change: karmaValue,
       newValue: updatedKarma[karmaType]
     });
@@ -418,35 +409,20 @@ function GammaLevelContent() {
           <div className="bg-black p-2 rounded border border-green-900">
             <img 
               ref={imageRef}
-<<<<<<< HEAD
               src="/challenges/gamma/danger!!!.png" 
-=======
-              src="/challenges/gamma/whistleblower.png" 
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
               alt="Encrypted Image"
               className="w-full max-h-64 object-contain"
             />
           </div>
           <div className="flex justify-between items-center">
             <a 
-<<<<<<< HEAD
               href="/challenges/gamma/danger!!!.png" 
-=======
-              href="/challenges/gamma/whistleblower.png" 
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
               download
               className="px-4 py-2 bg-green-900/50 hover:bg-green-800 text-green-100 rounded-md font-mono text-sm"
             >
               Download for Analysis
             </a>
           </div>
-<<<<<<< HEAD
-=======
-          <div className="text-green-300 text-sm mt-2 font-mono">
-            <p>Steganographic content detected. Check all channels separately.</p>
-            <p className="mt-1 text-xs text-green-400">Hint: Try analyzing the blue channel with LSB extraction.</p>
-          </div>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         </div>
       </div>
       
@@ -457,15 +433,9 @@ function GammaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'IMAGE ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-<<<<<<< HEAD
           `Agent. A critical image intercepted from the darknet. It holds a\n` +
           `whistleblower's truth. But be warned: truth is layered. Beyond\n` +
           `mere pixels, secrets reside. Capture the truth.\n\n` +
-=======
-          `Agent. A whistleblower's image was uploaded to a darknet dead drop.\n` +
-          `Within it is the truth. But truth is layered.\n` +
-          `Choose wisely — the image hides more than pixels.\n\n` +
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           `Begin your steganographic analysis...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
@@ -490,33 +460,21 @@ function GammaLevelContent() {
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-green-400">Objectives:</h4>
           <ul className="list-disc list-inside space-y-1">
-<<<<<<< HEAD
             <li>Find all hidden data inside the image file.</li>
             <li>Find secret information hidden subtly in the image.</li>
             <li>Find the final secret code (flag).</li>
             <li>Make a karma choice after capturing the flag.</li>
-=======
-            <li>Find and capture the flag hidden in the image data</li>
-            <li>Extract steganographic content from the image</li>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-green-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
-<<<<<<< HEAD
             <li>Image files contain multiple color channels (RGB).</li>
             <li>The image hides more than pixels.</li>
             <li>A single color holds a path.</li>
             <li>Whispers hide in the quietest bits.</li>
             <li>The flag is hidden in the image.</li>
-=======
-            <li>Steganography involves hiding data within other data</li>
-            <li>Image files contain multiple color channels (RGB)</li>
-            <li>The blue channel often contains hidden messages</li>
-            <li>The least significant bits (LSB) can store hidden data</li>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
@@ -565,14 +523,7 @@ export default function GammaLevel() {
         levelTitle="Spectral Overlay"
         levelDescription="A whistleblower's image was uploaded to a darknet dead drop. Within it is the truth. But truth is layered."
         objectives={[
-<<<<<<< HEAD
           'Uncover and capture the hidden flag embedded within the intercepted image data.'
-=======
-          'Analyze the image for hidden steganographic data',
-          'Extract the message from the image channels',
-          'Find the flag hidden within the image',
-          'Make a karma choice after capturing the flag'
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         ]}
         colorCode="green"
         loreText="The whistleblower claims to have evidence against Dr. Tenebris Draconis."
