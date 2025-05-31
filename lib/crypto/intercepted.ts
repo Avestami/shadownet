@@ -1,4 +1,4 @@
-import { createCanvas } from 'canvas';
+import { createCanvas } from '../utils/canvas-polyfill';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as QRCode from 'qrcode';
@@ -118,6 +118,12 @@ async function generateAudioWithQR() {
 
 // Generate the challenge files
 export async function generateInterceptedChallenge() {
+  // Prevent execution in production - these are only used for local development
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping intercepted challenge generation in production environment');
+    return;
+  }
+  
   const outputDir = path.join(process.cwd(), 'public/challenges/intercepted');
   fs.mkdirSync(outputDir, { recursive: true });
 
