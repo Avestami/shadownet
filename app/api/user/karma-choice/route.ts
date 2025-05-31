@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+<<<<<<< HEAD
 } 
       
       // Invalidate the user cache to ensure fresh data
@@ -154,4 +155,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+=======
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 } 

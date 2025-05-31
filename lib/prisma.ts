@@ -13,7 +13,11 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   },
   log: [
     {
+<<<<<<< HEAD
       emit: 'event',
+=======
+      emit: 'stdout',
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       level: 'query',
     },
     {
@@ -31,6 +35,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   ],
 });
 
+<<<<<<< HEAD
 // Add logging for all database operations
 prisma.$on('query', (e) => {
   console.log('[DB] Query:', e.query);
@@ -38,6 +43,8 @@ prisma.$on('query', (e) => {
   console.log('[DB] Duration:', `${e.duration}ms`);
 });
 
+=======
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }

@@ -73,8 +73,21 @@ function DeltaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
+<<<<<<< HEAD
     if (command.toLowerCase() === 'capture') {
       const flag = output;
+=======
+    const fullCommand = command.toLowerCase();
+    
+    // Special handling for the capture command
+    if (fullCommand.startsWith('capture')) {
+      // Extract the flag from the full command
+      const parts = fullCommand.split(' ');
+      const flag = parts.slice(1).join(' ').toUpperCase();
+      
+      console.log("Processing flag capture with command:", fullCommand);
+      console.log("Extracted flag:", flag);
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       
       if (flag === DELTA_FLAG) {
         setFlagCaptured(true);
@@ -363,7 +376,36 @@ function DeltaLevelContent() {
       </div>
       
       {/* Memory Analysis Section */}
+<<<<<<< HEAD
       
+=======
+      <div className="mb-6 bg-black/80 border border-purple-800 p-4 rounded-lg">
+        <h3 className="text-lg font-mono mb-3 text-purple-400">MEMORY FORENSICS</h3>
+        <div className="flex flex-col space-y-3">
+          <div className="bg-black p-2 rounded border border-purple-900">
+            <div className="w-full p-3 bg-black text-purple-300 font-mono text-sm">
+              <p>Memory dump file: shadownet_dump.raw (2.3 GB)</p>
+              <p>OS: Windows 10 x64</p>
+              <p>Profile: Win10x64_19041</p>
+              <p>Acquisition timestamp: 2023-06-15 03:42:19 UTC</p>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <a 
+              href="/challenges/delta/shadownet_dump.raw" 
+              download
+              className="px-4 py-2 bg-purple-900/50 hover:bg-purple-800 text-purple-100 rounded-md font-mono text-sm"
+            >
+              Download Memory Dump
+            </a>
+          </div>
+          <div className="text-purple-300 text-sm mt-2 font-mono">
+            <p>Memory dump contains evidence of system compromise.</p>
+            <p className="mt-1 text-xs text-purple-400">Hint: Look for unusual processes, network connections, and suspicious strings.</p>
+          </div>
+        </div>
+      </div>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       
       {/* Terminal UI */}
       <Terminal
@@ -372,11 +414,17 @@ function DeltaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'MEMORY ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
+<<<<<<< HEAD
           `A relic of the Cold War has surfaced – a compromised intel \n` +
           `manual. Its secrets are shielded by layers of seemingly innocent \n` +
           `ciphers, a playful facade masking a lethal payload. Decipher this\n` +
           `chain of nostalgic traps. The past holds the key to ShadowNet's \n` +
           `present vulnerability. Break the code. Retrieve the asset.\n\n` +
+=======
+          `ShadowNet detected an anomalous breach event.\n` +
+          `We&apos;ve acquired a memory dump from the compromised system.\n` +
+          `Your task: identify the breach method and exfiltration channel.\n\n` +
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           `Begin your memory forensics analysis...\n` +
           (flagCaptured ? 
           `\n========================================\n` +
@@ -401,32 +449,52 @@ function DeltaLevelContent() {
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-purple-400">Objectives:</h4>
           <ul className="list-disc list-inside space-y-1">
+<<<<<<< HEAD
             <li>Engage the intercepted file.</li>
             <li>Trace the pattern beneath the ink.</li>
             <li>Recover the original message.</li>
             <li>Deliver the final phrase without alteration.</li>
+=======
+            <li>Find and capture the flag hidden in the memory dump</li>
+            <li>Identify the attack vector and exfiltration method</li>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-purple-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
+<<<<<<< HEAD
             <li>The first shift is simple.</li>
             <li>A grid holds the next secret.</li>
             <li>Numbers can hide text? Maybe , You can Try.</li>
             <li>The final key dances with letters.</li>
+=======
+            <li>Memory dumps contain snapshots of all running processes</li>
+            <li>Look for unusual processes and network connections</li>
+            <li>Malware often uses memory residue to store sensitive data</li>
+            <li>Strings in memory may reveal the attacker&apos;s techniques</li>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-purple-400">FLAG CAPTURED!</h4>
+<<<<<<< HEAD
             <p>You've successfully analyzed the memory dump and identified the compromise.</p>
+=======
+            <p>You&apos;ve successfully analyzed the memory dump and identified the compromise.</p>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
                 <h4 className="font-bold text-purple-400">DECISION POINT:</h4>
+<<<<<<< HEAD
                 <p>You've discovered a critical memory vulnerability. What will you do with this knowledge?</p>
+=======
+                <p>You&apos;ve discovered a critical memory vulnerability. What will you do with this knowledge?</p>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                 
                 <div className="flex space-x-4 mt-3">
                   <button 
@@ -461,11 +529,20 @@ export default function DeltaLevel() {
       <LevelLayout
         levelId="delta"
         levelTitle="Memory Residue"
+<<<<<<< HEAD
         levelDescription="ShadowNet detected an anomalous breach event. We've acquired a memory dump from the compromised system."
         objectives={[
           'Uncover and capture the hidden flag by decrypting the intel manual.',
           `Attention:
 You have to report what you find immediately.`
+=======
+        levelDescription="ShadowNet detected an anomalous breach event. We&apos;ve acquired a memory dump from the compromised system."
+        objectives={[
+          'Analyze the memory dump for evidence of compromise',
+          'Identify the attack vector and exfiltration method',
+          'Find the flag hidden in memory artifacts',
+          'Make a karma choice after capturing the flag'
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
         ]}
         colorCode="purple"
         loreText="This breach may be connected to Dr. Tenebris Draconis' operations."

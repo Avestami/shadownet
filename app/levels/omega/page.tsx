@@ -326,7 +326,11 @@ function OmegaLevelContent() {
             </a>
           </div>
           <div className="text-green-300 text-sm mt-2 font-mono">
+<<<<<<< HEAD
             <p>Dr. Tenebris Draconis' final challenge. All paths converge here.</p>
+=======
+            <p>Dr. Tenebris Draconis Draconis&apos; final challenge. All paths converge here.</p>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             <p className="mt-1 text-xs text-green-400">Hint: Your karma path influences the available attack vectors. Consider your journey.</p>
           </div>
         </div>
@@ -374,7 +378,11 @@ function OmegaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'CONVERGENCE ACHIEVED' : 'FINAL CHALLENGE'}\n\n` +
           `SYSTEM MESSAGE:\n` +
+<<<<<<< HEAD
           `Welcome to The Convergence. This is Dr. Tenebris Draconis' final test.\n` +
+=======
+          `Welcome to The Convergence. This is Dr. Tenebris Draconis&apos; final test.\n` +
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           `All your skills, choices, and karma have led to this moment.\n` +
           `Your task: Decode the ultimate truth about ShadowNet.\n\n` +
           `Available commands:\n` +
@@ -494,7 +502,11 @@ Omega Level: The Convergence
           <h4 className="font-bold mb-1 text-green-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
             <li>Your previous karma choices have shaped your available paths</li>
+<<<<<<< HEAD
             <li>Consider how each previous level's techniques might apply here</li>
+=======
+            <li>Consider how each previous level&apos;s techniques might apply here</li>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             <li>The truth about ShadowNet lies at the convergence of all paths</li>
           </ul>
         </div>
@@ -502,12 +514,20 @@ Omega Level: The Convergence
         {flagCaptured ? (
           <div className="mt-4">
             <h4 className="font-bold mb-2 text-green-400">CONVERGENCE ACHIEVED!</h4>
+<<<<<<< HEAD
             <p>You've successfully uncovered the truth about ShadowNet and Dr. Tenebris Draconis.</p>
+=======
+            <p>You&apos;ve successfully uncovered the truth about ShadowNet and Dr. Tenebris Draconis.</p>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
             
             {!karmaChoiceMade && (
               <div className="mt-4 space-y-3">
                 <h4 className="font-bold text-green-400">FINAL DECISION:</h4>
+<<<<<<< HEAD
                 <p>You've reached the moment of truth. You now have the power to shape the future of ShadowNet and humanity's relationship with AI. What will you do?</p>
+=======
+                <p>You&apos;ve reached the moment of truth. You now have the power to shape the future of ShadowNet and humanity&apos;s relationship with AI. What will you do?</p>
+>>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                 
                 <div className="flex space-x-4 mt-3">
                   <button 
