@@ -27,7 +27,6 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@next/swc-win32-x64-msvc": "^15.1.8",
     "@prisma/client": "^5.10.0",
     "@types/uuid": "^9.0.8",
     "bcryptjs": "^2.4.3",
