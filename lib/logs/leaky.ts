@@ -1,4 +1,4 @@
-import { createCanvas, ImageData } from 'canvas';
+import { createCanvas, BasicImageData } from '../utils/canvas-polyfill';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -147,6 +147,12 @@ function generatePatternFromFrequency(frequency: number): [number, number][] {
 
 // Generate the challenge files
 export async function generateLeakyChallenge() {
+  // Prevent execution in production - these are only used for local development
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping leaky challenge generation in production environment');
+    return;
+  }
+  
   const outputDir = path.join(process.cwd(), 'public/challenges/leaky');
   fs.mkdirSync(outputDir, { recursive: true });
 

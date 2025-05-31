@@ -1,4 +1,4 @@
-import { createCanvas } from 'canvas';
+import { createCanvas } from '../utils/canvas-polyfill';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as QRCode from 'qrcode';
@@ -42,6 +42,12 @@ function embedLSBData(imageData: PixelData[], message: string): void {
 }
 
 export async function generateGammaChallenge() {
+  // Prevent execution in production - these are only used for local development
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping gamma challenge generation in production environment');
+    return;
+  }
+  
   const width = 512;
   const height = 512;
   const canvas = createCanvas(width, height);
