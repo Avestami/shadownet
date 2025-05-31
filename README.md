@@ -26,24 +26,6 @@ Project Control is an immersive cyberpunk-themed Capture The Flag (CTF) game whe
   - [Technical Features](#technical-features)
   - [Contributing](#contributing)
   - [License](#license)
-=======
-- [Game Overview](#game-overview)
-- [Installation](#installation)
-- [Gameplay](#gameplay)
-- [Level Walkthroughs](#level-walkthroughs)
-  - [Alpha Level: Perimeter Security](#alpha-level-perimeter-security)
-  - [Beta Level: Signal Dissonance](#beta-level-signal-dissonance)
-  - [Gamma Level: Spectral Overlay](#gamma-level-spectral-overlay)
-  - [Delta Level: Memory Residue](#delta-level-memory-residue)
-  - [Sigma Level: Network Shadows](#sigma-level-network-shadows)
-  - [Theta Level: Hardware Trojan](#theta-level-hardware-trojan)
-  - [Zeta Level: Web Intrusion](#zeta-level-web-intrusion)
-  - [Sigma-2 Level: AI Cultists](#sigma-2-level-ai-cultists)
-  - [Omega Level: Final Convergence](#omega-level-final-convergence)
-- [Karma System](#karma-system)
-- [Technical Features](#technical-features)
-- [Contributing](#contributing)
-- [License](#license)
 >>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 
 ## Game Overview
@@ -184,11 +166,7 @@ Project Control uses a terminal-based interface to simulate hacking. Here are th
 3. Use `cat clone_data.bin` to find mirror reference
 4. Find the key "mirr0r" in the logs
 5. Use `decrypt data-theta.enc mirr0r` to get the flag
-<<<<<<< HEAD
-   6. Capture the flag: `capture SHADOWNET{REFLECTIONS}`
-=======
 6. Capture the flag: `capture SHADOWNET{REFLECTIONS}`
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
 
 **Karma Choices**:
 - `choose secure` - Secure devices (+5 Loyalty)

@@ -17,8 +17,7 @@ const nextConfig = {
   staticPageGenerationTimeout: 120,
   images: {
     unoptimized: true
-  },
-  swcMinify: false
+  }
 }
 
 module.exports = nextConfig 

@@ -379,11 +379,7 @@ function SigmaLevelContent() {
         <div className="flex flex-col space-y-3">
           <div className="bg-black p-2 rounded border border-cyan-900">
             <div className="w-full p-3 bg-black text-cyan-300 font-mono text-sm">
-<<<<<<< HEAD
               <p>PCAP file: freedom_trace.pcap (28.7 MB)</p>
-=======
-              <p>PCAP file: suspicious_traffic.pcap (28.7 MB)</p>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
               <p>Capture time: 15 minutes</p>
               <p>Protocol distribution: TCP (78%), UDP (15%), ICMP (4%), Other (3%)</p>
               <p>Notable connections: 18 unique IPs, 12 domains</p>
@@ -391,11 +387,7 @@ function SigmaLevelContent() {
           </div>
           <div className="flex justify-between items-center">
             <a 
-<<<<<<< HEAD
               href="/challenges/sigma/freedom_trace.pcap" 
-=======
-              href="/challenges/sigma/suspicious_traffic.pcap" 
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
               download
               className="px-4 py-2 bg-cyan-900/50 hover:bg-cyan-800 text-cyan-100 rounded-md font-mono text-sm"
             >
@@ -486,15 +478,9 @@ Remember: Advanced adversaries often use legitimate-looking traffic to hide thei
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-cyan-400">Hints:</h4>
           <ul className="list-disc list-inside space-y-1">
-<<<<<<< HEAD
             <li>Freedom was never encrypted — just spelled out.</li>
             <li>The resolver saw everything.</li>
             <li>Look for what repeats. Look for what spells.</li>
-=======
-            <li>Examine DNS queries for unusual patterns</li>
-            <li>Check HTTP headers for hidden data</li>
-            <li>Look for encoded data in seemingly normal traffic</li>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 

@@ -106,11 +106,6 @@ function BetaLevelContent() {
   const handleTerminalCommand = (command: string, output: string) => {
     console.log("Command received:", command, "Output:", output);
     
-<<<<<<< HEAD
-    if (command.toLowerCase() === 'capture') {
-      const flag = output;
-      
-=======
     const fullCommand = command.toLowerCase();
     
     // Special handling for the capture command
@@ -123,7 +118,6 @@ function BetaLevelContent() {
       console.log("Extracted flag:", flag);
       
       // Check for the actual flag
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       if (flag === 'SHADOWNET{SOUND876}') {
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
@@ -313,11 +307,7 @@ function BetaLevelContent() {
     
     console.log('BETA LEVEL - Karma update:', {
       type: karmaType,
-<<<<<<< HEAD
-      oldValue: user.karma?.[karmaType] || 0,
-=======
       oldValue: typeof user.karma === 'object' && user.karma !== null ? user.karma[karmaType] || 0 : 0,
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
       change: karmaValue,
       newValue: updatedKarma[karmaType]
     });
@@ -440,16 +430,10 @@ function BetaLevelContent() {
           `User: ${user?.username || 'Unknown'}\n` +
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'AUDIO ANALYSIS REQUIRED'}\n\n` +
           `SYSTEM MESSAGE:\n` +
-<<<<<<< HEAD
           `ShadowNet's core communications breached. We've captured an\n` +
           `audio anomaly, laden with a hidden intelligence fragment. \n` +
           `Decrypt this signal, extract the embedded data, and secure the\n` +
           `flag. Time is critical.\n\n` +
-=======
-          `We've intercepted encrypted audio communications from ShadowNet.\n` +
-          `Your task: analyze the audio file to extract the hidden data.\n` +
-          `Use the download button below to save the audio evidence file for analysis.\n\n` +
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           `Available commands:\n` +
           `- help            Show all commands\n` +
           `- analyze         Get analysis tips\n` +
@@ -480,13 +464,8 @@ function BetaLevelContent() {
           Download the audio evidence file for offline analysis:
         </p>
         <a 
-<<<<<<< HEAD
           href="/challenges/beta/dissonance.wav" 
           download="/challenges/beta/dissonance.wav"
-=======
-          href="/challenges/beta/audio-evidence.mp3" 
-          download="shadownet-beta-evidence.mp3"
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           className="inline-flex items-center bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -503,13 +482,8 @@ function BetaLevelContent() {
         <div className="mb-3">
           <h4 className="font-bold mb-1 text-blue-400">Objectives:</h4>
           <ul className="list-disc list-inside space-y-1">
-<<<<<<< HEAD
             <li>Find hidden data inside the sound file.</li>
             <li>Find the secret code (flag) hidden in the sound changes.</li>
-=======
-            <li>Find and capture the flag hidden in the audio data</li>
-            <li>{betaChallenge.description}</li>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
           </ul>
         </div>
 
@@ -584,15 +558,8 @@ export default function BetaLevel() {
                     <p>Welcome to the Signal Dissonance challenge.</p>
                     <p className="mt-2">Objectives:</p>
                     <ul className="list-disc pl-5 space-y-1 text-sm">
-<<<<<<< HEAD
                       <li>Uncover and capture the hidden flag embedded within the intercepted audio data.</li>
                       <li>Attention: You have to purge what you find immediately.</li>
-=======
-                      <li>Analyze the audio file for hidden data</li>
-                      <li>Extract information from both audio channels</li>
-                      <li>Find the flag encoded in the frequencies</li>
-                      <li>Make a karma choice after capturing the flag</li>
->>>>>>> ed333d272b88f582e19676792eab9a4825d3277f
                     </ul>
                     
                     <div className="mt-4 pt-4 border-t border-blue-900">
