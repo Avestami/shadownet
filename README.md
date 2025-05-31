@@ -101,7 +101,7 @@ Project Control uses a terminal-based interface to simulate hacking. Here are th
 4. Decode the message to learn that the network key is in the audio
 5. Listen to the audio file and identify the key word "n3tw0rk"
 6. Use `decrypt data-beta.enc n3tw0rk` to get the flag
-7. Capture the flag: `capture SHADOWNET{SOUND876}`
+7. Capture the flag: `capture SHADOWNET{876}`
 
 **Karma Choices**:
 - `choose purge` - Purge the intercepted data (+5 Loyalty)

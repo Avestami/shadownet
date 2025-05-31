@@ -55,7 +55,7 @@ export const LEVEL_CHALLENGES: Record<string, Challenge> = {
     id: 'beta',
     title: 'Signal Dissonance',
     description: "Your receiver just caught a pulse. It's an echo embedded in noise, like someone screaming through static. Listen... but listen with intention. Split the truth from the tone.",
-    flag: 'SHADOWNET{SOUND876}',
+    flag: 'SHADOWNET{876}',
     files: ['dissonance.wav'],
     hints: [
       'The signal has two faces.',
