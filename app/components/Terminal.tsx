@@ -26,7 +26,7 @@ interface MissionData {
 
 interface TerminalProps {
   initialText?: string;
-  prompt?: string;
+  prompt?: string; q
   commands?: Record<string, (args: string[]) => string | Promise<string>>;
   typingEffect?: boolean;
   onCommandExecuted?: (command: string, output: string) => void;
