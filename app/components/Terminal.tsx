@@ -221,7 +221,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       // Add level-specific files
       if (levelId === 'alpha') {
-        files.push('file6.enc','README-alpha.md');
+        files.push('file6.enc','readme-alpha.md');
       } else if (levelId === 'delta') {
         files.push('see_the_starts.td');
       } else if (levelId === 'sigma') {
@@ -273,7 +273,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       
       // Handle level-specific data files by explicitly checking file names
       // This ensures files are accessible regardless of level detection
-      if (file == 'README-alpha.md') {
+      if (file == 'readme-alpha.md') {
         return`MISSION: Echoed Transmission
 
 Agent,
