@@ -3,6 +3,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "../../../../lib/prisma";
 
+// Debug logging for environment variables
+console.log("DATABASE_URL available:", !!process.env.DATABASE_URL);
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("NEXTAUTH_SECRET available:", !!process.env.NEXTAUTH_SECRET);
+
 // NextAuth handler
 const handler = NextAuth({
   providers: [
@@ -13,6 +18,8 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Authorize function called with username:", credentials?.username);
+        
         if (!credentials?.username || !credentials?.password) {
           console.log("Missing username or password");
           return null;
@@ -20,6 +27,7 @@ const handler = NextAuth({
 
         try {
           // Find user by username
+          console.log("Looking up user:", credentials.username);
           const user = await prisma.user.findUnique({
             where: { username: credentials.username },
           });
@@ -29,6 +37,8 @@ const handler = NextAuth({
             console.log("User not found:", credentials.username);
             return null;
           }
+          
+          console.log("User found, comparing password");
           
           // Compare the input password with stored hash
           const passwordMatch = await bcrypt.compare(
@@ -42,12 +52,19 @@ const handler = NextAuth({
           }
 
           // Create and store a new session
-          await prisma.session.create({
-            data: {
-              userId: user.id,
-              expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-            },
-          });
+          console.log("Password matched, creating session");
+          try {
+            await prisma.session.create({
+              data: {
+                userId: user.id,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+              },
+            });
+            console.log("Session created successfully");
+          } catch (sessionError) {
+            console.error("Failed to create session:", sessionError);
+            // Continue even if session creation fails
+          }
 
           console.log("Login successful for user:", user.username);
           
@@ -103,7 +120,7 @@ const handler = NextAuth({
       return session;
     },
   },
-  debug: process.env.NODE_ENV !== "production",
+  debug: true, // Enable debug mode
   logger: {
     error(code, metadata) {
       console.error(`[NextAuth] [Error] ${code}:`, metadata);
