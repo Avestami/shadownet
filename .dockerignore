@@ -39,4 +39,31 @@ yarn-error.log*
 # Docker
 Dockerfile
 .dockerignore
-docker-backup 
+docker-backup
+
+# Exclude package-lock.json to force regeneration with correct dependencies
+package-lock.json
+
+# Exclude development files
+.git
+.github
+.vscode
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Exclude test files
+__tests__
+*.test.js
+*.spec.js
+
+# Exclude build artifacts
+.next
+out
+dist
+build
+
+# Exclude environment files
+.env*
+!.env.example 
