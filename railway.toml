@@ -1,14 +1,14 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "npm run build"
+builder = "nixpacks"
+buildCommand = "npm install && npx prisma generate && npm run build"
 watchPatterns = ["prisma/**", "src/**", "app/**", "components/**", "public/**", "styles/**", "lib/**"]
 
 [deploy]
-startCommand = "node scripts/railway-entrypoint.js"
+startCommand = "npm start"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 5
+restartPolicyMaxRetries = 10
 
 [phases.setup]
 nixPkgs = ["openssl", "nodejs", "python3", "gcc", "git", "make", "cairo", "pango", "pixman", "libjpeg", "pkgconfig"]
@@ -21,4 +21,10 @@ env = ["NODE_ENV=production", "PRISMA_CLIENT_ENGINE_TYPE=binary"]
 [variables]
 NIXPACKS_PKGS = "openssl"
 NODE_OPTIONS = "--max-old-space-size=2048"
-PRISMA_CLIENT_ENGINE_TYPE = "binary" 
+PRISMA_CLIENT_ENGINE_TYPE = "binary"
+
+[build.env]
+NIXPACKS_NODE_VERSION = "18"
+
+[nixpacks]
+install-cmd = "apk add --no-cache openssl" 

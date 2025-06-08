@@ -106,6 +106,34 @@ export const LEVEL_CHALLENGES: Record<string, Challenge> = {
       }
     ],
     documents: ['harmonic_five']
+  },
+  
+  zeta: {
+    id: 'zeta',
+    title: 'Web Intrusion Analysis',
+    description: "We've discovered a vulnerable admin portal in the ShadowNet infrastructure. Your mission is to analyze the Docker container and exploit vulnerabilities in the JWT implementation.",
+    flag: 'SHADOWNET{TOKEN_FORGED}',
+    files: ['admin-portal.zip'],
+    hints: [
+      'Look for weak JWT signing algorithms',
+      'Check for hardcoded secrets in the source code',
+      'Try modifying the payload without invalidating the signature'
+    ],
+    karmaChoices: [
+      {
+        id: 'patch',
+        description: 'Patch the vulnerability and secure the system.',
+        type: 'mercy',
+        score: 100
+      },
+      {
+        id: 'blackmail',
+        description: 'Use the vulnerability to blackmail the administrators.',
+        type: 'defiance',
+        score: 90
+      }
+    ],
+    documents: ['jwt_security']
   }
 };
 
