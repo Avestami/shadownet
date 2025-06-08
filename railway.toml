@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npx prisma generate && npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/"
+healthcheckTimeout = 60
+
+[nixpacks]
+installCommand = "apt-get update && apt-get install -y openssl" 
