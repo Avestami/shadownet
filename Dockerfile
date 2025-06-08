@@ -29,7 +29,7 @@ COPY . .
 RUN npx prisma generate
 
 # Create a simple .env file for the build
-RUN echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/shadownet" > .env
+RUN echo "DATABASE_URL=postgresql://postgres:bXbWmMFKrKqabvxkeHExZOSmqaAqwxzH@postgres.railway.internal:5432/railway" > .env
 RUN echo "NEXTAUTH_URL=http://localhost:3000" >> .env
 RUN echo "NEXTAUTH_SECRET=supersecretkey12345" >> .env
 
@@ -52,6 +52,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.env ./.env
 
 # Expose the port the app will run on
 EXPOSE 3000
