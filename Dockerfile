@@ -25,13 +25,11 @@ COPY --from=deps /app/prisma ./prisma
 # Copy application code
 COPY . .
 
+# Use production environment variables
+COPY .env.production .env
+
 # Generate Prisma client
 RUN npx prisma generate
-
-# Create a simple .env file for the build
-RUN echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/shadownet" > .env
-RUN echo "NEXTAUTH_URL=http://localhost:3000" >> .env
-RUN echo "NEXTAUTH_SECRET=supersecretkey12345" >> .env
 
 # Build Next.js directly without using the railway scripts
 RUN npx next build
@@ -52,6 +50,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.env ./.env
 
 # Expose the port the app will run on
 EXPOSE 3000
