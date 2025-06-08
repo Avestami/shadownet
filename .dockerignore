@@ -66,4 +66,7 @@ build
 
 # Exclude environment files
 .env*
-!.env.example 
+!.env.example
+
+# Ensure prisma schema is included
+!prisma/schema.prisma 
