@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "node scripts/railway-build-setup.js",
-    "build": "prisma generate && next build",
-    "start": "node scripts/railway-entrypoint.js",
+    "build": "npx prisma generate && next build",
+    "start": "next start",
     "start:legacy": "node -r ./prisma/runtime.js node_modules/.bin/next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",

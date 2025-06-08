@@ -1,72 +1,31 @@
-FROM node:20-alpine AS base
+FROM node:18-alpine
 
-# Install dependencies required for canvas and Prisma
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    pixman-dev \
-    cairo-dev \
-    pango-dev \
-    libjpeg-turbo-dev \
-    giflib-dev \
-    openssl-dev
+# Install OpenSSL - this fixes the Prisma OpenSSL detection issue
+RUN apk add --no-cache openssl
 
-# Create a symlink for libssl.so.1.1 if it doesn't exist
-RUN if [ ! -f /lib/libssl.so.1.1 ]; then \
-      if [ -f /usr/lib/libssl.so.3 ]; then \
-        ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1; \
-        ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1; \
-      fi; \
-    fi
-
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package.json and package-lock.json
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps --ignore-scripts
 
-# Create a placeholder .env file with DATABASE_URL for Prisma
-RUN echo "DATABASE_URL=\"postgresql://postgres:postgres@database:5432/project-control?schema=public\"" > .env
-RUN echo "NEXTAUTH_URL=\"http://localhost:3000\"" >> .env
-RUN echo "NEXTAUTH_SECRET=\"supersecretkey12345\"" >> .env
+# Install dependencies
+RUN npm ci
 
-# Copy application code
+# Copy the rest of the application
 COPY . .
 
-# Build native modules and generate Prisma client
-RUN npm rebuild canvas --update-binary
+# Generate Prisma client
 RUN npx prisma generate
-
-# Add next.config.js output: 'standalone' if it doesn't exist
-RUN if [ ! -f next.config.js ]; then echo "module.exports = { output: 'standalone' };" > next.config.js; fi
-RUN if [ -f next.config.js ] && ! grep -q "output:" next.config.js; then sed -i 's/module.exports = {/module.exports = { output: "standalone",/g' next.config.js; fi
 
 # Build Next.js
 RUN npm run build
 
 # Set production environment
 ENV NODE_ENV production
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
 
-# Expose port
+# Expose the port the app will run on
 EXPOSE 3000
 
-# Create an entrypoint script to handle database connection and startup
-RUN echo '#!/bin/sh' > /app/entrypoint.sh
-RUN echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/entrypoint.sh
-RUN echo '  echo "DATABASE_URL=$DATABASE_URL" > .env' >> /app/entrypoint.sh
-RUN echo 'fi' >> /app/entrypoint.sh
-RUN echo 'if [ -n "$NEXTAUTH_URL" ]; then' >> /app/entrypoint.sh
-RUN echo '  echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env' >> /app/entrypoint.sh
-RUN echo 'fi' >> /app/entrypoint.sh
-RUN echo 'if [ -n "$NEXTAUTH_SECRET" ]; then' >> /app/entrypoint.sh
-RUN echo '  echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env' >> /app/entrypoint.sh
-RUN echo 'fi' >> /app/entrypoint.sh
-RUN echo 'exec npm start' >> /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # Start the application
-CMD ["/app/entrypoint.sh"]
+CMD ["npm", "start"]
