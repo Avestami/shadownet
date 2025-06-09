@@ -20,9 +20,9 @@ export default function Login() {
   // If already authenticated, redirect to home page
   useEffect(() => {
     if (status === 'authenticated' && session) {
-      router.replace('/');
+      window.location.href = '/';
     }
-  }, [session, status, router]);
+  }, [session, status]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +48,9 @@ export default function Login() {
         setDebugInfo(prev => `${prev}\nError: ${result.error}`);
       } else if (result?.ok) {
         setDebugInfo(prev => `${prev}\nLogin successful, redirecting...`);
-        router.replace('/');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 500);
       }
     } catch (error) {
       console.error('Login error:', error);

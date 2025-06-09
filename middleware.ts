@@ -31,7 +31,15 @@ export async function middleware(request: NextRequest) {
   // If we've redirected too many times, just proceed to prevent loops
   if (redirectCount > 2) {
     console.log('Too many redirects detected, allowing request to proceed');
-    return NextResponse.next();
+    
+    // Clear the redirect cookie to reset the counter for future requests
+    const response = NextResponse.next();
+    response.cookies.set('redirect_attempt', '0', {
+      maxAge: 60,
+      path: '/'
+    });
+    
+    return response;
   }
   
   try {
@@ -49,7 +57,9 @@ export async function middleware(request: NextRequest) {
     // If the user is not logged in and trying to access a protected route, redirect to login
     if (!token && !isPublicPath) {
       const url = new URL('/auth/login', request.url);
-      url.searchParams.set('callbackUrl', path);
+      
+      // Don't add callbackUrl parameter to avoid potential redirect issues
+      // url.searchParams.set('callbackUrl', path);
       
       // Set a cookie to track redirect attempts
       const response = NextResponse.redirect(url);
