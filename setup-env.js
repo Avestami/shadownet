@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Define the environment variables
-const envContent = `# Database URL for Docker PostgreSQL container
+const envContent = `# Database URL for local Docker PostgreSQL container
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/shadownet"
 
 # NextAuth configuration
