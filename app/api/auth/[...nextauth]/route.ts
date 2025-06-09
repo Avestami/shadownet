@@ -6,7 +6,7 @@ import { prisma } from "../../../../lib/prisma";
 // Debug logging for environment variables
 console.log("DATABASE_URL available:", !!process.env.DATABASE_URL);
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-console.log("NEXTAUTH_SECRET available:", !!process.env.NEXTAUTH_SECRET);
+console.log("NODE_ENV:", process.env.NODE_ENV);
 
 // NextAuth handler
 const handler = NextAuth({
@@ -78,7 +78,7 @@ const handler = NextAuth({
           console.error("Error in authorize function:", error);
           return null;
         }
-      },
+      }
     }),
   ],
   callbacks: {
@@ -114,7 +114,9 @@ const handler = NextAuth({
       if (session?.user && token) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
-        session.user.email = token.email as string;
+        if (token.email) {
+          session.user.email = token.email as string;
+        }
       }
       
       return session;
@@ -141,6 +143,7 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
+  useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
     sessionToken: {
       name: process.env.NODE_ENV === "production" 
@@ -158,7 +161,6 @@ const handler = NextAuth({
         ? "__Secure-next-auth.callback-url"
         : "next-auth.callback-url",
       options: {
-        httpOnly: true,
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",

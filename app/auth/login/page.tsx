@@ -7,6 +7,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MatrixBackground } from '../../components/MatrixBackground';
+import Script from 'next/script';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -14,19 +15,16 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [redirecting, setRedirecting] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // If already authenticated, redirect to home page
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      window.location.href = '/';
-    }
-  }, [session, status]);
+  // Don't automatically redirect on session detection to prevent loops
+  // Instead, let the user explicitly log in through the form
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
+    if (loading || redirecting) return;
     
     setLoading(true);
     setError('');
@@ -48,9 +46,12 @@ export default function Login() {
         setDebugInfo(prev => `${prev}\nError: ${result.error}`);
       } else if (result?.ok) {
         setDebugInfo(prev => `${prev}\nLogin successful, redirecting...`);
+        setRedirecting(true);
+        
+        // Use direct window location change after a short delay
         setTimeout(() => {
           window.location.href = '/';
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -123,12 +124,12 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || redirecting}
               className={`w-full py-2 px-4 bg-blue-800 hover:bg-blue-700 text-white font-mono rounded transition-colors ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+                (loading || redirecting) ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
-              {loading ? 'AUTHENTICATING...' : 'LOGIN'}
+              {loading ? 'AUTHENTICATING...' : redirecting ? 'REDIRECTING...' : 'LOGIN'}
             </button>
           </div>
         </form>
@@ -154,6 +155,58 @@ export default function Login() {
           </p>
         </div>
       </div>
+      
+      {/* Debug script for testing authentication */}
+      <Script id="auth-debug">
+        {`
+        // Authentication test script
+        console.log('=== Authentication Test Script ===');
+        
+        // Check for cookies
+        function checkCookies() {
+          console.log('Checking cookies:');
+          const cookies = document.cookie.split(';').map(c => c.trim());
+          console.log('All cookies:', cookies);
+          
+          // Look for NextAuth cookies
+          const authCookies = cookies.filter(c => 
+            c.startsWith('next-auth') || 
+            c.startsWith('__Secure-next-auth') || 
+            c.startsWith('__Host-next-auth')
+          );
+          
+          console.log('Auth cookies found:', authCookies);
+          return authCookies.length > 0;
+        }
+        
+        // Check session endpoint
+        async function checkSession() {
+          console.log('Checking session endpoint...');
+          try {
+            const res = await fetch('/api/auth/session');
+            const data = await res.json();
+            console.log('Session data:', data);
+            return data?.user != null;
+          } catch (error) {
+            console.error('Error checking session:', error);
+            return false;
+          }
+        }
+        
+        // Run tests
+        async function runTests() {
+          const hasCookies = checkCookies();
+          const hasSession = await checkSession();
+          
+          console.log('=== Authentication Test Results ===');
+          console.log('Has auth cookies:', hasCookies);
+          console.log('Has valid session:', hasSession);
+        }
+        
+        // Run tests after page load
+        setTimeout(runTests, 1000);
+        `}
+      </Script>
     </div>
   );
 } 
