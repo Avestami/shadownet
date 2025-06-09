@@ -13,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -29,21 +30,30 @@ export default function Login() {
     
     setLoading(true);
     setError('');
+    setDebugInfo('Attempting to sign in...');
 
     try {
+      console.log('Login attempt with username:', username);
       const result = await signIn('credentials', {
         username,
         password,
         redirect: false,
       });
 
+      console.log('SignIn result:', result);
+      setDebugInfo(prev => `${prev}\nSignIn result: ${JSON.stringify(result)}`);
+
       if (result?.error) {
         setError('Invalid username or password');
+        setDebugInfo(prev => `${prev}\nError: ${result.error}`);
       } else if (result?.ok) {
+        setDebugInfo(prev => `${prev}\nLogin successful, redirecting...`);
         router.replace('/');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError('An unexpected error occurred. Please try again.');
+      setDebugInfo(prev => `${prev}\nException: ${JSON.stringify(error)}`);
     } finally {
       setLoading(false);
     }
@@ -120,6 +130,12 @@ export default function Login() {
             </button>
           </div>
         </form>
+        
+        {debugInfo && (
+          <div className="mt-4 p-3 bg-gray-900 border border-gray-800 rounded text-gray-300 text-xs font-mono overflow-auto max-h-40">
+            <pre>{debugInfo}</pre>
+          </div>
+        )}
         
         <div className="mt-6 text-center">
           <p className="text-gray-400 font-mono text-sm">
