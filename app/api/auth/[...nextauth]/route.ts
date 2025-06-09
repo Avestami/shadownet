@@ -8,6 +8,18 @@ console.log("DATABASE_URL available:", !!process.env.DATABASE_URL);
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("NODE_ENV:", process.env.NODE_ENV);
 
+// Force NEXTAUTH_URL to use HTTP in development
+const baseUrl = process.env.NODE_ENV === "production" 
+  ? process.env.NEXTAUTH_URL 
+  : "http://localhost:3000";
+
+console.log("Using base URL:", baseUrl);
+
+// Override NEXTAUTH_URL if needed
+if (process.env.NODE_ENV !== "production") {
+  process.env.NEXTAUTH_URL = baseUrl;
+}
+
 // NextAuth handler
 const handler = NextAuth({
   providers: [

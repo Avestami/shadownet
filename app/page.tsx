@@ -105,6 +105,68 @@ export default function Home() {
     }
   };
 
+  // Fetch user data - only once on initial mount
+  const fetchUser = async () => {
+    // Check if we're already on an auth page to prevent redirect loops
+    if (isOnAuthPage()) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // Make sure we're using the correct base URL
+      const baseUrl = window.location.origin;
+      const res = await loggedFetch(`${baseUrl}/api/user`);
+      
+      if (res.ok) {
+        const userData = await res.json();
+        
+        // Restore karma from localStorage if available and more recent
+        const savedKarma = localStorage.getItem('userKarma');
+        if (savedKarma) {
+          try {
+            const karmaData = JSON.parse(savedKarma);
+            // Use localStorage karma if it's available
+            if (karmaData.karma !== undefined) {
+              userData.karma = karmaData.karma;
+            }
+          } catch (_) {
+            console.error('Invalid karma data in localStorage');
+          }
+        }
+        
+        setUser(userData);
+        
+        // If user has already made choices, redirect to the appropriate level
+        if (userData.choices && userData.choices.length > 0) {
+          router.push('/levels/alpha');
+        }
+      } else if (res.status === 404 || res.status === 401) {
+        // User not found or not authenticated - this is expected for new users
+        console.log('No authenticated user found (404/401), clearing session and redirecting to login');
+        
+        // Clear any invalid sessions
+        try {
+          await fetch(`${baseUrl}/api/clear-session`, { method: 'POST' });
+          console.log('Session cleared');
+        } catch (error) {
+          console.error('Error clearing session:', error);
+        }
+        
+        setUser(null);
+      } else {
+        console.error('Failed to fetch user:', res.status);
+        setError('Failed to load user data. Please try logging in again.');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // On network errors, assume no user and redirect to login
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Check for debug flag in localStorage
     const debugUser = localStorage.getItem('debugUser');
@@ -141,7 +203,10 @@ export default function Home() {
       }
       
       try {
-        const res = await loggedFetch('/api/user');
+        // Make sure we're using the correct base URL
+        const baseUrl = window.location.origin;
+        const res = await loggedFetch(`${baseUrl}/api/user`);
+        
         if (res.ok) {
           const userData = await res.json();
           
@@ -171,7 +236,7 @@ export default function Home() {
           
           // Clear any invalid sessions
           try {
-            await fetch('/api/clear-session', { method: 'POST' });
+            await fetch(`${baseUrl}/api/clear-session`, { method: 'POST' });
             console.log('Session cleared');
           } catch (error) {
             console.error('Error clearing session:', error);
@@ -227,7 +292,8 @@ export default function Home() {
       
       // Use a short timeout to prevent immediate redirect
       const timer = setTimeout(() => {
-        window.location.href = '/auth/login';
+        const baseUrl = window.location.origin;
+        window.location.href = `${baseUrl}/auth/login`;
       }, 100);
       
       return () => clearTimeout(timer);
@@ -284,7 +350,8 @@ export default function Home() {
       // Call logout API if we have a token
       const token = localStorage.getItem('authToken');
       if (token) {
-        await fetch('/api/logout', {
+        const baseUrl = window.location.origin;
+        await fetch(`${baseUrl}/api/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -296,15 +363,15 @@ export default function Home() {
       // Reset user state and redirect to login
       setUser(null);
       setTimeout(() => {
-        window.location.href = '/auth/login';
+        const baseUrl = window.location.origin;
+        window.location.href = `${baseUrl}/auth/login`;
       }, 2000);
-      
     } catch (error) {
-      console.error('Error during logout:', error);
-      // Still reset even if API call fails
-      setUser(null);
+      console.error('Logout error:', error);
+      // Even if there's an error, try to redirect to login
       setTimeout(() => {
-        window.location.href = '/auth/login';
+        const baseUrl = window.location.origin;
+        window.location.href = `${baseUrl}/auth/login`;
       }, 2000);
     }
   };

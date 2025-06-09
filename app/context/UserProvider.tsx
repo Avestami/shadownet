@@ -104,8 +104,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
       }
       
+      // Make sure we use the correct base URL
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      
       // Make an API call to refresh user data
-      const response = await fetch('/api/user?refresh=true', {
+      const response = await fetch(`${baseUrl}/api/user?refresh=true`, {
         method: 'GET',
         headers: {
           'Cache-Control': 'no-cache',

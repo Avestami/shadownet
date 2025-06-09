@@ -49,8 +49,10 @@ export default function Login() {
         setRedirecting(true);
         
         // Use direct window location change after a short delay
+        // Make sure we use the correct protocol and port
         setTimeout(() => {
-          window.location.href = '/';
+          const baseUrl = window.location.origin;
+          window.location.href = `${baseUrl}/`;
         }, 1000);
       }
     } catch (error) {
@@ -161,6 +163,7 @@ export default function Login() {
         {`
         // Authentication test script
         console.log('=== Authentication Test Script ===');
+        console.log('Current origin:', window.location.origin);
         
         // Check for cookies
         function checkCookies() {
