@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '../context/UserProvider';
+import { getLevelCompletionStatus } from '../lib/clientFlagUtils';
 
 interface Level {
   id: string;
@@ -45,24 +46,8 @@ export default function LevelNavigator() {
         console.error('Error parsing user choices:', error);
       }
       
-      // Check for flags captured
-      const captured: Record<string, boolean> = {
-        alpha: userFlags.includes('SHADOWNET{DTHEREFORTH}'),
-        beta: userFlags.includes('SHADOWNET{876}'),
-        gamma: userFlags.includes('SHADOWNET{S3CR3T_D34TH}'),
-        delta: userFlags.includes('SHADOWNET{NEUR0LINK}'),
-        sigma: userFlags.includes('SHADOWNET{DISTRICT_FREEDOM}'),
-        theta: userFlags.includes('SHADOWNET{REFLECTIONS}'),
-        zeta: userFlags.includes('SHADOWNET{TOKEN_FORGED}'),
-        'sigma-2': userFlags.includes('SHADOWNET{FIRST_WORSHIP}'),
-        omega: userFlags.includes('SHADOWNET{ASCENSION}')
-      };
-      
-      // A level is truly completed if flag is captured
-      const completed: Record<string, boolean> = {};
-      LEVELS.forEach(level => {
-        completed[level.id] = captured[level.id];
-      });
+      // Use the utility to check completed levels
+      const completed = getLevelCompletionStatus(userFlags);
       
       // Make all levels accessible regardless of completion status
       const unlocked: Record<string, boolean> = {};

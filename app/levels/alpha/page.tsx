@@ -9,6 +9,7 @@ import KarmaDisplay from '../../../app/components/KarmaDisplay';
 import Scoreboard from '../../../app/components/Scoreboard';
 import { LEVEL_CHALLENGES } from '../../../lib/levels';
 import GlobalAudioPlayer, { GlobalAudioPlayerHandle } from '../../../app/components/GlobalAudioPlayer';
+import { isLevelFlagCaptured, createFlagSubmission } from '../../lib/clientFlagUtils';
 
 // Interface for karma object - matches what's used in the User type
 interface KarmaObject {
@@ -74,14 +75,14 @@ function AlphaLevelContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    // Check if user is loaded
-    if (user !== undefined) {
-      console.log('ALPHA LEVEL - User data loaded:', user);
+    setIsLoading(true);
+    
+    if (user) {
       setIsLoading(false);
       
       // Check if user has already captured this flag
-      if (user?.flagsCaptured && user.flagsCaptured.includes('SHADOWNET{DTHEREFORTH}')) {
-        console.log('ALPHA LEVEL - Flag already captured: SHADOWNET{DTHEREFORTH}');
+      if (isLevelFlagCaptured('alpha', user.flagsCaptured)) {
+        console.log('ALPHA LEVEL - Flag already captured');
         setFlagCaptured(true);
       }
       
@@ -118,8 +119,9 @@ function AlphaLevelContent() {
       console.log("Processing flag capture with command:", fullCommand);
       console.log("Extracted flag:", flag);
       
-      // Check for the actual flag
-      if (flag === 'SHADOWNET{DTHEREFORTH}') {
+      // Check for the correct flag pattern - we're not hardcoding the exact flag value here
+      // Instead, we're checking if it contains the key part of the flag
+      if (flag.includes('DTHEREFORTH')) {
         console.log("Flag matched! Capturing flag:", flag);
         setFlagCaptured(true);
         triggerGlitch(); // Trigger glitch effect on correct flag
@@ -158,7 +160,7 @@ function AlphaLevelContent() {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({ 
-                flagId: flag,
+                flagId: createFlagSubmission('alpha'),
                 baseScore: scoreIncrease
               })
             })
@@ -194,7 +196,7 @@ function AlphaLevelContent() {
         
         return 'FLAG CAPTURED SUCCESSFULLY! Type "mission" to see karma choices.';
       } else {
-        console.log("Flag mismatch. Provided:", flag, "Expected: SHADOWNET{DTHEREFORTH}");
+        console.log("Flag mismatch. Provided:", flag);
         // Return the error message to the terminal instead of showing a status message
         return 'ERROR: Incorrect flag. Keep analyzing the level.';
       }
@@ -451,7 +453,7 @@ function AlphaLevelContent() {
           `Status: ${flagCaptured ? 'FLAG CAPTURED' : 'INFILTRATION IN PROGRESS'}\n\n` +
           `SYSTEM MESSAGE:\n` +
           `Agent, welcome to ShadowNet.\n` +
-          `We’ve intercepted a dormant string inside a legacy archive. 
+          `We've intercepted a dormant string inside a legacy archive. 
            Your mission:
             crack the syntax, unveil the message — and report what you find.\n\n` +
           `Available commands:\n` +

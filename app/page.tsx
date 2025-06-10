@@ -16,6 +16,7 @@ import Scoreboard from './components/Scoreboard';
 import { useLanguage } from './contexts/LanguageContext';
 import loggedFetch from './lib/apiLogger';
 import { User } from './types/user';
+import { isLevelFlagCaptured, createFlagSubmission } from './lib/clientFlagUtils';
 
 export default function Home() {
   const router = useRouter();
@@ -561,21 +562,8 @@ export default function Home() {
     connect: (args: string[]) => {
       const requestedLevel = args.join(' ').toLowerCase().trim();
       
-      // Define all flags by level
-      const levelFlags = {
-        'alpha': 'SHADOWNET{DTHEREFORTH}',
-        'beta': 'SHADOWNET{876}',
-        'gamma': 'SHADOWNET{FR33W1LL}',
-        'delta': 'SHADOWNET{NEUR0LINK}',
-        'sigma': 'SHADOWNET{L1B3R8}',
-        'theta': 'SHADOWNET{M1RR0R}',
-        'zeta': 'SHADOWNET{R3SCU3}',
-        'sigma-2': 'SHADOWNET{PURGE}',
-        'omega': 'SHADOWNET{ASCEND}'
-      };
-      
-      // Check if user has captured flags
-      const flagsCaptured = user?.flagsCaptured || [];
+      // Get user flags
+      const userFlags = user?.flagsCaptured || [];
       
       // Check karma choices made
       const hasKarmaChoices = typeof user?.karma === 'object' && 
@@ -583,7 +571,7 @@ export default function Home() {
         Object.values(user.karma).some(value => value > 0);
       
       // First level is always unlocked
-      const alphaCompleted = flagsCaptured.includes(levelFlags.alpha) && hasKarmaChoices;
+      const alphaCompleted = isLevelFlagCaptured('alpha', userFlags) && hasKarmaChoices;
       
       // Map requested level aliases to actual level IDs
       const levelMap: Record<string, string> = {
@@ -635,37 +623,37 @@ export default function Home() {
         return 'Connecting to BETA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'gamma' && alphaCompleted && flagsCaptured.includes(levelFlags.beta)) {
+      if (normalizedLevel === 'gamma' && alphaCompleted && isLevelFlagCaptured('beta', userFlags)) {
         window.location.href = '/levels/gamma';
         return 'Connecting to GAMMA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'delta' && flagsCaptured.includes(levelFlags.gamma)) {
+      if (normalizedLevel === 'delta' && isLevelFlagCaptured('gamma', userFlags)) {
         window.location.href = '/levels/delta';
         return 'Connecting to DELTA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'sigma' && flagsCaptured.includes(levelFlags.delta)) {
+      if (normalizedLevel === 'sigma' && isLevelFlagCaptured('delta', userFlags)) {
         window.location.href = '/levels/sigma';
         return 'Connecting to SIGMA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'theta' && flagsCaptured.includes(levelFlags.sigma)) {
+      if (normalizedLevel === 'theta' && isLevelFlagCaptured('sigma', userFlags)) {
         window.location.href = '/levels/theta';
         return 'Connecting to THETA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'zeta' && flagsCaptured.includes(levelFlags.theta)) {
+      if (normalizedLevel === 'zeta' && isLevelFlagCaptured('theta', userFlags)) {
         window.location.href = '/levels/zeta';
         return 'Connecting to ZETA level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'sigma-2' && flagsCaptured.includes(levelFlags.zeta)) {
+      if (normalizedLevel === 'sigma-2' && isLevelFlagCaptured('zeta', userFlags)) {
         window.location.href = '/levels/sigma-2';
         return 'Connecting to SIGMA-2 level...\nInitializing secure connection...\nAccess granted.';
       }
       
-      if (normalizedLevel === 'omega' && flagsCaptured.includes(levelFlags['sigma-2'])) {
+      if (normalizedLevel === 'omega' && isLevelFlagCaptured('sigma-2', userFlags)) {
         window.location.href = '/levels/omega';
         return 'Connecting to OMEGA level...\nInitializing secure connection...\nAccess granted.';
       }
@@ -754,21 +742,8 @@ export default function Home() {
       return 'Initializing mission...\nAccessing ShadowNet perimeter...\nRedirecting to Alpha level...';
     },
     levels: () => {
-      // Define all flags by level
-      const levelFlags = {
-        'alpha': 'SHADOWNET{DTHEREFORTH}',
-        'beta': 'SHADOWNET{876}',
-        'gamma': 'SHADOWNET{FR33W1LL}',
-        'delta': 'SHADOWNET{NEUR0LINK}',
-        'sigma': 'SHADOWNET{L1B3R8}',
-        'theta': 'SHADOWNET{M1RR0R}',
-        'zeta': 'SHADOWNET{R3SCU3}',
-        'sigma-2': 'SHADOWNET{PURGE}',
-        'omega': 'SHADOWNET{ASCEND}'
-      };
-      
-      // Check if user has captured flags
-      const flagsCaptured = user?.flagsCaptured || [];
+      // Get user flags
+      const userFlags = user?.flagsCaptured || [];
       
       // Check karma choices made - if user has any karma attribute more than 0, they've made at least one choice
       const hasKarmaChoices = typeof user?.karma === 'object' && 
@@ -781,7 +756,7 @@ export default function Home() {
       ];
       
       // Check if alpha is completed (flag captured and karma choice made)
-      const alphaCompleted = flagsCaptured.includes(levelFlags.alpha) && hasKarmaChoices;
+      const alphaCompleted = isLevelFlagCaptured('alpha', userFlags) && hasKarmaChoices;
       if (alphaCompleted) {
         levelStatus[0] = '1. ALPHA - Perimeter Security [✅ COMPLETED]';
       }
@@ -789,7 +764,7 @@ export default function Home() {
       // Status for beta level
       if (alphaCompleted) {
         // Check if beta is completed
-        const betaCompleted = flagsCaptured.includes(levelFlags.beta);
+        const betaCompleted = isLevelFlagCaptured('beta', userFlags);
         levelStatus.push(betaCompleted 
           ? '2. BETA - Network Infiltration [✅ COMPLETED]' 
           : '2. BETA - Network Infiltration [UNLOCKED]');
@@ -798,9 +773,9 @@ export default function Home() {
       }
       
       // Status for gamma level
-      if (alphaCompleted && flagsCaptured.includes(levelFlags.beta)) {
+      if (alphaCompleted && isLevelFlagCaptured('beta', userFlags)) {
         // Check if gamma is completed
-        const gammaCompleted = flagsCaptured.includes(levelFlags.gamma);
+        const gammaCompleted = isLevelFlagCaptured('gamma', userFlags);
         levelStatus.push(gammaCompleted 
           ? '3. GAMMA - Database Access [✅ COMPLETED]' 
           : '3. GAMMA - Database Access [UNLOCKED]');
@@ -809,9 +784,9 @@ export default function Home() {
       }
       
       // Status for delta level
-      if (alphaCompleted && flagsCaptured.includes(levelFlags.beta) && flagsCaptured.includes(levelFlags.gamma)) {
+      if (alphaCompleted && isLevelFlagCaptured('beta', userFlags) && isLevelFlagCaptured('gamma', userFlags)) {
         // Check if delta is completed
-        const deltaCompleted = flagsCaptured.includes(levelFlags.delta);
+        const deltaCompleted = isLevelFlagCaptured('delta', userFlags);
         levelStatus.push(deltaCompleted 
           ? '4. DELTA - Core Systems [✅ COMPLETED]' 
           : '4. DELTA - Core Systems [UNLOCKED]');
@@ -821,8 +796,8 @@ export default function Home() {
       
       // Add remaining levels as locked/completed based on progressive flag captures
       // Sigma
-      if (flagsCaptured.includes(levelFlags.delta)) {
-        const sigmaCompleted = flagsCaptured.includes(levelFlags.sigma);
+      if (isLevelFlagCaptured('delta', userFlags)) {
+        const sigmaCompleted = isLevelFlagCaptured('sigma', userFlags);
         levelStatus.push(sigmaCompleted 
           ? '5. SIGMA - District Liberation [✅ COMPLETED]' 
           : '5. SIGMA - District Liberation [UNLOCKED]');
@@ -831,8 +806,8 @@ export default function Home() {
       }
       
       // Theta
-      if (flagsCaptured.includes(levelFlags.sigma)) {
-        const thetaCompleted = flagsCaptured.includes(levelFlags.theta);
+      if (isLevelFlagCaptured('sigma', userFlags)) {
+        const thetaCompleted = isLevelFlagCaptured('theta', userFlags);
         levelStatus.push(thetaCompleted 
           ? '6. THETA - Identity Crisis [✅ COMPLETED]' 
           : '6. THETA - Identity Crisis [UNLOCKED]');
@@ -841,8 +816,8 @@ export default function Home() {
       }
       
       // Zeta
-      if (flagsCaptured.includes(levelFlags.theta)) {
-        const zetaCompleted = flagsCaptured.includes(levelFlags.zeta);
+      if (isLevelFlagCaptured('theta', userFlags)) {
+        const zetaCompleted = isLevelFlagCaptured('zeta', userFlags);
         levelStatus.push(zetaCompleted 
           ? '7. ZETA - Network Rescue [✅ COMPLETED]' 
           : '7. ZETA - Network Rescue [UNLOCKED]');
@@ -851,8 +826,8 @@ export default function Home() {
       }
       
       // Sigma-2
-      if (flagsCaptured.includes(levelFlags.zeta)) {
-        const sigma2Completed = flagsCaptured.includes(levelFlags['sigma-2']);
+      if (isLevelFlagCaptured('zeta', userFlags)) {
+        const sigma2Completed = isLevelFlagCaptured('sigma-2', userFlags);
         levelStatus.push(sigma2Completed 
           ? '8. SIGMA-2 - Digital Confession [✅ COMPLETED]' 
           : '8. SIGMA-2 - Digital Confession [UNLOCKED]');
@@ -861,8 +836,8 @@ export default function Home() {
       }
       
       // Omega
-      if (flagsCaptured.includes(levelFlags['sigma-2'])) {
-        const omegaCompleted = flagsCaptured.includes(levelFlags.omega);
+      if (isLevelFlagCaptured('sigma-2', userFlags)) {
+        const omegaCompleted = isLevelFlagCaptured('omega', userFlags);
         levelStatus.push(omegaCompleted 
           ? '9. OMEGA - Final Confrontation [✅ COMPLETED]' 
           : '9. OMEGA - Final Confrontation [UNLOCKED]');
@@ -875,13 +850,13 @@ export default function Home() {
       let highestUnlockedLevel = 1; // Alpha is always available
       
       if (alphaCompleted) highestUnlockedLevel = 2; // Beta
-      if (flagsCaptured.includes(levelFlags.beta)) highestUnlockedLevel = 3; // Gamma
-      if (flagsCaptured.includes(levelFlags.gamma)) highestUnlockedLevel = 4; // Delta
-      if (flagsCaptured.includes(levelFlags.delta)) highestUnlockedLevel = 5; // Sigma
-      if (flagsCaptured.includes(levelFlags.sigma)) highestUnlockedLevel = 6; // Theta
-      if (flagsCaptured.includes(levelFlags.theta)) highestUnlockedLevel = 7; // Zeta
-      if (flagsCaptured.includes(levelFlags.zeta)) highestUnlockedLevel = 8; // Sigma-2
-      if (flagsCaptured.includes(levelFlags['sigma-2'])) highestUnlockedLevel = 9; // Omega
+      if (isLevelFlagCaptured('beta', userFlags)) highestUnlockedLevel = 3; // Gamma
+      if (isLevelFlagCaptured('gamma', userFlags)) highestUnlockedLevel = 4; // Delta
+      if (isLevelFlagCaptured('delta', userFlags)) highestUnlockedLevel = 5; // Sigma
+      if (isLevelFlagCaptured('sigma', userFlags)) highestUnlockedLevel = 6; // Theta
+      if (isLevelFlagCaptured('theta', userFlags)) highestUnlockedLevel = 7; // Zeta
+      if (isLevelFlagCaptured('zeta', userFlags)) highestUnlockedLevel = 8; // Sigma-2
+      if (isLevelFlagCaptured('sigma-2', userFlags)) highestUnlockedLevel = 9; // Omega
       
       // Map level number to name
       const levelNames = ['ALPHA', 'BETA', 'GAMMA', 'DELTA', 'SIGMA', 'THETA', 'ZETA', 'SIGMA-2', 'OMEGA'];
@@ -999,21 +974,8 @@ export default function Home() {
                 commands={{
                   ...terminalCommands,
                   levels: () => {
-                    // Define all flags by level
-                    const levelFlags = {
-                      'alpha': 'SHADOWNET{DTHEREFORTH}',
-                      'beta': 'SHADOWNET{876}',
-                      'gamma': 'SHADOWNET{FR33W1LL}',
-                      'delta': 'SHADOWNET{NEUR0LINK}',
-                      'sigma': 'SHADOWNET{L1B3R8}',
-                      'theta': 'SHADOWNET{M1RR0R}',
-                      'zeta': 'SHADOWNET{R3SCU3}',
-                      'sigma-2': 'SHADOWNET{PURGE}',
-                      'omega': 'SHADOWNET{ASCEND}'
-                    };
-                    
-                    // Check if user has captured flags
-                    const flagsCaptured = user?.flagsCaptured || [];
+                    // Get user flags
+                    const userFlags = user?.flagsCaptured || [];
                     
                     // Check karma choices made - if user has any karma attribute more than 0, they've made at least one choice
                     const hasKarmaChoices = typeof user?.karma === 'object' && 
@@ -1026,7 +988,7 @@ export default function Home() {
                     ];
                     
                     // Check if alpha is completed (flag captured and karma choice made)
-                    const alphaCompleted = flagsCaptured.includes(levelFlags.alpha) && hasKarmaChoices;
+                    const alphaCompleted = isLevelFlagCaptured('alpha', userFlags) && hasKarmaChoices;
                     if (alphaCompleted) {
                       levelStatus[0] = '1. ALPHA - Perimeter Security [✅ COMPLETED]';
                     }
@@ -1034,7 +996,7 @@ export default function Home() {
                     // Status for beta level
                     if (alphaCompleted) {
                       // Check if beta is completed
-                      const betaCompleted = flagsCaptured.includes(levelFlags.beta);
+                      const betaCompleted = isLevelFlagCaptured('beta', userFlags);
                       levelStatus.push(betaCompleted 
                         ? '2. BETA - Network Infiltration [✅ COMPLETED]' 
                         : '2. BETA - Network Infiltration [UNLOCKED]');
@@ -1043,9 +1005,9 @@ export default function Home() {
                     }
                     
                     // Status for gamma level
-                    if (alphaCompleted && flagsCaptured.includes(levelFlags.beta)) {
+                    if (alphaCompleted && isLevelFlagCaptured('beta', userFlags)) {
                       // Check if gamma is completed
-                      const gammaCompleted = flagsCaptured.includes(levelFlags.gamma);
+                      const gammaCompleted = isLevelFlagCaptured('gamma', userFlags);
                       levelStatus.push(gammaCompleted 
                         ? '3. GAMMA - Database Access [✅ COMPLETED]' 
                         : '3. GAMMA - Database Access [UNLOCKED]');
@@ -1054,9 +1016,9 @@ export default function Home() {
                     }
                     
                     // Status for delta level
-                    if (alphaCompleted && flagsCaptured.includes(levelFlags.beta) && flagsCaptured.includes(levelFlags.gamma)) {
+                    if (alphaCompleted && isLevelFlagCaptured('beta', userFlags) && isLevelFlagCaptured('gamma', userFlags)) {
                       // Check if delta is completed
-                      const deltaCompleted = flagsCaptured.includes(levelFlags.delta);
+                      const deltaCompleted = isLevelFlagCaptured('delta', userFlags);
                       levelStatus.push(deltaCompleted 
                         ? '4. DELTA - Core Systems [✅ COMPLETED]' 
                         : '4. DELTA - Core Systems [UNLOCKED]');
@@ -1066,8 +1028,8 @@ export default function Home() {
                     
                     // Add remaining levels as locked/completed based on progressive flag captures
                     // Sigma
-                    if (flagsCaptured.includes(levelFlags.delta)) {
-                      const sigmaCompleted = flagsCaptured.includes(levelFlags.sigma);
+                    if (isLevelFlagCaptured('delta', userFlags)) {
+                      const sigmaCompleted = isLevelFlagCaptured('sigma', userFlags);
                       levelStatus.push(sigmaCompleted 
                         ? '5. SIGMA - District Liberation [✅ COMPLETED]' 
                         : '5. SIGMA - District Liberation [UNLOCKED]');
@@ -1076,8 +1038,8 @@ export default function Home() {
                     }
                     
                     // Theta
-                    if (flagsCaptured.includes(levelFlags.sigma)) {
-                      const thetaCompleted = flagsCaptured.includes(levelFlags.theta);
+                    if (isLevelFlagCaptured('sigma', userFlags)) {
+                      const thetaCompleted = isLevelFlagCaptured('theta', userFlags);
                       levelStatus.push(thetaCompleted 
                         ? '6. THETA - Identity Crisis [✅ COMPLETED]' 
                         : '6. THETA - Identity Crisis [UNLOCKED]');
@@ -1086,8 +1048,8 @@ export default function Home() {
                     }
                     
                     // Zeta
-                    if (flagsCaptured.includes(levelFlags.theta)) {
-                      const zetaCompleted = flagsCaptured.includes(levelFlags.zeta);
+                    if (isLevelFlagCaptured('theta', userFlags)) {
+                      const zetaCompleted = isLevelFlagCaptured('zeta', userFlags);
                       levelStatus.push(zetaCompleted 
                         ? '7. ZETA - Network Rescue [✅ COMPLETED]' 
                         : '7. ZETA - Network Rescue [UNLOCKED]');
@@ -1096,8 +1058,8 @@ export default function Home() {
                     }
                     
                     // Sigma-2
-                    if (flagsCaptured.includes(levelFlags.zeta)) {
-                      const sigma2Completed = flagsCaptured.includes(levelFlags['sigma-2']);
+                    if (isLevelFlagCaptured('zeta', userFlags)) {
+                      const sigma2Completed = isLevelFlagCaptured('sigma-2', userFlags);
                       levelStatus.push(sigma2Completed 
                         ? '8. SIGMA-2 - Digital Confession [✅ COMPLETED]' 
                         : '8. SIGMA-2 - Digital Confession [UNLOCKED]');
@@ -1106,8 +1068,8 @@ export default function Home() {
                     }
                     
                     // Omega
-                    if (flagsCaptured.includes(levelFlags['sigma-2'])) {
-                      const omegaCompleted = flagsCaptured.includes(levelFlags.omega);
+                    if (isLevelFlagCaptured('sigma-2', userFlags)) {
+                      const omegaCompleted = isLevelFlagCaptured('omega', userFlags);
                       levelStatus.push(omegaCompleted 
                         ? '9. OMEGA - Final Confrontation [✅ COMPLETED]' 
                         : '9. OMEGA - Final Confrontation [UNLOCKED]');
@@ -1120,13 +1082,13 @@ export default function Home() {
                     let highestUnlockedLevel = 1; // Alpha is always available
                     
                     if (alphaCompleted) highestUnlockedLevel = 2; // Beta
-                    if (flagsCaptured.includes(levelFlags.beta)) highestUnlockedLevel = 3; // Gamma
-                    if (flagsCaptured.includes(levelFlags.gamma)) highestUnlockedLevel = 4; // Delta
-                    if (flagsCaptured.includes(levelFlags.delta)) highestUnlockedLevel = 5; // Sigma
-                    if (flagsCaptured.includes(levelFlags.sigma)) highestUnlockedLevel = 6; // Theta
-                    if (flagsCaptured.includes(levelFlags.theta)) highestUnlockedLevel = 7; // Zeta
-                    if (flagsCaptured.includes(levelFlags.zeta)) highestUnlockedLevel = 8; // Sigma-2
-                    if (flagsCaptured.includes(levelFlags['sigma-2'])) highestUnlockedLevel = 9; // Omega
+                    if (isLevelFlagCaptured('beta', userFlags)) highestUnlockedLevel = 3; // Gamma
+                    if (isLevelFlagCaptured('gamma', userFlags)) highestUnlockedLevel = 4; // Delta
+                    if (isLevelFlagCaptured('delta', userFlags)) highestUnlockedLevel = 5; // Sigma
+                    if (isLevelFlagCaptured('sigma', userFlags)) highestUnlockedLevel = 6; // Theta
+                    if (isLevelFlagCaptured('theta', userFlags)) highestUnlockedLevel = 7; // Zeta
+                    if (isLevelFlagCaptured('zeta', userFlags)) highestUnlockedLevel = 8; // Sigma-2
+                    if (isLevelFlagCaptured('sigma-2', userFlags)) highestUnlockedLevel = 9; // Omega
                     
                     // Map level number to name
                     const levelNames = ['ALPHA', 'BETA', 'GAMMA', 'DELTA', 'SIGMA', 'THETA', 'ZETA', 'SIGMA-2', 'OMEGA'];
@@ -1168,21 +1130,8 @@ export default function Home() {
                   connect: (args: string[]) => {
                     const requestedLevel = args.join(' ').toLowerCase().trim();
                     
-                    // Define all flags by level
-                    const levelFlags = {
-                      'alpha': 'SHADOWNET{DTHEREFORTH}',
-                      'beta': 'SHADOWNET{876}',
-                      'gamma': 'SHADOWNET{FR33W1LL}',
-                      'delta': 'SHADOWNET{NEUR0LINK}',
-                      'sigma': 'SHADOWNET{L1B3R8}',
-                      'theta': 'SHADOWNET{M1RR0R}',
-                      'zeta': 'SHADOWNET{R3SCU3}',
-                      'sigma-2': 'SHADOWNET{PURGE}',
-                      'omega': 'SHADOWNET{ASCEND}'
-                    };
-                    
-                    // Check if user has captured flags
-                    const flagsCaptured = user?.flagsCaptured || [];
+                    // Get user flags
+                    const userFlags = user?.flagsCaptured || [];
                     
                     // Check karma choices made
                     const hasKarmaChoices = typeof user?.karma === 'object' && 
@@ -1190,7 +1139,7 @@ export default function Home() {
                       Object.values(user.karma).some(value => value > 0);
                     
                     // First level is always unlocked
-                    const alphaCompleted = flagsCaptured.includes(levelFlags.alpha) && hasKarmaChoices;
+                    const alphaCompleted = isLevelFlagCaptured('alpha', userFlags) && hasKarmaChoices;
                     
                     // Map requested level aliases to actual level IDs
                     const levelMap: Record<string, string> = {
@@ -1242,37 +1191,37 @@ export default function Home() {
                       return 'Connecting to BETA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'gamma' && alphaCompleted && flagsCaptured.includes(levelFlags.beta)) {
+                    if (normalizedLevel === 'gamma' && alphaCompleted && isLevelFlagCaptured('beta', userFlags)) {
                       window.location.href = '/levels/gamma';
                       return 'Connecting to GAMMA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'delta' && flagsCaptured.includes(levelFlags.gamma)) {
+                    if (normalizedLevel === 'delta' && isLevelFlagCaptured('gamma', userFlags)) {
                       window.location.href = '/levels/delta';
                       return 'Connecting to DELTA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'sigma' && flagsCaptured.includes(levelFlags.delta)) {
+                    if (normalizedLevel === 'sigma' && isLevelFlagCaptured('delta', userFlags)) {
                       window.location.href = '/levels/sigma';
                       return 'Connecting to SIGMA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'theta' && flagsCaptured.includes(levelFlags.sigma)) {
+                    if (normalizedLevel === 'theta' && isLevelFlagCaptured('sigma', userFlags)) {
                       window.location.href = '/levels/theta';
                       return 'Connecting to THETA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'zeta' && flagsCaptured.includes(levelFlags.theta)) {
+                    if (normalizedLevel === 'zeta' && isLevelFlagCaptured('theta', userFlags)) {
                       window.location.href = '/levels/zeta';
                       return 'Connecting to ZETA level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'sigma-2' && flagsCaptured.includes(levelFlags.zeta)) {
+                    if (normalizedLevel === 'sigma-2' && isLevelFlagCaptured('zeta', userFlags)) {
                       window.location.href = '/levels/sigma-2';
                       return 'Connecting to SIGMA-2 level...\nInitializing secure connection...\nAccess granted.';
                     }
                     
-                    if (normalizedLevel === 'omega' && flagsCaptured.includes(levelFlags['sigma-2'])) {
+                    if (normalizedLevel === 'omega' && isLevelFlagCaptured('sigma-2', userFlags)) {
                       window.location.href = '/levels/omega';
                       return 'Connecting to OMEGA level...\nInitializing secure connection...\nAccess granted.';
                     }
