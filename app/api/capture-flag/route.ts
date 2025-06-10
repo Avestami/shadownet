@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 import { getUserIdFromRequest } from '../../lib/authUtils';
 import { invalidateUserCache } from '../../lib/userCache';
+import { getAllFlags } from '../../lib/flagConstants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,17 +75,7 @@ export async function POST(request: NextRequest) {
     // Handle debug mode capturing all flags
     if (allFlags) {
       // Define all flags or use the provided list
-      const ALL_FLAGS = flagList.length > 0 ? flagList : [
-        'SHADOWNET{DTHEREFORTH}',
-        'SHADOWNET{SOUND876}',
-        'SHADOWNET{S3CR3T_D34TH}',
-        'SHADOWNET{M3M0RY_DUMP_1337}',
-        'SHADOWNET{P4CK3T_W1Z4RD}',
-        'SHADOWNET{FIRMWARE_BACKDOOR_X23}',
-        'SHADOWNET{VULN_HUNTER_PRO}',
-        'SHADOWNET{CRYPTO_BREAKER_9000}',
-        'SHADOWNET{FINAL_ASCENSION}'
-      ];
+      const ALL_FLAGS = flagList.length > 0 ? flagList : getAllFlags();
       
       // Get current flags and add new ones
       const flagsCaptured = user.flagsCaptured || [];
@@ -153,6 +144,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         message: 'Flag already captured',
+        score: user.score || 0,
+        flagsCaptured,
+        karma: karmaObj,
+        karmaDetails: karmaObj
+      });
+    }
+    
+    // Validate the flag against the list of valid flags from environment variables
+    const validFlags = getAllFlags();
+    const isValid = validFlags.includes(flagId);
+    
+    if (!isValid) {
+      console.log('[API] Invalid flag submitted:', flagId);
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid flag',
         score: user.score || 0,
         flagsCaptured,
         karma: karmaObj,

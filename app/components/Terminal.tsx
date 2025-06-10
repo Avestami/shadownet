@@ -208,7 +208,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       console.log("Current level ID:", levelId); // Debug info
       
       // Base files always present
-      let files = [
+      const files = [
         'system',
         'network', 
         'users',
