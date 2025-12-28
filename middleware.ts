@@ -11,7 +11,13 @@ export async function middleware(request: NextRequest) {
   
   // Define public routes that don't need authentication
   const publicPaths = ['/auth/login', '/auth/register', '/auth/error'];
-  const isPublicPath = publicPaths.some(pp => path.startsWith(pp));
+  
+  // In Next.js with basePath, the pathname might include the basePath or not depending on the environment
+  // We check both the raw path and the path without the /cts prefix
+  const pathWithoutPrefix = path.startsWith('/cts') ? path.replace('/cts', '') : path;
+  const isPublicPath = publicPaths.some(pp => 
+    path.startsWith(pp) || pathWithoutPrefix.startsWith(pp)
+  );
   
   // Check if the path is already a public path or API route
   const isApiPath = path.includes('/api/');
