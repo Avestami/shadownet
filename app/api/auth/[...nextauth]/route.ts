@@ -167,7 +167,7 @@ const handler = NextAuth({
       options: {
         httpOnly: true,
         sameSite: "lax",
-        path: "/",
+        path: process.env.NODE_ENV === "production" ? "/cts" : "/",
         secure: process.env.NODE_ENV === "production",
       },
     },
@@ -177,7 +177,7 @@ const handler = NextAuth({
         : "next-auth.callback-url",
       options: {
         sameSite: "lax",
-        path: "/",
+        path: process.env.NODE_ENV === "production" ? "/cts" : "/",
         secure: process.env.NODE_ENV === "production",
       },
     },
@@ -188,7 +188,7 @@ const handler = NextAuth({
       options: {
         httpOnly: true,
         sameSite: "lax",
-        path: "/",
+        path: process.env.NODE_ENV === "production" ? "/cts" : "/",
         secure: process.env.NODE_ENV === "production",
       },
     },
