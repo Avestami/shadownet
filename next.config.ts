@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  basePath: '/cts',
+  // Optional: assetPrefix if needed for CDN, but basePath handles most cases
 };
 
 export default nextConfig;
