@@ -40,14 +40,16 @@ export async function middleware(request: NextRequest) {
     
     // If the user is logged in and trying to access a login page, redirect them to home
     if (token && isPublicPath) {
-      // Next.js automatically handles the basePath in internal redirects
-      return NextResponse.redirect(new URL('/', request.url));
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
     }
     
     // If the user is not logged in and trying to access a protected route, redirect to login
     if (!token && !isPublicPath) {
-      // Next.js automatically handles the basePath in internal redirects
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/login';
+      return NextResponse.redirect(url);
     }
     
     // Allow access to the requested route
