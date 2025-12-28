@@ -214,7 +214,7 @@ export async function processKarmaChoice(
       throw new Error('Level not found');
     }
 
-    const choices: KarmaChoice[] = JSON.parse(level.availableKarmaChoices as string);
+    const choices: KarmaChoice[] = (level.availableKarmaChoices as any) || [];
     const selectedChoice = choices.find(c => c.id === choiceId);
 
     if (!selectedChoice) {
@@ -242,13 +242,13 @@ export async function processKarmaChoice(
       throw new Error('User not found');
     }
 
-    const currentKarma = JSON.parse(user.karma as string);
+    const currentKarma = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
     currentKarma[selectedChoice.type] += selectedChoice.score;
 
     await prisma.user.update({
       where: { id: userId },
       data: {
-        karma: JSON.stringify(currentKarma),
+        karma: currentKarma,
         score: user.score + selectedChoice.score
       }
     });

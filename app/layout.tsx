@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import "./globals.css";
 import { Providers } from './providers';
 import ClientLevelNavigator from './components/ClientLevelNavigator';
+import GlobalAudioPlayer from './components/GlobalAudioPlayer';
+import SignOutButtonWrapper from './components/SignOutButtonWrapper';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +28,8 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <GlobalAudioPlayer />
+          <SignOutButtonWrapper />
           {/* Level navigation for easy access */}
           <ClientLevelNavigator />
         </Providers>

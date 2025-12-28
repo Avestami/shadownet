@@ -8,12 +8,13 @@ const SignOutButton: React.FC = () => {
     
     // Just remove the debug user but keep other game data
     localStorage.removeItem('debugUser');
+    localStorage.removeItem('authToken');
     
     // Redirect to the home page
-    window.location.href = '/';
+    window.location.href = '/auth/login';
     
     // Could also make an API call to clear server-side session if needed
-    // fetch('/api/auth/logout', { method: 'POST' });
+    fetch('/api/logout', { method: 'POST' });
   };
   
   const handleGameReset = () => {
@@ -31,7 +32,7 @@ const SignOutButton: React.FC = () => {
     // localStorage.clear();
     
     // Redirect to the home page with a clean slate
-    window.location.href = '/';
+    window.location.href = '/auth/login';
   };
 
   return (

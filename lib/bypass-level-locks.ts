@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 
 // Define a list of all level IDs
 export const ALL_LEVEL_IDS = [
@@ -20,7 +19,7 @@ let bypassLevelLocks = true;
  * Check if a level is unlocked for a user
  * This function will always return true if bypassLevelLocks is enabled
  */
-export function isLevelUnlocked(levelId: string): boolean {
+export function isLevelUnlocked(_levelId: string): boolean {
   // Always return true if bypass is enabled
   if (bypassLevelLocks) {
     return true;

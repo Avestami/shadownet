@@ -31,7 +31,7 @@ const HARMONIC_FREQUENCIES = [
 const TARGET_FREQUENCY = HARMONIC_FREQUENCIES.reduce((a, b) => a + b) / HARMONIC_FREQUENCIES.length; // 549.34 Hz
 
 // Generate the final echo audio with embedded flag
-async function generateFinalEcho(variant: AudioVariant): Promise<AudioBuffer> {
+async function generateFinalEcho(variant: AudioVariant): Promise<any> {
   const context = new AudioContext();
   const duration = 30; // seconds
   const sampleRate = context.sampleRate;
@@ -75,7 +75,7 @@ async function generateFinalEcho(variant: AudioVariant): Promise<AudioBuffer> {
 }
 
 // Generate Dr. Draconis's final log based on karma
-async function generateDraconisLog(karma: KarmaState): Promise<AudioBuffer> {
+async function generateDraconisLog(karma: KarmaState): Promise<any> {
   const context = new AudioContext();
   const duration = 15; // seconds
   const sampleRate = context.sampleRate;
@@ -128,7 +128,7 @@ async function generateDraconisLog(karma: KarmaState): Promise<AudioBuffer> {
 }
 
 // Generate the lab environment audio effects
-async function generateLabAmbience(karma: KarmaState): Promise<AudioBuffer> {
+async function generateLabAmbience(karma: KarmaState): Promise<any> {
   const context = new AudioContext();
   const duration = 60; // seconds
   const sampleRate = context.sampleRate;

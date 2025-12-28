@@ -50,15 +50,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Parse current karma object or create a new one
-    let karmaObject;
+    let karmaObject: any;
     
     try {
-      karmaObject = typeof user.karma === 'string' 
-        ? JSON.parse(user.karma) 
-        : (user.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 });
-      console.log('[API] Parsed karma object:', karmaObject);
+      karmaObject = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
+      console.log('[API] Current karma object:', karmaObject);
     } catch (error) {
-      console.error('[API] Error parsing karma:', error);
+      console.error('[API] Error processing karma:', error);
       karmaObject = { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
     }
     

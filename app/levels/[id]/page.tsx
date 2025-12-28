@@ -175,8 +175,8 @@ export default function LevelPage() {
     }
   };
 
-  // Get the current decision data with a default fallback
-  const decision = decisions.find(d => d.id === levelId) || {
+  // Get the current decision data with a default fallback (initial state)
+  const [decision, setDecision] = useState(decisions.find(d => d.id === levelId) || {
     id: levelId || 'alpha',
     narrative: `Welcome to level ${levelId || 'alpha'}. Due to a communication error, detailed mission briefing is unavailable.`,
     options: [
@@ -193,7 +193,32 @@ export default function LevelPage() {
         consequences: 'May reveal additional information'
       }
     ]
-  };
+  });
+
+  // Fetch dynamic level data from API
+  useEffect(() => {
+    const fetchLevelData = async () => {
+      try {
+        const res = await fetch(`/api/levels/${levelId}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Only update if we got valid data back (not an error)
+          if (data && !data.error) {
+            setDecision(prev => ({
+              ...prev,
+              ...data,
+              // If API returns empty options (e.g. newly created level), keep fallback or use what's there
+              options: data.options && data.options.length > 0 ? data.options : prev.options
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching dynamic level data:", error);
+      }
+    };
+    
+    fetchLevelData();
+  }, [levelId]);
   const levelDifficulty = LEVEL_DIFFICULTY[levelId as keyof typeof LEVEL_DIFFICULTY] || 'medium';
 
   // Request level info when component mounts

@@ -57,24 +57,20 @@ export async function POST(request: NextRequest) {
       choices = [];
     }
     
-    // Parse current karma value
-    let currentKarma = 0;
+    // Parse current karma object
+    let karmaObject: any = { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
     try {
       if (user.karma) {
-        if (typeof user.karma === 'number') {
-          currentKarma = user.karma;
-        } else if (typeof user.karma === 'string') {
-          currentKarma = parseInt(user.karma, 10) || 0;
+        if (typeof user.karma === 'string') {
+          karmaObject = JSON.parse(user.karma);
         } else if (typeof user.karma === 'object') {
-          // If karma is an object with individual values, compute a total
-          const karmaObj = user.karma as Record<string, number>;
-          currentKarma = Object.values(karmaObj).reduce((sum, val) => sum + val, 0);
+          karmaObject = user.karma;
         }
       }
     } catch (error) {
-      console.error('Error parsing karma:', error);
+      console.error('Error parsing karma object:', error);
     }
-    
+
     // Find the decision and choice to calculate karma change
     let karmaDelta = 0;
     
@@ -95,16 +91,16 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    
-    // Calculate new karma value
-    const newKarmaValue = currentKarma + karmaDelta;
+
+    // Update integration karma as a general measure
+    karmaObject.integration = (karmaObject.integration || 0) + karmaDelta;
     
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        choices: JSON.stringify([...choices, choiceId]),
-        karma: newKarmaValue
+        choices: [...choices, choiceId],
+        karma: karmaObject
       }
     });
     

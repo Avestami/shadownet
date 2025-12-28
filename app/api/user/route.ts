@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
           id: cachedUser.id,
           email: cachedUser.email,
           username: cachedUser.username,
+          role: (cachedUser as any).role || 'USER',
           karma: cachedUser.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 },
           score: cachedUser.score || 0,
           choices: cachedUser.choices || [],
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
       id: user.id, 
       username: user.username,
       score: user.score, 
-      flagsCount: user.flagsCaptured?.length,
+      flagsCount: Array.isArray(user.flagsCaptured) ? user.flagsCaptured.length : 0,
       karmaType: typeof user.karma
     });
 
@@ -107,6 +108,7 @@ export async function GET(request: NextRequest) {
       id: user.id,
       email: user.email,
       username: user.username,
+      role: user.role || 'USER',
       karma: user.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 },
       score: user.score || 0,
       choices: user.choices || [],
@@ -117,7 +119,8 @@ export async function GET(request: NextRequest) {
     };
     
     // Cache the user data
-    setCachedUser(userId, user);
+    // We cache the parsed data to avoid double parsing in the future
+    setCachedUser(userId, userData as any);
     
     // Return the user data in the expected format for the UserProvider
     return NextResponse.json({

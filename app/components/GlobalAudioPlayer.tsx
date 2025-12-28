@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface GlobalAudioPlayerProps {
-  levelId: string;
+  levelId?: string;
   autoPlay?: boolean;
   initialVolume?: number;
   onCapture?: () => void;
@@ -28,11 +29,22 @@ export interface GlobalAudioPlayerHandle {
  * - Flag capture sound
  */
 const GlobalAudioPlayer = forwardRef<GlobalAudioPlayerHandle, GlobalAudioPlayerProps>(({ 
-  levelId, 
+  levelId: propLevelId, 
   autoPlay = false,
   initialVolume = 0.5,
   onCapture
 }, ref) => {
+  const pathname = usePathname();
+  
+  // Determine level ID from props or pathname
+  const levelId = (() => {
+    if (propLevelId) return propLevelId;
+    if (pathname?.startsWith('/levels/')) {
+      return pathname.split('/')[2];
+    }
+    return 'menu'; // Default to menu
+  })();
+
   const [volume, setVolume] = useState(initialVolume);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);

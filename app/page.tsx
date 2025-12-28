@@ -31,6 +31,7 @@ export default function Home() {
   interface UserData {
     id: string;
     username: string;
+    role?: string;
     karma: number;
     choices: string;
     flagsCaptured: string[];
@@ -138,6 +139,13 @@ export default function Home() {
         
         setUser(userData);
         
+        // Redirect Admin
+        if (userData.role === 'ADMIN') {
+          console.log('Admin user detected, redirecting to dashboard');
+          router.push('/admin/dashboard');
+          return;
+        }
+        
         // If user has already made choices, redirect to the appropriate level
         if (userData.choices && userData.choices.length > 0) {
           router.push('/levels/alpha');
@@ -226,6 +234,13 @@ export default function Home() {
           }
           
           setUser(userData);
+          
+          // Redirect Admin
+          if (userData.role === 'ADMIN') {
+            console.log('Admin user detected, redirecting to dashboard');
+            router.push('/admin/dashboard');
+            return;
+          }
           
           // If user has already made choices, redirect to the appropriate level
           if (userData.choices && userData.choices.length > 0) {

@@ -20,12 +20,13 @@ services:
     depends_on:
       - db
     ports:
-      - '3000:3000'
+      - '3001:3001'
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/shadownet
       - NODE_ENV=production
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=yoursecretkey
+      - NEXTAUTH_URL=https://blckbrd.ir/cts
+      - NEXTAUTH_SECRET=supersecretkey12345
+      - PORT=3001
     restart: always
 
 volumes:

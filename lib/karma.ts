@@ -49,7 +49,7 @@ export async function updateKarma(
       }
 
       // Parse current karma values
-      const currentKarma: KarmaValues = JSON.parse(user.karma as string);
+      const currentKarma: KarmaValues = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
 
       // Update karma value for the specific type
       currentKarma[choice.type] += choice.value;
@@ -58,7 +58,7 @@ export async function updateKarma(
       await tx.user.update({
         where: { id: userId },
         data: {
-          karma: JSON.stringify(currentKarma)
+          karma: currentKarma as any
         }
       });
 
@@ -90,7 +90,7 @@ export async function getDominantKarmaType(userId: string): Promise<KarmaType | 
       return null;
     }
 
-    const karma: KarmaValues = JSON.parse(user.karma as string);
+    const karma: KarmaValues = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
     let maxValue = -1;
     let dominantType: KarmaType | null = null;
 

@@ -73,7 +73,16 @@ export async function POST(request: NextRequest) {
     
     // Add flag if provided
     if (flagId) {
-      const currentFlags = user.flagsCaptured || [];
+      let currentFlags: string[] = [];
+      try {
+        if (Array.isArray(user.flagsCaptured)) {
+          currentFlags = user.flagsCaptured as string[];
+        }
+      } catch (e) {
+        console.error('[FORCE-UPDATE] Error parsing flags:', e);
+        currentFlags = [];
+      }
+
       if (!currentFlags.includes(flagId)) {
         updateData.flagsCaptured = [...currentFlags, flagId];
         console.log('[FORCE-UPDATE] Adding flag:', flagId);
@@ -85,11 +94,9 @@ export async function POST(request: NextRequest) {
     // Update karma if provided
     if (karmaType && karmaValue !== 0) {
       // Parse current karma object
-      let karmaObj;
+      let karmaObj: any;
       try {
-        karmaObj = typeof user.karma === 'string' 
-          ? JSON.parse(user.karma) 
-          : (user.karma || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 });
+        karmaObj = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
       } catch (error) {
         console.error('[FORCE-UPDATE] Error parsing karma:', error);
         karmaObj = { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
@@ -115,16 +122,11 @@ export async function POST(request: NextRequest) {
       // Parse choices data
       let currentChoices: string[] = [];
       try {
-        // Handle both string and array formats
-        if (typeof user.choices === 'string') {
-          currentChoices = JSON.parse(user.choices || '[]');
-          console.log('[FORCE-UPDATE] Parsed choices from string:', currentChoices);
-        } else if (Array.isArray(user.choices)) {
-          // Ensure all elements are strings
-          currentChoices = user.choices.map(item => String(item));
+        if (Array.isArray(user.choices)) {
+          currentChoices = user.choices as string[];
           console.log('[FORCE-UPDATE] Using existing array choices:', currentChoices);
         } else {
-          console.log('[FORCE-UPDATE] Choices is neither string nor array, using empty array');
+          console.log('[FORCE-UPDATE] Choices is not an array, using empty array');
         }
       } catch (error) {
         console.error('[FORCE-UPDATE] Error parsing choices:', error);

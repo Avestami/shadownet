@@ -30,23 +30,23 @@ export async function GET(request: NextRequest) {
     }
     
     // Parse user choices
-    const userChoices = JSON.parse(user.choices as string) as string[];
+    const userChoices = (user.choices as string[]) || [];
     
     // Parse user karma
     let karmaValue = 0;
     if (user.karma) {
       try {
-        if (typeof user.karma === 'number') {
-          karmaValue = user.karma;
-        } else if (typeof user.karma === 'string') {
-          karmaValue = parseInt(user.karma, 10) || 0;
-        } else if (typeof user.karma === 'object') {
+        if (typeof user.karma === 'object') {
           // If karma is an object, calculate average of all karma values
           const karmaObj = user.karma as Record<string, number>;
           const karmaValues = Object.values(karmaObj);
           karmaValue = karmaValues.length > 0
             ? Math.floor(karmaValues.reduce((sum, val) => sum + val, 0) / karmaValues.length)
             : 0;
+        } else if (typeof user.karma === 'number') {
+          karmaValue = user.karma;
+        } else if (typeof user.karma === 'string') {
+          karmaValue = parseInt(user.karma, 10) || 0;
         }
       } catch (error) {
         console.error('Error parsing karma:', error);

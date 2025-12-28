@@ -23,7 +23,8 @@ async function main() {
       username: 'admin',
       email: 'admin@example.com',
       password: adminPassword,
-      score: 1000
+      score: 1000,
+      role: 'ADMIN'
     }
   });
 

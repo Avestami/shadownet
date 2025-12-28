@@ -29,8 +29,8 @@ COPY . .
 RUN npx prisma generate
 
 # Create a simple .env file for the build
-RUN echo "DATABASE_URL=postgresql://postgres:bXbWmMFKrKqabvxkeHExZOSmqaAqwxzH@postgres.railway.internal:5432/railway" > .env
-RUN echo "NEXTAUTH_URL=http://localhost:3000" >> .env
+RUN echo "DATABASE_URL=postgresql://postgres:postgres@db:5432/shadownet" > .env
+RUN echo "NEXTAUTH_URL=https://blckbrd.ir/cts" >> .env
 RUN echo "NEXTAUTH_SECRET=supersecretkey12345" >> .env
 
 # Build Next.js directly without using the railway scripts
@@ -45,6 +45,7 @@ RUN apk add --no-cache openssl
 
 # Set production environment
 ENV NODE_ENV=production
+ENV PORT=3001
 
 # Copy necessary files from build stage
 COPY --from=builder /app/public ./public
@@ -55,7 +56,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.env ./.env
 
 # Expose the port the app will run on
-EXPOSE 3000
+EXPOSE 3001
 
 # Start the application
-CMD ["npx", "next", "start"]
+CMD ["npm", "run", "start"]

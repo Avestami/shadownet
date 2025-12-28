@@ -90,13 +90,17 @@ export async function POST(request: NextRequest) {
     
     // Parse the flags array
     let flagsCaptured: string[] = [];
-    try {
-      flagsCaptured = JSON.parse(user.flagsCaptured as string || '[]');
-      if (!Array.isArray(flagsCaptured)) {
+    if (Array.isArray(user.flagsCaptured)) {
+      flagsCaptured = user.flagsCaptured as string[];
+    } else if (typeof user.flagsCaptured === 'string') {
+      try {
+        flagsCaptured = JSON.parse(user.flagsCaptured);
+      } catch (e) {
         flagsCaptured = [];
       }
-    } catch (error) {
-      console.error('[API] Error parsing flags:', error);
+    }
+    
+    if (!Array.isArray(flagsCaptured)) {
       flagsCaptured = [];
     }
     
@@ -119,7 +123,7 @@ export async function POST(request: NextRequest) {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        flagsCaptured: JSON.stringify(flagsCaptured),
+        flagsCaptured: flagsCaptured,
         score: newScore
       }
     });

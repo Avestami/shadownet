@@ -8,21 +8,25 @@ const SignOutButtonWrapper: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   useEffect(() => {
-    // Check if there's a debug user in localStorage
-    const hasUser = !!localStorage.getItem('debugUser');
-    setIsLoggedIn(hasUser);
+    // Check if there's a debug user in localStorage or user in session
+    const checkLoginStatus = () => {
+      const hasDebugUser = !!localStorage.getItem('debugUser');
+      const hasAuthToken = !!localStorage.getItem('authToken');
+      // We can also check cookie existence if needed, but localStorage is primary for this client-side check
+      setIsLoggedIn(hasDebugUser || hasAuthToken);
+    };
+
+    checkLoginStatus();
     
     // Set up an event listener for storage changes
     const handleStorageChange = () => {
-      setIsLoggedIn(!!localStorage.getItem('debugUser'));
+      checkLoginStatus();
     };
     
     window.addEventListener('storage', handleStorageChange);
     
     // Also check periodically
-    const checkInterval = setInterval(() => {
-      setIsLoggedIn(!!localStorage.getItem('debugUser'));
-    }, 5000);
+    const checkInterval = setInterval(checkLoginStatus, 5000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);

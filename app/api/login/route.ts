@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
         username: username.trim(),
         password: '', // Empty password as it's not required for this login method
         score: 0,
-        karma: 0,
-        choices: JSON.stringify([]),
+        karma: { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 },
+        choices: [],
         flagsCaptured: []
       }
     });
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       username: user.username,
       score: user.score,
       karma: user.karma,
-      choices: JSON.parse(user.choices as string),
+      choices: user.choices,
       flagsCaptured: user.flagsCaptured
     });
   } catch (error) {

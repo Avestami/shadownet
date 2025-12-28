@@ -9,9 +9,9 @@ console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("NODE_ENV:", process.env.NODE_ENV);
 
 // Force NEXTAUTH_URL to use HTTP in development
-const baseUrl = process.env.NODE_ENV === "production" 
+const baseUrl = process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "production" 
   ? process.env.NEXTAUTH_URL 
-  : "http://localhost:3000";
+  : "http://localhost:3001");
 
 console.log("Using base URL:", baseUrl);
 
@@ -85,6 +85,7 @@ const handler = NextAuth({
             id: user.id,
             name: user.username,
             email: user.email || undefined,
+            role: user.role || 'USER',
           };
         } catch (error) {
           console.error("Error in authorize function:", error);
@@ -99,10 +100,11 @@ const handler = NextAuth({
       
       // Initial sign in
       if (user) {
-        console.log("[NextAuth] JWT callback: User signed in", { userId: user.id });
+        console.log("[NextAuth] JWT callback: User signed in", { userId: user.id, role: (user as any).role });
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.role = (user as any).role;
       }
       
       // Handle token updates if needed
@@ -126,6 +128,7 @@ const handler = NextAuth({
       if (session?.user && token) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
+        (session.user as any).role = token.role as string;
         if (token.email) {
           session.user.email = token.email as string;
         }

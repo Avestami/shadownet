@@ -80,7 +80,7 @@ export async function getAvailableDocuments(userId: string, levelId: string): Pr
       return [];
     }
 
-    const levelDocs: string[] = JSON.parse(level.documents as string);
+    const levelDocs: string[] = (level.documents as any) || [];
     const availableDocs: Document[] = [];
 
     for (const docId of levelDocs) {
@@ -94,7 +94,7 @@ export async function getAvailableDocuments(userId: string, levelId: string): Pr
           });
 
           if (user) {
-            const karma = JSON.parse(user.karma as string);
+            const karma = (user.karma as any) || { loyalty: 0, defiance: 0, mercy: 0, curiosity: 0, integration: 0 };
             const karmaValue = karma[doc.condition.karmaType || ''] || 0;
             
             if (karmaValue >= (doc.condition.karmaThreshold || 0)) {
