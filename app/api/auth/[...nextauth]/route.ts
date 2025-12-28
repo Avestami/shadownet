@@ -22,6 +22,8 @@ if (process.env.NODE_ENV !== "production") {
 
 // NextAuth handler
 const handler = NextAuth({
+  debug: process.env.NODE_ENV === 'development',
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "credentials",
