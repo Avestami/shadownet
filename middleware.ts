@@ -31,14 +31,18 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET
     });
     
+    const baseUrl = process.env.NODE_ENV === 'production' ? '/cts' : '';
+    
     // If the user is logged in and trying to access a login page, redirect them to home
     if (token && isPublicPath) {
+      // With basePath: '/cts', we should NOT include /cts in the URL string
+      // because Next.js adds it automatically for relative paths
       return NextResponse.redirect(new URL('/', request.url));
     }
     
     // If the user is not logged in and trying to access a protected route, redirect to login
     if (!token && !isPublicPath) {
-      // Don't add any parameters to avoid redirect loops
+      // With basePath: '/cts', we should NOT include /cts in the URL string
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
     
