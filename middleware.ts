@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     
     // Log for debugging in production
     if (process.env.NODE_ENV === 'production') {
-      console.log(`Middleware: path=${path}, isPublic=${isPublicPath}, token=${!!token}`);
+      console.log(`Middleware: path=${path}, basePath=${request.nextUrl.basePath}, isPublic=${isPublicPath}, token=${!!token}`);
     }
     
     // If the user is logged in and trying to access a login page, redirect them to home
