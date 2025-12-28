@@ -6,20 +6,16 @@ import { getToken } from 'next-auth/jwt';
 const BYPASS_LEVEL_LOCKS = true;
 
 export async function middleware(request: NextRequest) {
-  // Get the pathname
+  // Get the pathname - Next.js automatically removes basePath from this in middleware
   const path = request.nextUrl.pathname;
   
   // Define public routes that don't need authentication
   const publicPaths = ['/auth/login', '/auth/register', '/auth/error'];
   
-  // In Next.js with basePath, the pathname might include the basePath or not depending on the environment
-  // We check both the raw path and the path without the /cts prefix
-  const pathWithoutPrefix = path.startsWith('/cts') ? path.replace('/cts', '') : path;
-  const isPublicPath = publicPaths.some(pp => 
-    path.startsWith(pp) || pathWithoutPrefix.startsWith(pp)
-  );
+  // Check if it is a public path
+  const isPublicPath = publicPaths.some(pp => path === pp || path.startsWith(pp + '/'));
   
-  // Check if the path is already a public path or API route
+  // Check if the path is an API route or Next.js internal path
   const isApiPath = path.includes('/api/');
   const isNextInternal = path.startsWith('/_next/') || 
                          path.includes('/favicon.ico') ||
@@ -37,19 +33,21 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET
     });
     
-    const baseUrl = process.env.NODE_ENV === 'production' ? '/cts' : '';
-    console.log(`Middleware processing: path=${path}, baseUrl=${baseUrl}, isPublicPath=${isPublicPath}, token exists: ${!!token}`);
+    // Log for debugging in production
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`Middleware: path=${path}, isPublic=${isPublicPath}, token=${!!token}`);
+    }
     
     // If the user is logged in and trying to access a login page, redirect them to home
     if (token && isPublicPath) {
-      console.log('Redirecting logged in user from public path to home');
-      return NextResponse.redirect(new URL(baseUrl + '/', request.url));
+      // Next.js automatically handles the basePath in internal redirects
+      return NextResponse.redirect(new URL('/', request.url));
     }
     
     // If the user is not logged in and trying to access a protected route, redirect to login
     if (!token && !isPublicPath) {
-      console.log('Redirecting unauthenticated user to login');
-      return NextResponse.redirect(new URL(baseUrl + '/auth/login', request.url));
+      // Next.js automatically handles the basePath in internal redirects
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
     
     // Allow access to the requested route
