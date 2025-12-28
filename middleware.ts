@@ -32,6 +32,7 @@ export async function middleware(request: NextRequest) {
     });
     
     const baseUrl = process.env.NODE_ENV === 'production' ? '/cts' : '';
+    console.log(`Middleware processing: path=${path}, baseUrl=${baseUrl}, isPublicPath=${isPublicPath}, token exists: ${!!token}`);
     
     // If the user is logged in and trying to access a login page, redirect them to home
     if (token && isPublicPath) {
